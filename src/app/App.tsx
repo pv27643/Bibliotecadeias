@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Zap, Workflow, FileText, Library, Plus, X, Sparkles, Video, Pencil, Image, MessageSquare, Clock, Play, Circle, CheckCircle2, ArrowRight, MoreVertical, Copy, Check, Layout, Box, PenTool, Smartphone, ClipboardList, Linkedin, Mail, BarChart3, Edit, Trash2, Star, ArrowLeft, Search } from 'lucide-react';
 import { projectId, publicAnonKey } from '/utils/supabase/info';
+import { supabase } from '/utils/supabase/client';
+import ImageUpload from './components/ImageUpload';
 
 type View = 'biblioteca' | 'prompts' | 'workflows';
 type Modal = 'categoria' | 'ferramenta' | 'prompt' | 'workflow' | null;
@@ -87,154 +89,179 @@ export default function App() {
   const [newPromptImage, setNewPromptImage] = useState<string>('');
   const [newPromptCategory, setNewPromptCategory] = useState<string>('Marketing');
   const [newPromptModels, setNewPromptModels] = useState<string>('ChatGPT, Claude');
+  const [editingPromptId, setEditingPromptId] = useState<string | null>(null);
 
-  const [toolCategories, setToolCategories] = useState<string[]>(['Todas', 'Texto', 'Negócios', '3D', 'Audio', 'Outros', 'Vídeo', 'Código', 'Imagem']);
-  const [promptCategories, setPromptCategories] = useState<string[]>(['Todos', 'Marketing', 'Desenvolvimento', 'Design', 'Produtividade']);
-  const [workflowCategories, setWorkflowCategories] = useState<string[]>(['Todos', 'Marketing', 'Operações', 'Vendas']);
+  // Carregar do localStorage ou usar defaults
+  const [toolCategories, setToolCategories] = useState<string[]>(() => {
+    const saved = localStorage.getItem('toolCategories');
+    let categories = ['Todas', 'Texto', 'Negócios', '3D', 'Audio', 'Outros', 'Vídeo', 'Código', 'Imagem', 'Prompts'];
+    if (saved && saved !== 'undefined' && saved !== 'null') {
+      try {
+        categories = JSON.parse(saved);
+      } catch (e) {
+        console.warn('Erro ao carregar toolCategories:', e);
+      }
+    }
+    // Migração automática: adicionar "Prompts" se não existir
+    if (!categories.includes('Prompts')) {
+      categories.push('Prompts');
+    }
+    return categories;
+  });
+  const [promptCategories, setPromptCategories] = useState<string[]>(() => {
+    const saved = localStorage.getItem('promptCategories');
+    let categories = ['Todos', 'Engenharia de Prompts', 'Aspect Ratio & Frame', 'Backgrounds & Surfaces', 'Camera Profiles', 'Lighting Setups', 'UGC Poses & Scenes', 'Hands & Models', 'Atmospheric Effects', 'Director Signatures', 'Motion & Camera Verbs'];
+    if (saved && saved !== 'undefined' && saved !== 'null') {
+      try {
+        categories = JSON.parse(saved);
+      } catch (e) {
+        console.warn('Erro ao carregar promptCategories:', e);
+      }
+    }
+    // Migração automática: adicionar categorias se não existirem
+    if (!categories.includes('Aspect Ratio & Frame')) {
+      categories.push('Aspect Ratio & Frame');
+    }
+    if (!categories.includes('Backgrounds & Surfaces')) {
+      categories.push('Backgrounds & Surfaces');
+    }
+    if (!categories.includes('Camera Profiles')) {
+      categories.push('Camera Profiles');
+    }
+    if (!categories.includes('Lighting Setups')) {
+      categories.push('Lighting Setups');
+    }
+    if (!categories.includes('UGC Poses & Scenes')) {
+      categories.push('UGC Poses & Scenes');
+    }
+    if (!categories.includes('Hands & Models')) {
+      categories.push('Hands & Models');
+    }
+    if (!categories.includes('Atmospheric Effects')) {
+      categories.push('Atmospheric Effects');
+    }
+    if (!categories.includes('Director Signatures')) {
+      categories.push('Director Signatures');
+    }
+    if (!categories.includes('Motion & Camera Verbs')) {
+      categories.push('Motion & Camera Verbs');
+    }
+    return categories;
+  });
+  const [workflowCategories, setWorkflowCategories] = useState<string[]>(() => {
+    const saved = localStorage.getItem('workflowCategories');
+    if (saved && saved !== 'undefined' && saved !== 'null') {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.warn('Erro ao carregar workflowCategories:', e);
+      }
+    }
+    return ['Todos', 'Marketing', 'Operações', 'Vendas'];
+  });
 
-  const [subcategoriesMap, setSubcategoriesMap] = useState<Record<string, string[]>>({
+  const [subcategoriesMap, setSubcategoriesMap] = useState<Record<string, string[]>>(() => {
+    const saved = localStorage.getItem('subcategoriesMap');
+    let map = {
     'Texto': ['Copywriting', 'SEO', 'Tradução', 'Resumo', 'Redação'],
     'Negócios': ['CRM', 'Analytics', 'Automação', 'Produtividade', 'Finanças'],
-    '3D': ['Modelação', 'Renderização', 'Animação', 'Texturas'],
+    '3D': ['Geração de Modelos 3D & WebGL', 'Fotogrametria & Ambientes 360º', 'Captura de Movimento & Animação', 'Texturas & Materiais'],
     'Audio': ['Geração de Voz', 'Música', 'Edição', 'Transcrição'],
     'Outros': ['Geral', 'Educação', 'Saúde', 'Lifestyle'],
     'Vídeo': ['Geração', 'Edição', 'Animação', 'Legendas', 'Personalização'],
-    'Código': ['Geração', 'Revisão', 'Debugging', 'Documentação'],
-    'Imagem': ['Geração', 'Edição', 'Upscaling', 'Avatar', 'Logo', 'Assistente Design']
+    'Código': ['Geração', 'Revisão', 'Debugging', 'Documentação', 'SQL', 'Planilhas', 'Assistente de Código', 'Low-Code & Integrações', 'Desenvolvimento Elite'],
+    'Imagem': ['Geração', 'Edição', 'Upscaling', 'Avatar', 'Logo', 'Assistente Design'],
+    'Prompts': ['Gestão & Produção', 'Biblioteca & Pesquisa', 'Observabilidade']
+    };
+
+    if (saved && saved !== 'undefined' && saved !== 'null') {
+      try {
+        map = JSON.parse(saved);
+      } catch (e) {
+        console.warn('Erro ao carregar subcategoriesMap:', e);
+      }
+    }
+
+    // Migração automática: adicionar subcategorias de "Prompts" se não existir
+    if (!map['Prompts']) {
+      map['Prompts'] = ['Gestão & Produção', 'Biblioteca & Pesquisa', 'Observabilidade'];
+    }
+    return map;
   });
 
-  // Load data from database on mount
+  // Supabase desativado - usando apenas localStorage
+  // useEffect(() => {
+  //   const loadData = async () => {
+  //     try {
+  //       const response = await fetch(`${API_BASE}/data`, {
+  //         headers: {
+  //           'Authorization': `Bearer ${publicAnonKey}`
+  //         }
+  //       });
+  //       if (!response.ok) {
+  //         throw new Error(`HTTP error! status: ${response.status}`);
+  //       }
+  //       const data = await response.json();
+  //       console.log('Dados carregados com sucesso da base de dados');
+  //     } catch (error) {
+  //       console.warn('Servidor Supabase ainda não foi deployado. A usar dados locais.', error);
+  //     }
+  //   };
+  //   loadData();
+  // }, []);
+
+  // Guardar categorias no localStorage sempre que mudarem
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const response = await fetch(`${API_BASE}/data`, {
-          headers: {
-            'Authorization': `Bearer ${publicAnonKey}`
-          }
-        });
+    localStorage.setItem('toolCategories', JSON.stringify(toolCategories));
+  }, [toolCategories]);
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+  useEffect(() => {
+    localStorage.setItem('promptCategories', JSON.stringify(promptCategories));
+  }, [promptCategories]);
 
-        const data = await response.json();
+  useEffect(() => {
+    localStorage.setItem('workflowCategories', JSON.stringify(workflowCategories));
+  }, [workflowCategories]);
 
-        // Comentado temporariamente para usar dados locais atualizados
-        // if (data.tools && data.tools.length > 0) setTools(data.tools.map(t => ({ ...t, favorite: t.favorite || false })));
-        if (data.prompts && data.prompts.length > 0) setPrompts(data.prompts.map(p => ({ ...p, favorite: p.favorite || false })));
-        if (data.workflows && data.workflows.length > 0) setWorkflows(data.workflows.map(w => ({ ...w, favorite: w.favorite || false })));
-        if (data.toolCategories && data.toolCategories.length > 0) setToolCategories(data.toolCategories);
-        if (data.promptCategories && data.promptCategories.length > 0) setPromptCategories(data.promptCategories);
-        if (data.workflowCategories && data.workflowCategories.length > 0) setWorkflowCategories(data.workflowCategories);
-        if (data.subcategories && Object.keys(data.subcategories).length > 0) setSubcategoriesMap(data.subcategories);
+  useEffect(() => {
+    localStorage.setItem('subcategoriesMap', JSON.stringify(subcategoriesMap));
+  }, [subcategoriesMap]);
 
-        console.log('Dados carregados com sucesso da base de dados');
-      } catch (error) {
-        console.warn('Servidor Supabase ainda não foi deployado. A usar dados locais.', error);
-        // Continua com os dados iniciais já definidos no estado
-      }
-    };
-    loadData();
-  }, []);
-
-  // Save data helpers
+  // Save data helpers (Supabase desativado - usando apenas localStorage)
   const saveTools = async (newTools: Tool[]) => {
-    try {
-      const response = await fetch(`${API_BASE}/tools`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${publicAnonKey}`
-        },
-        body: JSON.stringify(newTools)
-      });
-      if (response.ok) {
-        console.log('Ferramentas guardadas na base de dados');
-      }
-    } catch (error) {
-      console.warn('Servidor Supabase ainda não deployado. Faça deploy para persistir dados.', error);
-    }
+    // Dados salvos automaticamente via useEffect + localStorage
   };
 
   const savePrompts = async (newPrompts: Prompt[]) => {
-    try {
-      const response = await fetch(`${API_BASE}/prompts`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${publicAnonKey}`
-        },
-        body: JSON.stringify(newPrompts)
-      });
-      if (response.ok) {
-        console.log('Prompts guardados na base de dados');
-      }
-    } catch (error) {
-      console.warn('Servidor Supabase ainda não deployado. Faça deploy para persistir dados.', error);
-    }
+    // Dados salvos automaticamente via useEffect + localStorage
   };
 
   const saveWorkflows = async (newWorkflows: WorkflowType[]) => {
-    try {
-      const response = await fetch(`${API_BASE}/workflows`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${publicAnonKey}`
-        },
-        body: JSON.stringify(newWorkflows)
-      });
-      if (response.ok) {
-        console.log('Workflows guardados na base de dados');
-      }
-    } catch (error) {
-      console.warn('Servidor Supabase ainda não deployado. Faça deploy para persistir dados.', error);
-    }
+    // Dados salvos automaticamente via useEffect + localStorage
   };
 
   const saveCategories = async (type: 'tool' | 'prompt' | 'workflow', categories: string[]) => {
-    try {
-      const response = await fetch(`${API_BASE}/categories`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${publicAnonKey}`
-        },
-        body: JSON.stringify({ type, categories })
-      });
-      if (response.ok) {
-        console.log('Categorias guardadas na base de dados');
-      }
-    } catch (error) {
-      console.warn('Servidor Supabase ainda não deployado. Faça deploy para persistir dados.', error);
-    }
+    // Dados salvos automaticamente via useEffect + localStorage
   };
 
   const saveSubcategories = async (subcategories: Record<string, string[]>) => {
-    try {
-      const response = await fetch(`${API_BASE}/subcategories`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${publicAnonKey}`
-        },
-        body: JSON.stringify({ subcategories })
-      });
-      if (response.ok) {
-        console.log('Subcategorias guardadas na base de dados');
-      }
-    } catch (error) {
-      console.warn('Servidor Supabase ainda não deployado. Faça deploy para persistir dados.', error);
-    }
+    // Dados salvos automaticamente via useEffect + localStorage
   };
 
-  const [tools, setTools] = useState<Tool[]>([
+  const [tools, setTools] = useState<Tool[]>(() => {
+    const saved = localStorage.getItem('tools');
+    if (saved && saved !== 'undefined' && saved !== 'null') {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.warn('Erro ao carregar tools do localStorage:', e);
+      }
+    }
+    return [
     { id: '1', name: 'Jasper', description: 'Crie textos de marketing, artigos para blogues e campanhas de ads completas.', category: 'Texto', subcategory: 'Copywriting', badges: ['Freemium', 'Pago'], tags: ['Texto'], icon: 'pen-tool', link: 'https://www.jasper.ai', favorite: false },
     { id: '2', name: 'Midjourney', description: 'Geração de imagens fotorrealistas e ilustrações a partir de texto (text-to-image) com a mais alta qualidade artística do mercado.', category: 'Imagem', subcategory: 'Geração', badges: ['Pago'], tags: ['Imagem', 'Gerador'], icon: 'image', link: 'https://midjourney.com', favorite: false },
     { id: '3', name: 'Runway', description: 'O padrão da indústria criativa para geração de vídeo a partir de texto (text-to-video) e imagem (image-to-video) com a mais alta fidelidade e controle. Inclui ferramentas de remoção de fundo e interpolação.', category: 'Vídeo', subcategory: 'Animação', badges: ['Freemium'], tags: ['Vídeo', 'Text-to-Video', 'VFX'], icon: 'video', link: 'https://runwayml.com', favorite: false },
-    { id: '4', name: 'Spline AI', description: 'Gere cenas 3D usando comandos em texto.', category: '3D', subcategory: 'Modelação', badges: ['Freemium'], tags: ['3D'], icon: 'box', link: 'https://spline.design', favorite: false },
     { id: '5', name: 'ChatGPT', description: 'IA de conversação avançada para pesquisa, produtividade e muito mais.', category: 'Texto', subcategory: 'Redação', badges: ['Free', 'Pago'], tags: ['Chatbot', 'Text'], icon: 'message-square', link: 'https://chat.openai.com', favorite: false },
-    { id: '6', name: 'GitHub Copilot', description: 'Assistente de programação com IA para autocompletar código.', category: 'Código', subcategory: 'Geração', badges: ['Pago'], tags: ['Código', 'Programação'], icon: 'sparkles', link: 'https://github.com/features/copilot', favorite: false },
     { id: '7', name: 'Nano Banana 2', description: 'Geração de imagens a partir de texto, edição avançada (combinando imagem e comandos de texto) e composição ou transferência de estilo a partir de múltiplas imagens.', category: 'Imagem', subcategory: 'Geração', badges: ['Freemium'], tags: ['Imagem', 'Edição'], icon: 'image', link: 'https://gemini.google.com', favorite: false },
     { id: '8', name: 'Adobe Firefly', description: 'Geração de imagens e preenchimento/remoção generativa de elementos seguro para uso comercial, com integração no ecossistema Adobe.', category: 'Imagem', subcategory: 'Geração', badges: ['Pago'], tags: ['Imagem', 'Adobe'], icon: 'image', link: 'https://adobe.com/sensei/generative-ai/firefly.html', favorite: false },
     { id: '9', name: 'Stable Diffusion', description: 'Modelo base de código aberto para geração de imagens, que permite controlo total e execução local ou na nuvem.', category: 'Imagem', subcategory: 'Geração', badges: ['Free'], tags: ['Imagem', 'Open Source'], icon: 'image', link: 'https://stability.ai', favorite: false },
@@ -400,7 +427,87 @@ export default function App() {
     { id: '169', name: 'Speechify', description: 'Um dos geradores mais populares, especialmente bom a converter textos muito longos (como artigos de blog de clientes ou manuais de produto) em áudios fluidos para podcasts ou versões em áudio do próprio artigo.', category: 'Audio', subcategory: 'Geração de Voz', badges: ['Freemium'], tags: ['Audio', 'TTS', 'Artigos'], icon: 'message-square', link: 'https://speechify.com', favorite: false },
     { id: '170', name: 'Voicemaker', description: 'Oferece vozes neuronais padrão de alta qualidade e integrações fáceis para desenvolvedores através de uma API em conta, sendo uma boa opção de backup para projetos com menor orçamento.', category: 'Audio', subcategory: 'Geração de Voz', badges: ['Freemium'], tags: ['Audio', 'TTS', 'API'], icon: 'message-square', link: 'https://voicemaker.in', favorite: false },
     { id: '171', name: 'MetaVoice', description: 'Destaca-se na clonagem de voz e na alteração de identidade vocal em tempo real. Muito útil para a equipa criativa que quer gravar um guião com a sua própria voz e depois, com um clique, transformar essa gravação na voz do locutor pretendido.', category: 'Audio', subcategory: 'Geração de Voz', badges: ['Freemium'], tags: ['Audio', 'Clonagem', 'Tempo Real'], icon: 'message-square', link: 'https://themetavoice.xyz', favorite: false },
-  ]);
+
+    // Categoria: 3D & Animação - Geração de Modelos 3D & WebGL
+    { id: '172', name: 'Meshy AI', description: 'Cria ativos 3D fotorrealistas ou estilizados a partir de texto ou imagens, com otimização automática da malha (mesh) e texturas UV.', category: '3D', subcategory: 'Geração de Modelos 3D & WebGL', badges: ['Freemium'], tags: ['3D', 'Modelação', 'Texturas'], icon: 'box', link: 'https://meshy.ai', favorite: false },
+    { id: '173', name: 'Tripo3D', description: 'Gerador ultrarrápido que cria modelos 3D complexos e detalhados em segundos a partir de uma única fotografia do produto.', category: '3D', subcategory: 'Geração de Modelos 3D & WebGL', badges: ['Freemium'], tags: ['3D', 'Fotografia', 'Modelação'], icon: 'box', link: 'https://tripo3d.ai', favorite: false },
+    { id: '174', name: 'Spline AI', description: 'A plataforma de eleição para Web Designers criarem sites interativos. Permite gerar objetos e aplicar materiais 3D através de comandos de texto.', category: '3D', subcategory: 'Geração de Modelos 3D & WebGL', badges: ['Freemium'], tags: ['3D', 'Web Design', 'Interativo'], icon: 'box', link: 'https://spline.design/ai', favorite: false },
+    { id: '175', name: 'Kaedim', description: 'Especializada em converter Concept Art (desenhos 2D) em modelos 3D de alta precisão com topologia limpa para produção profissional.', category: '3D', subcategory: 'Geração de Modelos 3D & WebGL', badges: ['Pago'], tags: ['3D', 'Concept Art', 'Produção'], icon: 'box', link: 'https://kaedim3d.com', favorite: false },
+    { id: '176', name: 'CSM.ai', description: 'Simplifica a conversão de imagens para 3D. Muito útil para e-commerce, robótica e prototipagem em Realidade Aumentada (AR).', category: '3D', subcategory: 'Geração de Modelos 3D & WebGL', badges: ['Freemium'], tags: ['3D', 'E-commerce', 'AR'], icon: 'box', link: 'https://csm.ai', favorite: false },
+
+    // Categoria: 3D & Animação - Fotogrametria & Ambientes 360º
+    { id: '177', name: 'Polycam', description: 'App de fotogrametria que transforma o telemóvel num scanner 3D. Filma objetos reais e a IA entrega modelos 3D texturizados perfeitos.', category: '3D', subcategory: 'Fotogrametria & Ambientes 360º', badges: ['Freemium'], tags: ['3D', 'Fotogrametria', 'Scanner'], icon: 'box', link: 'https://poly.cam', favorite: false },
+    { id: '178', name: 'Luma AI', description: 'O padrão para fotorrealismo e Gaussian Splatting. Transforma vídeos normais capturados com o telemóvel em ambientes 3D hiper-realistas e navegáveis.', category: '3D', subcategory: 'Fotogrametria & Ambientes 360º', badges: ['Freemium'], tags: ['3D', 'Fotorrealismo', 'Gaussian Splatting'], icon: 'box', link: 'https://lumalabs.ai', favorite: false },
+    { id: '179', name: 'Skybox Lab', description: 'Gera ambientes panorâmicos 360º fotorrealistas a partir de texto. Perfeito para usar como fundo HDRI em motores de renderização.', category: '3D', subcategory: 'Fotogrametria & Ambientes 360º', badges: ['Freemium'], tags: ['3D', 'HDRI', '360º'], icon: 'box', link: 'https://skybox.blockadelabs.com', favorite: false },
+
+    // Categoria: 3D & Animação - Captura de Movimento & Animação
+    { id: '180', name: 'DeepMotion', description: 'Extrai a captura de movimento de um simples vídeo 2D de uma pessoa e aplica a animação diretamente num personagem 3D.', category: '3D', subcategory: 'Captura de Movimento & Animação', badges: ['Freemium'], tags: ['3D', 'Mocap', 'Animação'], icon: 'box', link: 'https://deepmotion.com', favorite: false },
+    { id: '181', name: 'Plask', description: 'Ferramenta baseada no browser para animação de personagens via vídeo. Ideal para animadores que precisam de prototipar movimentos rapidamente.', category: '3D', subcategory: 'Captura de Movimento & Animação', badges: ['Freemium'], tags: ['3D', 'Browser', 'Animação'], icon: 'box', link: 'https://plask.ai', favorite: false },
+    { id: '182', name: 'AccuRIG', description: 'Faz Auto-Rigging. Deteta automaticamente braços, pernas e articulações num modelo 3D estático e cria o esqueleto funcional num minuto.', category: '3D', subcategory: 'Captura de Movimento & Animação', badges: ['Free'], tags: ['3D', 'Rigging', 'Automação'], icon: 'box', link: 'https://actorcore.reallusion.com/auto-rig', favorite: false },
+    { id: '183', name: 'NVIDIA Audio2Face', description: 'Anima o rosto e os lábios de um personagem 3D automaticamente em tempo real, baseando-se apenas num ficheiro de áudio com a locução.', category: '3D', subcategory: 'Captura de Movimento & Animação', badges: ['Free'], tags: ['3D', 'Facial', 'Áudio'], icon: 'box', link: 'https://nvidia.com/omniverse/apps/audio2face', favorite: false },
+
+    // Categoria: 3D & Animação - Texturas & Materiais
+    { id: '184', name: 'Polyhive', description: 'Gera texturas adaptadas especificamente a malhas 3D (meshes), mantendo a consistência do estilo visual em toda a campanha.', category: '3D', subcategory: 'Texturas & Materiais', badges: ['Freemium'], tags: ['3D', 'Texturas', 'PBR'], icon: 'box', link: 'https://polyhive.ai', favorite: false },
+    { id: '185', name: 'Texture Lab', description: 'Gerador rápido de texturas 3D PBR prontas a usar (incluindo mapas de normais, altura e reflexo) a partir de descrições de texto.', category: '3D', subcategory: 'Texturas & Materiais', badges: ['Freemium'], tags: ['3D', 'PBR', 'Materiais'], icon: 'box', link: 'https://texturelab.xyz', favorite: false },
+
+    // Categoria: Código - SQL & Análise de Banco de Dados
+    { id: '186', name: 'Ai2sql', description: 'O padrão para democratizar o acesso aos dados. Permite que não engenheiros escrevam consultas SQL eficientes sem saber SQL. Excelente para a equipa de Marketing extrair dados de campanhas autonomamente.', category: 'Código', subcategory: 'SQL', badges: ['Freemium'], tags: ['SQL', 'Queries', 'Linguagem Natural'], icon: 'sparkles', link: 'https://ai2sql.io', favorite: false },
+    { id: '187', name: 'EverSQL', description: 'Ferramenta indispensável para Backend. Explica automaticamente e de forma simples o que a consulta SQL faz, gratuitamente. Incrivelmente útil para otimizar queries lentas que estejam a travar o site de um cliente.', category: 'Código', subcategory: 'SQL', badges: ['Free'], tags: ['SQL', 'Otimização', 'Performance'], icon: 'sparkles', link: 'https://eversql.com/sql-query-text', favorite: false },
+    { id: '188', name: 'MindsDB', description: 'Plataforma avançada que traz NLP dentro do banco de dados. Permite criar, treinar e implantar modelos de Machine Learning diretamente usando código SQL padrão, sem precisar de mudar dados de sítio.', category: 'Código', subcategory: 'SQL', badges: ['Freemium'], tags: ['SQL', 'Machine Learning', 'NLP'], icon: 'sparkles', link: 'https://mindsdb.com', favorite: false },
+    { id: '189', name: 'Olli.ai', description: 'Analista de dados de IA. Responde a perguntas e cria gráficos 10 vezes mais rápido. Ideal para gerar relatórios visuais complexos para clientes a partir de bases de dados brutas.', category: 'Código', subcategory: 'SQL', badges: ['Pago'], tags: ['SQL', 'Analytics', 'Gráficos'], icon: 'sparkles', link: 'https://olli.ai', favorite: false },
+    { id: '190', name: 'OtterTune', description: 'Ferramenta de ajuste de banco de dados que otimiza o desempenho e reduz os custos para bancos de dados PostgreSQL e MySQL. Excelente adição para DevOps.', category: 'Código', subcategory: 'SQL', badges: ['Freemium'], tags: ['SQL', 'Performance', 'PostgreSQL', 'MySQL'], icon: 'sparkles', link: 'https://ottertune.com', favorite: false },
+    { id: '191', name: 'Outerbase', description: 'Interface de banco de dados amigável para explorar dados. Combina geração de SQL por IA (assistente EZQL) com interface visual intuitiva, substituindo ferramentas antigas de gestão de bases de dados.', category: 'Código', subcategory: 'SQL', badges: ['Freemium'], tags: ['SQL', 'Interface', 'EZQL'], icon: 'sparkles', link: 'https://outerbase.com', favorite: false },
+    { id: '192', name: 'Text2SQL', description: 'Solução simples, direta e popular para tarefas rápidas do dia a dia. Transforma Linguagem Natural em Consultas SQL com Facilidade. Ideal para snippets rápidos.', category: 'Código', subcategory: 'SQL', badges: ['Free'], tags: ['SQL', 'Linguagem Natural', 'Snippets'], icon: 'sparkles', link: 'https://toolske.com/text2sql', favorite: false },
+    { id: '193', name: 'Coginiti', description: 'Plataforma colaborativa desenhada para equipas de dados. Simplifica o Desenvolvimento SQL e aumenta a Produtividade de Dados e Análise com Capacidades de IA Generativa Responsável.', category: 'Código', subcategory: 'SQL', badges: ['Freemium'], tags: ['SQL', 'Colaboração', 'Equipas'], icon: 'sparkles', link: 'https://coginiti.co', favorite: false },
+    { id: '194', name: 'AI Query', description: 'Uma das formas mais limpas e diretas do mercado para criar código a partir de texto. Premissa simples: Gere SQL sem erros em segundos.', category: 'Código', subcategory: 'SQL', badges: ['Pago'], tags: ['SQL', 'Geração', 'Texto'], icon: 'sparkles', link: 'https://aiquery.co', favorite: false },
+
+    // Categoria: Código - Planilhas (Excel & Sheets)
+    { id: '195', name: 'GPT for Sheets (and Docs)', description: 'O verdadeiro canivete suíço. Traz a IA diretamente para dentro das células do Google Sheets. Perfeito para SEO limpar palavras-chave, traduzir milhares de linhas ou categorizar sentimentos de feedbacks usando a fórmula =GPT().', category: 'Código', subcategory: 'Planilhas', badges: ['Freemium'], tags: ['Google Sheets', 'Excel', 'GPT'], icon: 'sparkles', link: 'https://workspace.google.com', favorite: false },
+    { id: '196', name: 'Excel Formula Bot', description: 'O padrão ouro da indústria. Escreves o que queres em linguagem natural e gera a fórmula de Excel ou Google Sheets perfeita. Acaba com as horas perdidas a tentar perceber o que está errado num código.', category: 'Código', subcategory: 'Planilhas', badges: ['Freemium'], tags: ['Excel', 'Fórmulas', 'Linguagem Natural'], icon: 'sparkles', link: 'https://excelformulabot.com', favorite: false },
+    { id: '197', name: 'Coefficient', description: 'Ferramenta de nível corporativo. Liga o Google Sheets diretamente aos CRMs (Salesforce, HubSpot, SQL). A IA ajuda a construir relatórios visuais complexos, atualizar dados de vendas em tempo real e detetar anomalias.', category: 'Código', subcategory: 'Planilhas', badges: ['Pago'], tags: ['Google Sheets', 'CRM', 'Enterprise'], icon: 'sparkles', link: 'https://coefficient.io', favorite: false },
+    { id: '198', name: 'Numerous.ai', description: 'Motor de processamento em lote. Permite treinar a IA para classificar dados repetitivos e arrastar a célula para aplicar a inteligência a milhares de linhas instantaneamente. Excelente para limpar listas de leads.', category: 'Código', subcategory: 'Planilhas', badges: ['Freemium'], tags: ['Excel', 'Processamento', 'Automação'], icon: 'sparkles', link: 'https://numerous.ai', favorite: false },
+    { id: '199', name: 'Ajelix', description: 'Salvador da equipa de contabilidade. Especialista em gerar e explicar código VBA (Macros). Permite automatizar processos inteiros e rotinas pesadas dentro do Microsoft Excel sem precisar de saber programar.', category: 'Código', subcategory: 'Planilhas', badges: ['Freemium'], tags: ['Excel', 'VBA', 'Macros'], icon: 'sparkles', link: 'https://ajelix.com', favorite: false },
+    { id: '200', name: 'PromptLoop', description: 'Revoluciona a pesquisa de mercado. Transforma qualquer folha de cálculo num motor de extração de IA. Podes dar uma lista de 500 sites e pedir à IA para extrair e-mail, CEO e preços automaticamente.', category: 'Código', subcategory: 'Planilhas', badges: ['Freemium'], tags: ['Excel', 'Web Scraping', 'Extração'], icon: 'sparkles', link: 'https://promptloop.com', favorite: false },
+    { id: '201', name: 'Parseur', description: 'Automação e redução de erro humano. Lê centenas de PDFs, faturas ou e-mails, extrai os dados estruturados através de IA e insere-os diretamente numa folha de cálculo pronta a analisar.', category: 'Código', subcategory: 'Planilhas', badges: ['Freemium'], tags: ['PDF', 'Extração', 'Automação'], icon: 'sparkles', link: 'https://parseur.com', favorite: false },
+    { id: '202', name: 'Arcwise AI', description: 'Verdadeiro assistente integrado. Ajuda a compreender e a limpar "esparguete" de dados. Consegue perceber a intenção por trás de tabelas enormes e confusas, e formata, cruza e gera resumos estatísticos com comandos de texto.', category: 'Código', subcategory: 'Planilhas', badges: ['Free'], tags: ['Google Sheets', 'Limpeza', 'Copilot'], icon: 'sparkles', link: 'https://arcwise.app', favorite: false },
+
+    // Categoria: Código - Assistente de Código
+    { id: '203', name: 'GitHub Copilot', description: 'O standard absoluto da indústria. Imprescindível para qualquer equipa de desenvolvimento moderno, reduzindo drasticamente o tempo gasto em código boilerplate e funções rotineiras.', category: 'Código', subcategory: 'Assistente de Código', badges: ['Freemium', 'Pago'], tags: ['IDE', 'Autocompletar', 'GitHub'], icon: 'sparkles', link: 'https://github.com/features/copilot', favorite: false },
+    { id: '204', name: 'Refact AI', description: 'A grande vantagem para agências que lidam com clientes corporativos ou código sensível: é um assistente de IA self-hosted (alojado localmente), garantindo total privacidade do código fonte.', category: 'Código', subcategory: 'Assistente de Código', badges: ['Freemium'], tags: ['Self-hosted', 'Privacidade', 'IDE'], icon: 'sparkles', link: 'https://refact.ai', favorite: false },
+    { id: '205', name: 'Codeium', description: 'Alternativa de peso de nível empresarial com um foco brutal em rapidez e suporte a múltiplas IDEs. Excelente para escalar operações e manter a fluidez de código em equipas ágeis.', category: 'Código', subcategory: 'Assistente de Código', badges: ['Free', 'Pago'], tags: ['IDE', 'Enterprise', 'Rapidez'], icon: 'sparkles', link: 'https://codeium.com', favorite: false },
+    { id: '206', name: 'Coderabbit.ai', description: 'Revisão de Pull Requests automatizada linha a linha. Poupa dezenas de horas semanais aos Tech Leads, sugerindo melhorias de arquitetura e detetando bugs antes de qualquer merge.', category: 'Código', subcategory: 'Assistente de Código', badges: ['Freemium'], tags: ['Code Review', 'Pull Request', 'Automação'], icon: 'sparkles', link: 'https://coderabbit.ai', favorite: false },
+    { id: '207', name: 'CodiumAI', description: 'Focado exclusivamente na geração de testes significativos. Para equipas de QA e developers, analisa o código e cria testes unitários robustos, garantindo maior cobertura com uma fração do esforço manual.', category: 'Código', subcategory: 'Assistente de Código', badges: ['Free', 'Pago'], tags: ['Testes', 'QA', 'Unit Tests'], icon: 'sparkles', link: 'https://codium.ai', favorite: false },
+    { id: '208', name: 'Checksum', description: 'Automação de testes ponta-a-ponta (E2E) gerados por IA. Um autêntico game-changer para garantir a estabilidade de aplicações web em produção, escrevendo e mantendo os testes por si.', category: 'Código', subcategory: 'Assistente de Código', badges: ['Pago'], tags: ['E2E', 'Testes', 'Automação'], icon: 'sparkles', link: 'https://checksum.ai', favorite: false },
+    { id: '209', name: 'Codacy', description: 'Plataforma de excelência (agora infundida com IA) para análise de código estático. Fundamental para impor standards de qualidade em toda a agência e corrigir vulnerabilidades automaticamente em múltiplas linguagens.', category: 'Código', subcategory: 'Assistente de Código', badges: ['Free', 'Pago'], tags: ['Análise Estática', 'Qualidade', 'Segurança'], icon: 'sparkles', link: 'https://ai.codacy.com', favorite: false },
+    { id: '210', name: 'Warp AI', description: 'Um terminal reconstruído do zero para o século 21. Construído em Rust e com IA integrada nativamente, aumenta a velocidade de navegação, debug e execução de comandos para qualquer engenheiro da equipa.', category: 'Código', subcategory: 'Assistente de Código', badges: ['Free', 'Pago'], tags: ['Terminal', 'CLI', 'Rust'], icon: 'sparkles', link: 'https://warp.dev', favorite: false },
+    { id: '211', name: 'Phind', description: 'O motor de busca desenhado especificamente para developers seniores. Lê documentação técnica profunda e responde a problemas complexos de infraestrutura, superando largamente modelos genéricos em contexto de engenharia.', category: 'Código', subcategory: 'Assistente de Código', badges: ['Free', 'Pago'], tags: ['Pesquisa', 'Documentação', 'Developer'], icon: 'sparkles', link: 'https://phind.com', favorite: false },
+    { id: '212', name: 'Fix My Code', description: 'Um nicho incrivelmente valioso para agências web: foca-se em otimizar o código para cumprir as rigorosas normas de Acessibilidade (WCAG 2.1 AA), mitigando o risco legal para os clientes finais.', category: 'Código', subcategory: 'Assistente de Código', badges: ['Free'], tags: ['Acessibilidade', 'WCAG', 'A11y'], icon: 'sparkles', link: 'https://userway.org/fixmycode', favorite: false },
+    { id: '213', name: 'FlutterFlow AI Gen', description: 'Acelera exponencialmente a criação de aplicações mobile e web. Permite que equipas estruturem componentes visuais e lógicos complexos rapidamente, exportando código de produção limpo e pronto a escalar.', category: 'Código', subcategory: 'Assistente de Código', badges: ['Freemium'], tags: ['Flutter', 'Mobile', 'Low-Code'], icon: 'sparkles', link: 'https://flutterflow.io/ai-gen', favorite: false },
+
+    // Categoria: Código - Low-Code, No-Code & Integrações
+    { id: '214', name: 'Make', description: 'O verdadeiro peso-pesado da automação visual (iPaaS). Permite à agência construir arquiteturas de integração complexas e adicionar nós de IA no meio dos fluxos para processar dados de clientes e automatizar o back-office.', category: 'Código', subcategory: 'Low-Code & Integrações', badges: ['Freemium'], tags: ['Automação', 'iPaaS', 'Integrações'], icon: 'sparkles', link: 'https://make.com', favorite: false },
+    { id: '215', name: 'Retool AI', description: 'O standard absoluto para construir ferramentas internas. Com os blocos de IA, permite às equipas operacionais criar dashboards e painéis de controlo ligados a bases de dados numa fração do tempo.', category: 'Código', subcategory: 'Low-Code & Integrações', badges: ['Freemium'], tags: ['Low-Code', 'Dashboards', 'Internal Tools'], icon: 'sparkles', link: 'https://retool.com', favorite: false },
+    { id: '216', name: 'Bardeen AI', description: 'Automação de fluxos de trabalho diretamente no browser. Poupa centenas de horas à equipa de operações ao extrair dados (scraping) e conectar aplicações sem depender de integrações lentas por API.', category: 'Código', subcategory: 'Low-Code & Integrações', badges: ['Free'], tags: ['Automação', 'Browser', 'Scraping'], icon: 'sparkles', link: 'https://bardeen.ai', favorite: false },
+    { id: '217', name: 'Mutiny', description: 'Uma arma secreta para agências de Growth Marketing. Plataforma que personaliza sites B2B em tempo real com base no visitante, gerando aumentos drásticos na conversão e receita dos clientes.', category: 'Código', subcategory: 'Low-Code & Integrações', badges: ['Pago'], tags: ['Marketing', 'Personalização', 'B2B'], icon: 'sparkles', link: 'https://mutinyhq.com', favorite: false },
+    { id: '218', name: 'Nanonets', description: 'Plataforma avançada de OCR baseada em IA. Transforma a entrada manual de dados, automatizando o processamento de faturas, documentos estruturados e recibos para a equipa financeira.', category: 'Código', subcategory: 'Low-Code & Integrações', badges: ['Freemium'], tags: ['OCR', 'Automação', 'Documentos'], icon: 'sparkles', link: 'https://nanonets.com', favorite: false },
+
+    // Categoria: Código - Desenvolvimento e Engenharia de Elite
+    { id: '219', name: 'Cursor', description: 'A IDE que está a revolucionar o desenvolvimento. É um fork do VS Code com IA integrada no núcleo, capaz de ler e compreender todo o repositório para realizar refatorações em massa e encontrar bugs escondidos.', category: 'Código', subcategory: 'Desenvolvimento Elite', badges: ['Freemium'], tags: ['IDE', 'VS Code', 'Refatoração'], icon: 'sparkles', link: 'https://cursor.com', favorite: false },
+    { id: '220', name: 'Claude.ai (Sonnet 3.5)', description: 'Atualmente o modelo de linguagem superior para lógica de programação pura. Pela sua capacidade de raciocínio e o recurso Artifacts, é a ferramenta de eleição para criar protótipos funcionais e resolver algoritmos complexos.', category: 'Código', subcategory: 'Desenvolvimento Elite', badges: ['Freemium'], tags: ['LLM', 'Algoritmos', 'Protótipos'], icon: 'sparkles', link: 'https://claude.ai', favorite: false },
+    { id: '221', name: 'Sentry (AI Debugging)', description: 'Indispensável para operações de agência. Utiliza IA para analisar erros em tempo real, agrupar incidências semelhantes e sugerir a correção exata, reduzindo o MTTR (Mean Time to Recovery) drasticamente.', category: 'Código', subcategory: 'Desenvolvimento Elite', badges: ['Freemium'], tags: ['Debugging', 'Monitorização', 'Erros'], icon: 'sparkles', link: 'https://sentry.io', favorite: false },
+    { id: '222', name: 'Supermaven', description: 'O assistente de código mais rápido do mundo. Com uma janela de contexto de 1 milhão de tokens e latência quase nula, permite trabalhar em projetos gigantescos sem que a IA perca o fio à meada.', category: 'Código', subcategory: 'Desenvolvimento Elite', badges: ['Freemium'], tags: ['Autocompletar', 'Performance', 'Contexto'], icon: 'sparkles', link: 'https://supermaven.com', favorite: false },
+    { id: '223', name: 'Pieces for Developers', description: 'O "segundo cérebro" do programador. Organiza snippets, documentação e contexto de reuniões de forma inteligente, permitindo que a equipa recupere lógica complexa meses depois sem esforço.', category: 'Código', subcategory: 'Desenvolvimento Elite', badges: ['Free'], tags: ['Snippets', 'Organização', 'Documentação'], icon: 'sparkles', link: 'https://pieces.app', favorite: false },
+    { id: '224', name: 'Tabnine', description: 'A solução de topo para privacidade corporativa. Permite treinar modelos personalizados baseados no código privado da agência e pode ser executado em servidores locais (On-premises).', category: 'Código', subcategory: 'Desenvolvimento Elite', badges: ['Pago'], tags: ['Privacidade', 'On-premises', 'Enterprise'], icon: 'sparkles', link: 'https://tabnine.com', favorite: false },
+    { id: '225', name: 'Mintlify', description: 'Automação de documentação de código. Lê o repositório e gera documentação técnica legível e profissional automaticamente, garantindo que o conhecimento não morre quando um developer sai do projeto.', category: 'Código', subcategory: 'Desenvolvimento Elite', badges: ['Freemium'], tags: ['Documentação', 'Automação', 'Repositório'], icon: 'sparkles', link: 'https://mintlify.com', favorite: false },
+
+    // Categoria: Prompts - Gestão & Produção
+    { id: '226', name: 'Vellum', description: 'O standard de ouro para levar prompts para produção. Permite à equipa comparar a mesma instrução em múltiplos modelos (GPT-4, Claude, Gemini) lado a lado e fazer testes de regressão antes de lançar qualquer ferramenta para o cliente.', category: 'Prompts', subcategory: 'Gestão & Produção', badges: ['Pago'], tags: ['Prompts', 'Testes', 'Produção'], icon: 'file-text', link: 'https://vellum.ai', favorite: false },
+    { id: '227', name: 'PromptLayer', description: 'O middleware essencial para a equipa de engenharia. Interceta e regista cada requisição feita à IA, permitindo à direção monitorizar custos exatos por projeto, analisar alucinações e atualizar prompts sem ter de reescrever o código da aplicação.', category: 'Prompts', subcategory: 'Gestão & Produção', badges: ['Freemium'], tags: ['Prompts', 'Middleware', 'Monitorização'], icon: 'file-text', link: 'https://promptlayer.com', favorite: false },
+    { id: '228', name: 'TypingMind', description: 'A interface definitiva para unificar o uso de IA na equipa não-técnica (copywriters, account managers). Permite criar e partilhar bibliotecas de prompts corporativos padronizados, garantindo que todos usam as melhores práticas e o tom de voz correto.', category: 'Prompts', subcategory: 'Gestão & Produção', badges: ['Pago'], tags: ['Prompts', 'Interface', 'Colaboração'], icon: 'file-text', link: 'https://typingmind.com', favorite: false },
+    { id: '229', name: 'PromptHero', description: 'A maior base de dados de engenharia de prompts visuais. Indispensável para a direção de arte; poupa horas na pesquisa dos parâmetros e pesos exatos para Midjourney ou Stable Diffusion na geração de assets publicitários de alta fidelidade.', category: 'Prompts', subcategory: 'Biblioteca & Pesquisa', badges: ['Freemium'], tags: ['Prompts', 'Midjourney', 'Stable Diffusion'], icon: 'file-text', link: 'https://prompthero.com', favorite: false },
+    { id: '230', name: 'Langfuse', description: 'Ferramenta de observabilidade open-source. Se a agência criar chatbots ou fluxos de IA para clientes, esta plataforma monitoriza em tempo real a eficácia dos prompts, detetando onde a IA está a falhar ou a demorar demasiado a responder.', category: 'Prompts', subcategory: 'Observabilidade', badges: ['Freemium'], tags: ['Observabilidade', 'Chatbots', 'Open Source'], icon: 'file-text', link: 'https://langfuse.com', favorite: false },
+  ];
+  });
 
   const getToolIcon = (iconName: string, size: 'sm' | 'md' = 'md') => {
     const sizeClass = size === 'sm' ? 'w-5 h-5' : 'w-6 h-6';
@@ -470,140 +577,792 @@ export default function App() {
         return <Sparkles {...iconProps} />;
       case 'Imagem':
         return <Image {...iconProps} />;
+      case 'Prompts':
+        return <FileText {...iconProps} />;
       default:
         return <Library {...iconProps} />;
     }
   };
 
-  const [prompts, setPrompts] = useState<Prompt[]>([
+  const [prompts, setPrompts] = useState<Prompt[]>(() => {
+    const defaultPrompts: Prompt[] = [
     {
-      id: '1',
-      title: 'Artigo de Blogue Otimizado SEO',
-      description: 'Cria artigos de blogue completos e otimizados para SEO com estrutura profissional, meta descrição e estratégia de palavras-chave.',
-      category: 'Marketing',
-      models: ['ChatGPT', 'Claude'],
-      content: `Atue como um especialista em SEO e redator profissional. Escreva um artigo de blogue detalhado sobre [TEMA] focando-se na palavra-chave [KEYWORD]. O artigo deve ter entre 1500-2000 palavras e incluir:
+      id: '6',
+      title: 'Panorâmico Anamórfico 2.39:1',
+      description: 'Rácio épico dos blockbusters com compressão horizontal, bokeh oval e flares característicos para sequências de ação e grande formato.',
+      category: 'Aspect Ratio & Frame',
+      models: ['Midjourney', 'Nano Banana Pro'],
+      content: `Model: Nano Banana Pro · Aspect: 2.39:1
+Scene: [SUBJECT] framed for widescreen action or grand scale. Horizontal composition with clear left and right zones.
+Lens: Anamorphic 40mm at f/2.8. T2.8 equivalent, horizontal squeeze ratio 2x, characteristic oval bokeh.
+Key: Strong directional source from camera-left or right at an angle that catches the anamorphic lens. Produces subtle horizontal flares and breathing.
+Stock feel: Kodak Vision3 500T or clean digital cinema.
 
-1. Título chamativo com a palavra-chave principal
-2. Meta descrição otimizada (150-160 caracteres)
-3. Introdução que capte a atenção do leitor
-4. Subtítulos H2 e H3 estratégicos com variações da palavra-chave
-5. Conteúdo informativo e de valor para o leitor
-6. Exemplos práticos e dados relevantes
-7. Call-to-action no final
-8. Sugestões de links internos e externos
-
-Tom de voz: [PROFISSIONAL/CASUAL/TÉCNICO]
-Público-alvo: [DESCREVA O PÚBLICO]`,
+Casos de Uso: Sequências de perseguição/ação, planos de estabelecimento épicos (estilo Villeneuve) ou grande formato (Nolan).`,
       favorite: false
     },
     {
-      id: '2',
-      title: 'Revisão de Código em React',
-      description: 'Análise profunda de código React com foco em performance, segurança, acessibilidade e boas práticas modernas de desenvolvimento.',
-      category: 'Desenvolvimento',
-      models: ['GitHub Copilot', 'ChatGPT'],
-      content: `Atue como um programador sênior especializado em React. Revise o seguinte código e forneça sugestões de melhoria focando em:
+      id: '7',
+      title: 'Ultra Panorâmico 2.76:1',
+      description: 'Rácio de extremo épico (Ben-Hur, The Hateful Eight) onde a largura domina completamente, ideal para batalhas e paisagens impossíveis.',
+      category: 'Aspect Ratio & Frame',
+      models: ['Midjourney', 'Nano Banana Pro'],
+      content: `Model: Nano Banana Pro · Aspect: 2.76:1
+Scene: [SUBJECT] in an extreme horizontal composition where the width dominates and vertical information is scarce.
+Lens: 25mm anamorphic at f/4. Wide spherical equivalent, catches the full horizontal field.
+Stock feel: Kodak Vision3 500T pushed for epic warmth, or 70mm emulation.
+Aspect-specific feel: Spectacle over intimacy. Horizontal action, processions, landscapes, or multiple subjects arrayed in a line.
 
-1. Performance (memoização, lazy loading, code splitting)
-2. Boas práticas e padrões modernos do React
-3. Acessibilidade (ARIA labels, navegação por teclado)
-4. Segurança (XSS, validação de inputs)
-5. Legibilidade e manutenibilidade do código
-6. Testes unitários recomendados
-7. Otimizações específicas
-
-Para cada sugestão, explique:
-- O problema identificado
-- Por que é importante corrigir
-- Como implementar a solução
-- Impacto esperado
-
-CÓDIGO:
-[CÓDIGO]`,
+Casos de Uso: Batalhas, grandes multidões ou paisagens de largura impossível.`,
       favorite: false
     },
     {
-      id: '3',
-      title: 'Geração de Imagens Estilo Cyberpunk',
-      description: 'Prompt otimizado para criar imagens cyberpunk fotorrealistas com ambientação futurista, luzes neon e estética Blade Runner.',
-      category: 'Design',
-      models: ['Midjourney'],
-      content: `Uma rua chuvosa em Tóquio à noite com luzes neon vibrantes em tons de rosa, azul e roxo, anúncios holográficos flutuantes com caracteres japoneses, carros futuristas voadores, pessoas com implantes cibernéticos e roupas high-tech caminhando pelas calçadas molhadas que refletem as luzes da cidade. Arranha-céus gigantescos ao fundo cobertos de telas digitais. Névoa cyberpunk, atmosfera noir, chuva intensa, fotorrealista, alta qualidade, 8k, iluminação cinematográfica, estilo Blade Runner --ar 16:9 --v 6`,
+      id: '8',
+      title: 'Cinema Padrão 1.85:1',
+      description: 'Padrão das salas de cinema modernas com equilíbrio clássico entre cinema e ecrã doméstico, ideal para dramas e realismo contemporâneo.',
+      category: 'Aspect Ratio & Frame',
+      models: ['Midjourney', 'Nano Banana Pro'],
+      content: `Model: Nano Banana Pro · Aspect: 1.85:1
+Scene: [SUBJECT] in a classically-balanced composition. Wider than 16:9 but not blockbuster-compressed.
+Lens: 50mm at f/2.8. The workhorse focal length, natural perspective.
+Stock feel: Kodak Vision3 500T or Fuji Eterna.
+Aspect-specific feel: Frame reads neutral. Allows both landscape width and portrait intimacy.
+
+Casos de Uso: Dramas, obras focadas em diálogos e realismo contemporâneo.`,
       favorite: false
     },
     {
-      id: '4',
-      title: 'Resumo Executivo de Reuniões',
-      description: 'Transforma transcrições de reuniões em resumos executivos estruturados com decisões, ações, responsáveis e prazos organizados.',
-      category: 'Produtividade',
-      models: ['ChatGPT', 'Notion AI'],
-      content: `Analise a seguinte transcrição de reunião e crie um resumo executivo estruturado seguindo este formato:
+      id: '9',
+      title: 'Formato Academy 1.37:1',
+      description: 'Formato clássico da era dourada de Hollywood, quase quadrado, promove composição formal estilizada ao estilo Wes Anderson.',
+      category: 'Aspect Ratio & Frame',
+      models: ['Midjourney', 'Nano Banana Pro'],
+      content: `Model: Nano Banana Pro · Aspect: 1.37:1
+Scene: [SUBJECT] in a near-square composition reminiscent of pre-1953 Hollywood or Wes Anderson's stylized period work.
+Lens: 40mm at f/4. Slightly wide, flat symmetrical blocking-friendly.
+Stock feel: Kodak Vision3 250D for contemporary look, or emulate vintage stocks (Tri-X / Plus-X grain).
+Aspect-specific feel: Formal, presentational, stage-like.
 
-## RESUMO EXECUTIVO DE REUNIÃO
-
-**Data:** [DATA]
-**Participantes:** [LISTA]
-**Duração:** [TEMPO]
-
-### 📋 TÓPICOS DISCUTIDOS
-- [Ponto 1]
-- [Ponto 2]
-- [Ponto 3]
-
-### ✅ DECISÕES TOMADAS
-1. [Decisão com contexto]
-2. [Decisão com contexto]
-
-### 🎯 AÇÕES A EXECUTAR
-| Ação | Responsável | Prazo |
-|------|-------------|-------|
-| [Ação] | [Nome] | [Data] |
-
-### 📌 PRÓXIMOS PASSOS
-- [Próximo passo 1]
-- [Próximo passo 2]
-
-### ⚠️ BLOQUEIOS/RISCOS
-- [Se aplicável]
-
-TRANSCRIÇÃO:
-[TRANSCRIÇÃO DA REUNIÃO]`,
+Casos de Uso: Peças de época, enquadramentos íntimos ou simetria ao estilo Wes Anderson.`,
       favorite: false
     },
     {
-      id: '5',
-      title: 'E-mail de Vendas (Cold Outreach)',
-      description: 'Cria emails de prospecção personalizados usando o método RAR (Razão-Atenção-Resultado) com call-to-action eficaz e prova social.',
-      category: 'Marketing',
-      models: ['Jasper', 'ChatGPT'],
-      content: `Escreva um e-mail de prospecção fria (cold outreach) seguindo o método RAR:
+      id: '10',
+      title: 'TV Vintage 4:3',
+      description: 'Nostalgia televisiva pré-1953 ou estética VHS com foco central, ideal para found footage e vídeo caseiro.',
+      category: 'Aspect Ratio & Frame',
+      models: ['Midjourney', 'Nano Banana Pro'],
+      content: `Model: Nano Banana Pro · Aspect: 4:3
+Scene: [SUBJECT] framed for the squarer 4:3 ratio. Common in early cinema, pre-widescreen television, and VHS home video.
+Lens: 35mm at f/4 for contemporary clean look, or emulated VHS camcorder.
+Stock feel: Fuji Velvia 50 for vintage richness, or VHS simulation (softness, chromatic aberration).
 
-**R - RAZÃO (Motivo do contato)**
-**A - ATENÇÃO (Valor/Benefício)**
-**R - RESULTADO (Call-to-Action)**
-
-Contexto:
-- Empresa alvo: [NOME DA EMPRESA]
-- Pessoa de contato: [NOME E CARGO]
-- Produto/Serviço: [DESCRIÇÃO]
-- Benefício principal: [BENEFÍCIO]
-
-Diretrizes:
-1. Assunto: Curto, personalizado e intrigante (máx. 50 caracteres)
-2. Abertura: Personalizada com pesquisa sobre a empresa/pessoa
-3. Corpo: Foque no problema que você resolve, não no produto
-4. Prova social: Mencione caso de sucesso relevante
-5. CTA: Simples e de baixo compromisso (ex: reunião de 15min)
-6. Assinatura: Profissional com links relevantes
-
-Tom: Profissional mas amigável, consultivo, não agressivo
-Tamanho: 100-150 palavras máximo`,
+Casos de Uso: Enquadramentos de época, "found footage" ou estética de vídeo caseiro.`,
       favorite: false
     },
-  ]);
+    {
+      id: '11',
+      title: 'Cinema Vertical 9:16',
+      description: 'Cinema pensado para telemóvel com composição vertical para TikTok, Reels, Stories e conteúdo mobile-first.',
+      category: 'Aspect Ratio & Frame',
+      models: ['Midjourney', 'Nano Banana Pro'],
+      content: `Model: Nano Banana Pro · Aspect: 9:16
+Scene: [SUBJECT] composed for vertical reading. Vertical center axis, top-to-bottom compositional flow.
+Lens: 35mm at f/2.8. Wide enough for vertical elements, shallow enough for focus hierarchy.
+Aspect-specific moves: Subject often fills the center-vertical column. Architecture and figures read as vertical pillars.
 
-  const [workflows, setWorkflows] = useState<WorkflowType[]>([
+Casos de Uso: Conteúdo para redes sociais (TikTok/Reels), Stories ou videoclipes mobile-first.`,
+      favorite: false
+    },
+    {
+      id: '12',
+      title: 'Estúdio Branco Puro',
+      description: 'Fundo branco impecável para e-commerce. Ideal para catálogos e listagens de produtos que exigem um aspeto limpo e profissional.',
+      category: 'Backgrounds & Surfaces',
+      models: ['Midjourney', 'Nano Banana Pro'],
+      content: `Model: Nano Banana Pro · Aspect: 1:1
+Backdrop: Seamless #FFFFFF paper infinity cove, no visible seam line.
+Surface: Invisible white sweep, [PRODUCT] sits 18in from the backdrop.
+Key: Large gridded softbox camera-left, 45° elevation, 5500K daylight.
+Lens: 85mm at f/8, tripod.
+Stock feel: Fujifilm Eterna. Neutral, precise material rendering.
+
+Casos de Uso: Listagens de lojas online, catálogos de produtos.`,
+      favorite: false
+    },
+    {
+      id: '13',
+      title: 'Superfície de Mármore Branco',
+      description: 'Bancada de mármore elegante. Transmite luxo e sofisticação, ideal para produtos premium.',
+      category: 'Backgrounds & Surfaces',
+      models: ['Midjourney', 'Nano Banana Pro'],
+      content: `Model: Nano Banana Pro · Aspect: 3:4
+Surface: Polished Carrara marble, visible gray veining with individual crystal reflections.
+Key: Single large window source camera-left, 5600K diffused through sheer curtain.
+Stock feel: CineStill 800T. Warm halation bloom on the brightest reflections.
+Physical detail: One faint fingerprint smudge on the marble corner. Wiped but not gone.
+
+Casos de Uso: Beleza de luxo, joalharia, produtos premium.`,
+      favorite: false
+    },
+    {
+      id: '14',
+      title: 'Fundo de Luxo Escuro',
+      description: 'Fundo dramático e escuro. O produto emerge das sombras, criando uma aura de exclusividade e mistério.',
+      category: 'Backgrounds & Surfaces',
+      models: ['Midjourney', 'Nano Banana Pro'],
+      content: `Model: Nano Banana Pro · Aspect: 1:1
+Backdrop: Deep charcoal #1A1A1C gradient collapsing to pure black #0A0A0A at the edges.
+Key: Single hard rim light behind-right at 15° elevation, 3200K tungsten-warm.
+Stock feel: Kodak Vision3 500T. Warm cinema tungsten palette, organic highlight halation.
+Physical detail: One single gold dust particle suspended in the rim light.
+
+Casos de Uso: Fragrâncias premium, artigos de luxo de alta gama.`,
+      favorite: false
+    },
+    {
+      id: '15',
+      title: 'Cenário de Bancada de Cozinha',
+      description: 'Cenário de cozinha real e vivido. Evita o aspeto de "showroom" para focar numa estética de "preparação em curso".',
+      category: 'Backgrounds & Surfaces',
+      models: ['Midjourney', 'Nano Banana Pro'],
+      content: `Model: Nano Banana Pro · Aspect: 3:4
+Setting: Modern home kitchen, quartz or Carrara countertop filling the lower half; subway tile backsplash defocused.
+Key: Natural window light camera-right, 5200K afternoon, slightly directional.
+Stock feel: Kodak Ektar 100. Vivid, clean, saturated without cartoon.
+Physical detail: A single crumb or a pinch of spilled sea salt on the counter near the product.
+
+Casos de Uso: Produtos alimentares, utensílios de cozinha, suplementos.`,
+      favorite: false
+    },
+    {
+      id: '16',
+      title: 'Gradiente Creme Quente',
+      description: 'Gradiente suave em tons creme. Uma alternativa luxuosa e quente ao branco puro, evocando rituais de cuidado e tranquilidade.',
+      category: 'Backgrounds & Surfaces',
+      models: ['Midjourney', 'Nano Banana Pro'],
+      content: `Model: Nano Banana Pro · Aspect: 3:4
+Backdrop: Hand-painted gradient, #F5F0E8 warm cream at the bottom fading to #FFFFFF at the top.
+Lens: 85mm at f/5.6.
+Stock feel: Kodak Portra 400. Warm highlight rolloff, organic color rendering.
+Mood: Premium ritual, sophisticated quiet. Never "Instagram clean."
+
+Casos de Uso: Skincare premium, produtos de bem-estar.`,
+      favorite: false
+    },
+    {
+      id: '17',
+      title: 'Textura de Tecido de Linho',
+      description: 'Fundo de textura têxtil orgânica. O linho confere um toque artesanal e natural à composição.',
+      category: 'Backgrounds & Surfaces',
+      models: ['Midjourney', 'Nano Banana Pro'],
+      content: `Model: Nano Banana Pro · Aspect: 1:1
+Surface: Natural undyed linen weave, #F0E9D9 cream-beige, visible warp/weft texture.
+Key: Soft overhead window light, 5000K morning.
+Stock feel: Kodak Portra 400 for the warm organic palette.
+Physical detail: One single thread loose at frame edge, catching the key.
+
+Casos de Uso: Wellness, produtos biológicos/orgânicos.`,
+      favorite: false
+    },
+    {
+      id: '18',
+      title: 'Ambiente de Quarto',
+      description: 'Cenário matinal aconchegante. Focado no conforto e no autocuidado autêntico.',
+      category: 'Backgrounds & Surfaces',
+      models: ['Midjourney', 'Nano Banana Pro'],
+      content: `Model: Nano Banana Pro · Aspect: 3:4
+Setting: Quiet bedroom nightstand or the linen edge of a made bed.
+Key: Large window source camera-right, diffused by the sheer. Motivated single-source.
+Depth: Shallow. Product sharp, the rest falls into soft warm defocus.
+Physical detail: One pillow corner visible with a subtle imprint dent.
+
+Casos de Uso: Suplementos para sono, self-care, têxteis de casa.`,
+      favorite: false
+    },
+    {
+      id: '19',
+      title: 'Plano Macro de Textura',
+      description: 'Plano de pormenor extremo focado na textura. Transforma o detalhe do material numa composição abstrata e tátil.',
+      category: 'Camera Profiles',
+      models: ['Midjourney', 'Nano Banana Pro'],
+      content: `Model: Nano Banana Pro · Aspect: 1:1
+Subject: Extreme close-up on [FOCUS_SUBJECT]. Fills the entire frame, abstract composition.
+Lens: Macro at f/2.8, 1:1 magnification.
+Key: Raking side light from camera-left at 10° elevation. Skims the surface, reveals every micro-texture.
+Stock feel: Kodak Ektar 100. Vivid, precise material rendering.
+Physical detail: One tiny imperfection. A loose thread, a pore, a micro-crack, a fingerprint ridge.
+
+Casos de Uso: Texturas de tecido, pormenores de ingredientes, foco em artesanato.`,
+      favorite: false
+    },
+    {
+      id: '20',
+      title: 'Flatlay Padrão 50mm',
+      description: 'O padrão para fotografias de topo (flatlays). Oferece uma visão organizada e simétrica, com foco nítido em todos os elementos.',
+      category: 'Camera Profiles',
+      models: ['Midjourney', 'Nano Banana Pro'],
+      content: `Model: Nano Banana Pro · Aspect: 1:1
+Angle: Perfect 90° top-down, camera plane parallel to surface. No distortion.
+Lens: 50mm at f/8.
+Key: Large 4ft overhead softbox centered, 5500K daylight. Soft shadowless fill.
+Physical detail: One element slightly off the symmetric grid. A leaf angled 8° off axis. Keeps it hand-styled.
+
+Casos de Uso: Conjuntos de oferta, arranjos de vários produtos.`,
+      favorite: false
+    },
+    {
+      id: '21',
+      title: 'Plano Herói 85mm',
+      description: 'O plano "herói" clássico. A lente de 85mm lisonjeia a silhueta do produto, eliminando distorções e focando na sua forma ideal.',
+      category: 'Camera Profiles',
+      models: ['Midjourney', 'Nano Banana Pro'],
+      content: `Model: Nano Banana Pro · Aspect: 4:5
+Subject: [PRODUCT] centered, fills ~70% of frame width.
+Angle: 3/4 front view, elevated 12° above product.
+Lens: 85mm at f/8.
+Stock feel: Fujifilm Eterna. Neutral, precise color rendering.
+Shadow: Soft gradient contact shadow directly beneath, slight bias toward fill side.
+
+Casos de Uso: Imagens principais de produto, capas de catálogo.`,
+      favorite: false
+    },
+    {
+      id: '22',
+      title: 'Grande Angular Ambiente 35mm',
+      description: 'Plano aberto que mostra o produto inserido no seu contexto real. Transmite uma sensação de "momento vivido" e não apenas encenado.',
+      category: 'Camera Profiles',
+      models: ['Midjourney', 'Nano Banana Pro'],
+      content: `Model: Nano Banana Pro · Aspect: 3:2
+Frame: Wide environmental. [PRODUCT] occupies ~40% of the frame.
+Lens: 35mm at f/4.
+Key: Natural daylight from a window or skylight, 5200K, falling at ~30° from upper-left.
+Stock feel: Kodak Portra 400. Warm lifestyle, organic palette.
+Physical detail: One element that suggests a person lives here. A jacket on a chair back or a half-drunk mug.
+
+Casos de Uso: Cenas de lifestyle, ambientação em divisões da casa.`,
+      favorite: false
+    },
+    {
+      id: '23',
+      title: 'Ângulo Baixo Heroico',
+      description: 'Uma perspetiva poderosa, de baixo para cima, que confere autoridade e um ar monumental ao produto.',
+      category: 'Camera Profiles',
+      models: ['Midjourney', 'Nano Banana Pro'],
+      content: `Model: Nano Banana Pro · Aspect: 4:5
+Angle: Low, 25° below product center, looking up. Hero perspective.
+Lens: 50mm at f/4.
+Key: Single hard directional source camera-right, 4200K, at product eye level.
+Stock feel: Kodak Vision3 500T. Cinematic tungsten-warm with organic highlight bloom.
+Mood: Monument. The product is the subject of a Kubrick one-point composition.
+
+Casos de Uso: Branding de autoridade, produtos premium, estética dramática.`,
+      favorite: false
+    },
+    {
+      id: '24',
+      title: 'Softbox Três Pontos',
+      description: 'O padrão de ouro da iluminação comercial. Proporciona uma definição de forma perfeita, ideal para catálogos profissionais onde a clareza é prioritária.',
+      category: 'Lighting Setups',
+      models: ['Midjourney', 'Nano Banana Pro'],
+      content: `Model: Nano Banana Pro · Aspect: 4:5
+Key: Large 4x6ft softbox camera-left at 45° elevation, 5500K daylight.
+Fill: Medium 2x3ft softbox camera-right at 45°, 50% power.
+Rim: Narrow strip softbox behind product at 30° offset.
+Stock feel: Fujifilm Eterna. Neutral, slightly cool, precise material rendering.
+
+Casos de Uso: E-commerce, catálogos, fotografia de produto profissional.`,
+      favorite: false
+    },
+    {
+      id: '25',
+      title: 'Luz Natural de Janela',
+      description: 'Iluminação autêntica e orgânica proveniente de uma única janela. Evita o aspeto artificial de estúdio, focando-se numa estética de estilo de vida real.',
+      category: 'Lighting Setups',
+      models: ['Midjourney', 'Nano Banana Pro'],
+      content: `Model: Nano Banana Pro · Aspect: 3:4
+Lighting: Single window as the only source. Motivated, not studio.
+Quality: Diffused through a sheer curtain or frosted pane. Soft directional.
+Stock feel: Kodak Portra 400. Warm lifestyle, skin-safe palette.
+Physical detail: One dust mote floating in the window light beam. Confirms the light is real.
+
+Casos de Uso: Fotografias de lifestyle, ambientes domésticos, estética autêntica.`,
+      favorite: false
+    },
+    {
+      id: '26',
+      title: 'Calor da Hora Dourada',
+      description: 'A luz cinematográfica do pôr-do-sol. Tons quentes e âmbar que criam uma atmosfera aspiracional e acolhedora.',
+      category: 'Lighting Setups',
+      models: ['Midjourney', 'Nano Banana Pro'],
+      content: `Model: Nano Banana Pro · Aspect: 3:2
+Lighting: Low-angle sunset / sunrise directional sun.
+Color: 3400-3800K rich golden. Amber highlights, warm shadow tone.
+Accent: A small subtle lens flare bleeding in from the sun direction.
+Stock feel: CineStill 800T for halation bloom on the warm highlights.
+
+Casos de Uso: Campanhas de verão, lifestyle caloroso, vibrações aconchegantes.`,
+      favorite: false
+    },
+    {
+      id: '27',
+      title: 'Luz Lateral Dramática',
+      description: 'Iluminação lateral ousada de fonte única. Cria um contraste forte (6:1) que revela todas as micro-texturas do material.',
+      category: 'Lighting Setups',
+      models: ['Midjourney', 'Nano Banana Pro'],
+      content: `Model: Nano Banana Pro · Aspect: 4:5
+Key: Hard-edged fresnel or small softbox, 4200K neutral-warm.
+Fill: Minimal. 10-15% bounce only. The deep opposite-side shadow is the point.
+Contrast: 6:1. The shadow side collapses into structural darkness.
+Mood: Noir product portraiture. Deakins single-source discipline.
+
+Casos de Uso: Produtos premium, fotografias artísticas, imagens "hero" dramáticas.`,
+      favorite: false
+    },
+    {
+      id: '28',
+      title: 'Branco Clínico Limpo',
+      description: 'Iluminação de alta chave (high-key), brilhante e uniforme. Transmite confiança, precisão e higiene total.',
+      category: 'Lighting Setups',
+      models: ['Midjourney', 'Nano Banana Pro'],
+      content: `Model: Nano Banana Pro · Aspect: 1:1
+Key: Two large overhead softboxes at 30° left/right of camera axis, 6500K cool daylight.
+Fill: Underfill from below via white bounce at 70%. Kills base shadow completely.
+Stock feel: Fujifilm Velvia 50 or Eterna.
+Mood: Pharmacy shelf meets Apple Store. Precise, trustworthy.
+
+Casos de Uso: Produtos médicos, suplementos, branding clínico.`,
+      favorite: false
+    },
+    {
+      id: '29',
+      title: 'Atmosférico Sombrio',
+      description: 'Iluminação de baixa chave (low-key) inspirada no cinema. O produto emerge das sombras com uma aura de luxo e mistério.',
+      category: 'Lighting Setups',
+      models: ['Midjourney', 'Nano Banana Pro'],
+      content: `Model: Nano Banana Pro · Aspect: 4:5
+Key: Small soft narrow source from upper-right at 35° elevation, 3200K tungsten-warm.
+Atmospheric: Subtle haze or soft fog in the mid-ground. Light has texture.
+Backdrop: Matte charcoal #1A1A1C to black gradient.
+Mood: After-hours fragrance campaign. Villeneuve atmospheric discipline.
+
+Casos de Uso: Perfumaria, artigos de luxo, campanhas noturnas.`,
+      favorite: false
+    },
+    {
+      id: '30',
+      title: 'Depoimento Falado',
+      description: 'O formato clássico de depoimento direto para a câmara. Foca-se na autenticidade, com uma aparência natural e imperfeições que transmitem honestidade.',
+      category: 'UGC Poses & Scenes',
+      models: ['Seedance 2.0', 'Nano Banana 2'],
+      content: `Model: Seedance 2.0 · Aspect: 9:16 · Duration: 6s
+Subject: Relatable [GENDER], [AGE_RANGE], natural appearance. Real skin, real hair.
+Action: Subject speaks mid-sentence. Lips in motion, one hand gesturing lightly.
+Setting: Real home background. Softly blurred at f/2.8-equivalent.
+Stock feel: Phone camera. Slight compression artifacts, limited dynamic range.
+
+Casos de Uso: Vídeos de testemunhos, reviews, conteúdo nativo para TikTok.`,
+      favorite: false
+    },
+    {
+      id: '31',
+      title: 'Selfie ao Espelho',
+      description: 'Uma fotografia casual em frente ao espelho. O cenário deve parecer vivido e ligeiramente "desarrumado" para reforçar que é uma pessoa real a usar o produto.',
+      category: 'UGC Poses & Scenes',
+      models: ['Nano Banana 2', 'Midjourney'],
+      content: `Model: Nano Banana 2 · Aspect: 9:16
+Scene: A person taking a mirror selfie in [LOCATION], holding [PRODUCT] in the non-phone hand.
+Environment: The [LOCATION] is real and messy at the edges. A hair tie, a crumpled towel.
+Lighting: Mixed color temperature. Natural window mixing with warm ~2800K overhead.
+Imperfections: One smudge on the mirror; a stray hair.
+
+Casos de Uso: Instagram Stories, TikTok, provas de produto autênticas.`,
+      favorite: false
+    },
+    {
+      id: '32',
+      title: 'Reação em Uso',
+      description: 'Captura o momento exato de surpresa ou satisfação ao usar o produto. A chave aqui é a expressão não posada e o ambiente doméstico.',
+      category: 'UGC Poses & Scenes',
+      models: ['Nano Banana 2', 'Midjourney'],
+      content: `Model: Nano Banana 2 · Aspect: 9:16
+Expression: Mid-reaction. Eyes slightly widened, mouth caught between words, not a held smile.
+Environment: Living room couch, a throw blanket half-kicked off, a coffee mug nearby.
+Physical detail: One grounding detail. A pet hair on the blanket or a crumb on the shirt.
+
+Casos de Uso: Conteúdo de reação, revelação de produto, reviews espontâneas.`,
+      favorite: false
+    },
+    {
+      id: '33',
+      title: 'Montagem Antes/Depois',
+      description: 'Comparação de transformação com ecrã dividido. A credibilidade vem de manter o mesmo ângulo e iluminação, com uma melhoria visível mas realista.',
+      category: 'UGC Poses & Scenes',
+      models: ['Nano Banana 2', 'Midjourney'],
+      content: `Model: Nano Banana 2 · Aspect: 9:16
+Composition: Vertical split frame, clean center dividing line.
+LEFT (BEFORE): Flat bathroom overhead at 2800K. Slightly unflattering but believable.
+RIGHT (AFTER): Visibly improved. Glow is subtle, not extreme. Healthy, not photoshopped.
+Credibility: 60-70% improvement. Noticeable at thumbnail, not extreme.
+
+Casos de Uso: Resultados de tratamento, demonstração de eficácia, transformações.`,
+      favorite: false
+    },
+    {
+      id: '34',
+      title: 'Momento de Revelação do Produto',
+      description: 'O momento do unboxing. Foca-se apenas nas mãos e no produto a emergir da embalagem, criando antecipação.',
+      category: 'UGC Poses & Scenes',
+      models: ['Seedance 2.0', 'Nano Banana 2'],
+      content: `Model: Seedance 2.0 · Aspect: 9:16 · Duration: 5s
+Subject: Hands only. Identity off-frame. Real hands, one visible freckle, not model hands.
+Action: Tissue paper being pushed aside; [PRODUCT] emerging from the packaging.
+Lighting: Soft natural daylight from camera-right at 5200K.
+Physical detail: A single thread from the tissue paper clings to the product.
+
+Casos de Uso: Unboxing, primeiras impressões, lançamentos.`,
+      favorite: false
+    },
+    {
+      id: '35',
+      title: 'Segurar com Mãos Femininas',
+      description: 'Mãos femininas elegantes a segurar o produto. Foco na delicadeza, com texturas de pele reais (poros e veias subtis) para evitar um aspeto artificial.',
+      category: 'Hands & Models',
+      models: ['Nano Banana Pro', 'Midjourney'],
+      content: `Model: Nano Banana Pro · Aspect: 4:5
+Subject: Feminine hands, [SKIN_TONE] skin with real pore texture, fine natural lines at the knuckles.
+Pose: Relaxed elegant grip. Product held at ~35° toward camera, weight balanced on the fingertips.
+Lighting: Large softbox camera-left at 5500K, 45° elevation. Motivated daylight.
+Stock feel: Kodak Portra 400. Skin-safe warm palette.
+
+Casos de Uso: Produtos de beleza, skincare, apresentações de luxo.`,
+      favorite: false
+    },
+    {
+      id: '36',
+      title: 'Segurar com Mãos Masculinas',
+      description: 'Mãos masculinas com preensão firme. A iluminação é mais contrastada para definir a estrutura óssea e muscular, transmitindo força e confiança.',
+      category: 'Hands & Models',
+      models: ['Nano Banana Pro', 'Midjourney'],
+      content: `Model: Nano Banana Pro · Aspect: 4:5
+Subject: Masculine hands, [SKIN_TONE] skin with visible knuckle definition, subtle vein structure.
+Lighting: Harder key from camera-left at 5200K with a 4:1 contrast ratio.
+Physical detail: One small visible scar, callus, or shorter healing cut. Confirms the hand works for a living.
+Stock feel: Kodak Vision3 500T. Tungsten-warm cinema palette.
+
+Casos de Uso: Higiene masculina (grooming), ferramentas, produtos tecnológicos.`,
+      favorite: false
+    },
+    {
+      id: '37',
+      title: 'Movimento de Aplicação',
+      description: 'Captura o momento da aplicação do produto (creme, sérum). O movimento é deliberado e a pele mantém a sua textura natural, com poros e pequenas linhas de expressão.',
+      category: 'Hands & Models',
+      models: ['Seedance 2.0', 'Nano Banana Pro'],
+      content: `Model: Seedance 2.0 · Aspect: 4:5 · Duration: 4s
+Action: [APPLICATION_ACTION]. Mid-motion. Fingers beginning the spread / massage / stroke.
+Skin: Healthy glow with visible natural texture. NOT airbrushed beauty skin.
+Motion: Slight natural motion blur on the moving fingertips. 1/60s shutter equivalent.
+Lens: 50mm macro at f/2.8.
+
+Casos de Uso: Tutoriais de skincare, vídeos de "como usar", planos de uso real.`,
+      favorite: false
+    },
+    {
+      id: '38',
+      title: 'Mãos a Revelar Unboxing',
+      description: 'As mãos a retirar o produto da embalagem premium. O foco está no ritual de abertura, com o produto a emergir do papel de seda.',
+      category: 'Hands & Models',
+      models: ['Nano Banana Pro', 'Midjourney'],
+      content: `Model: Nano Banana Pro · Aspect: 4:5
+Scene: Hands mid-action lifting [PRODUCT] from a premium gift box.
+Pose: Product emerging from tissue paper, held between thumb and first two fingers at 35° from vertical.
+Packaging: Open cream or ivory gift box, gold or blush tissue paper displaced at a natural angle.
+Physical detail: One single strand of tissue paper catches on the product's surface as it lifts.
+
+Casos de Uso: Conteúdo de unboxing, revelações premium, momentos de oferta.`,
+      favorite: false
+    },
+    {
+      id: '39',
+      title: 'Camada de Nevoeiro Denso',
+      description: 'Nevoeiro volumétrico denso que "engole" as silhuetas. Cria uma sensação de mistério e escala, onde o nevoeiro funciona como a própria fonte de luz difusa.',
+      category: 'Atmospheric Effects',
+      models: ['Nano Banana Pro', 'Midjourney'],
+      content: `Model: Nano Banana Pro · Aspect: 2.39:1
+Scene: [SUBJECT] as a small silhouette against vast dense fog bank, 70% negative space above.
+Key: Single hard hidden sun behind the fog at 20° elevation, 4800K neutral daylight.
+Atmospheric: Fog density is textural. You can see layers at 10m, 50m, 100m. Closer fog has visible particulate drift.
+
+Casos de Uso: Paisagens estilo Arrakis (Dune), revelações de mistério, exteriores melancólicos.`,
+      favorite: false
+    },
+    {
+      id: '40',
+      title: 'Lençol de Chuva',
+      description: 'Chuva em "lençóis" visíveis, inspirada em Blade Runner 2049. A chuva só é visível quando atravessa os cones de luz, criando um ambiente neo-noir autêntico.',
+      category: 'Atmospheric Effects',
+      models: ['Nano Banana Pro', 'Midjourney'],
+      content: `Model: Nano Banana Pro · Aspect: 2.39:1
+Scene: [SUBJECT] in wet exterior at night, rain falling in visible sheets.
+Key: Single hard overhead streetlight, 2800K sodium-vapor amber, rain falls THROUGH the beam.
+Stock feel: CineStill 800T. Halation on the amber highlights.
+Physical detail: One splash pattern frozen mid-air where a droplet just hit the asphalt.
+
+Casos de Uso: Exteriores neo-noir, cenas de perseguição dramáticas, revelações à noite.`,
+      favorite: false
+    },
+    {
+      id: '41',
+      title: 'Partículas de Pó na Luz',
+      description: 'Partículas de pó suspensas num feixe de luz. Uma técnica clássica de cinematografia contemplativa que confere uma alma orgânica aos interiores.',
+      category: 'Atmospheric Effects',
+      models: ['Nano Banana Pro', 'Midjourney'],
+      content: `Model: Nano Banana Pro · Aspect: 4:3
+Key: One window source camera-right at 3800K warm afternoon, raking across the room.
+Atmospheric: Dust particulate at roughly 1 mote per cubic foot, drifting slowly. Motes only visible INSIDE the shaft.
+Physical detail: One specific mote catching a hot reflection on [SUBJECT]'s sleeve.
+
+Casos de Uso: Interiores contemplativos, revelações de espaços antigos (estilo Tarkovsky/Malick).`,
+      favorite: false
+    },
+    {
+      id: '42',
+      title: 'Feixes de Fumo Volumétrico',
+      description: 'Fumo denso que corta a luz de fundo em feixes definidos. Cria silhuetas dramáticas e uma forte compressão de escala.',
+      category: 'Atmospheric Effects',
+      models: ['Nano Banana Pro', 'Midjourney'],
+      content: `Model: Nano Banana Pro · Aspect: 2.39:1
+Scene: [SUBJECT] silhouetted against heavy smoke with visible shafts of backlight cutting through.
+Key: Single hard backlight source behind the smoke at 30° elevation, 5200K.
+Atmospheric: Smoke density heavy enough that light shafts are visible as discrete beams, not diffuse wash.
+
+Casos de Uso: Atmosferas pesadas, campos de batalha (estilo Ridley Scott), palcos de concertos.`,
+      favorite: false
+    },
+    {
+      id: '43',
+      title: 'Névoa da Hora Dourada',
+      description: 'Saturação atmosférica suave durante a "hora mágica". A névoa comprime o fundo, fazendo com que o sujeito se destaque num brilho âmbar.',
+      category: 'Atmospheric Effects',
+      models: ['Nano Banana Pro', 'Midjourney'],
+      content: `Model: Nano Banana Pro · Aspect: 3:2
+Lens: 85mm at f/2.8 (compression reads as "long lens golden hour").
+Stock feel: Kodak Portra 400. Warm pastel rendering, organic highlight rolloff.
+Atmospheric: Soft haze density. Far-ground at 100m+ dissolved into golden-amber wash.
+
+Casos de Uso: Paisagens românticas ou nostálgicas, revelações ao pôr-do-sol.`,
+      favorite: false
+    },
+    {
+      id: '44',
+      title: 'Queda de Neve Ambiente',
+      description: 'Queda de neve suave e silenciosa. A neve funciona como um refletor natural gigante, suavizando as sombras em toda a cena.',
+      category: 'Atmospheric Effects',
+      models: ['Nano Banana Pro', 'Midjourney'],
+      content: `Model: Nano Banana Pro · Aspect: 4:5
+Key: Single warm practical camera-left (window or streetlamp), 2800K tungsten.
+Atmospheric: Snow density 1/4 of frame. Individual flakes visible within 3m, blurring into a softer wash at distance.
+Physical detail: One snowflake caught on [SUBJECT]'s eyelash or shoulder, still crystalline.
+
+Casos de Uso: Narrativas de inverno, exteriores íntimos, peças de época.`,
+      favorite: false
+    },
+    {
+      id: '45',
+      title: 'Monólito Villeneuve',
+      description: 'Inspirado em Dune e Arrival. Uma silhueta minúscula contra uma arquitetura monumental, transmitindo uma escala épica e desoladora através de névoa atmosférica e tons monocromáticos.',
+      category: 'Director Signatures',
+      models: ['Nano Banana Pro', 'Midjourney'],
+      content: `Model: Nano Banana Pro · Aspect: 2.39:1
+Scene: [SUBJECT] rendered as a tiny silhouette (3-5% of frame height) against a monumental geometric structure.
+Key: Hard directional hidden source (behind the monolith or above), 4800K neutral.
+Palette: Monochromatic. ONE dominant hue (amber / teal / rust / cobalt) as environmental wash.
+
+Casos de Uso: Planos de estabelecimento à escala de Arrakis, revelações monumentais, épicos de deserto.`,
+      favorite: false
+    },
+    {
+      id: '46',
+      title: 'Luz Prática Única Deakins',
+      description: 'A essência do minimalismo de Roger Deakins (1917, Skyfall). Uma única fonte de luz motivada no cenário (lâmpada, vela ou janela), sem qualquer luz de preenchimento artificial.',
+      category: 'Director Signatures',
+      models: ['Nano Banana Pro', 'Midjourney'],
+      content: `Model: Nano Banana Pro · Aspect: 2.39:1
+Scene: [SUBJECT] in interior lit by exactly ONE practical light source (lamp / window / fire / candle).
+Fill: NONE. Shadow side falls off naturally. Contrast: 8:1 ratio.
+Stock feel: ARRI Alexa digital clean or Kodak Vision3 for a filmic feel.
+
+Casos de Uso: Interiores dramáticos, silhuetas de noir clássico, retratos de contenção emocional.`,
+      favorite: false
+    },
+    {
+      id: '47',
+      title: 'Enquadramento de Porta Park Chan-wook',
+      description: 'Simetria perfeita e cores ricas (esmeralda e carmesim) inspiradas em The Handmaiden. O enquadramento através de portas cria uma sensação de voyeurismo e opulência.',
+      category: 'Director Signatures',
+      models: ['Nano Banana Pro', 'Midjourney'],
+      content: `Model: Nano Banana Pro · Aspect: 16:9
+Scene: [SUBJECT] centered in a doorway or architectural frame. Central symmetry.
+Palette: Saturated jewel tones. Emerald green wallpaper, crimson accents, gold metal hardware.
+Textural emphasis: Silk / embroidery / lacquered wood textures rendered with fine detail.
+
+Casos de Uso: Interiores ornamentados, simetria de época, cenas com tons de joia saturados.`,
+      favorite: false
+    },
+    {
+      id: '48',
+      title: 'Retrato à Luz de Vela Sciamma·Mathon',
+      description: 'Inspirado em Portrait of a Lady on Fire. Um retrato íntimo iluminado apenas por velas, com uma qualidade pictórica que remete para os mestres da pintura holandesa.',
+      category: 'Director Signatures',
+      models: ['Nano Banana Pro', 'Midjourney'],
+      content: `Model: Nano Banana Pro · Aspect: 4:3
+Scene: Two figures in interior lit ONLY by a single candle or fireplace.
+Key: Candle/firelight at 1800K deep amber. No studio fill.
+Composition: Dutch Masters / Vermeer style. Subjects positioned with quiet dignity.
+
+Casos de Uso: Interiores de época, conversas íntimas, estética de pintura a óleo.`,
+      favorite: false
+    },
+    {
+      id: '49',
+      title: 'Sala Vermelha Lynch',
+      description: 'O surrealismo de Twin Peaks. Cortinas de veludo carmesim, chão em ziguezague (chevron) e uma iluminação que cria uma atmosfera onírica e inquietante.',
+      category: 'Director Signatures',
+      models: ['Nano Banana Pro', 'Midjourney'],
+      content: `Model: Nano Banana Pro · Aspect: 16:9
+Scene: [SUBJECT] in a deep crimson interior with red velvet curtains on all walls. Black-and-white chevron floor.
+Palette: Dominant crimson + black-and-white chevron floor + pale skin tone.
+Temporal uncanniness: [SUBJECT]'s pose or expression should feel slightly off or frozen mid-motion.
+
+Casos de Uso: Sonhos surreais, revelações oníricas, estética de estranheza visual.`,
+      favorite: false
+    },
+    {
+      id: '50',
+      title: 'Grande Plano Extremo Leone (Olhos)',
+      description: 'O clímax do Western de Sergio Leone. Um plano ultra-aproximado focado apenas nos olhos, com textura de suor, pó e distorção por calor.',
+      category: 'Director Signatures',
+      models: ['Nano Banana Pro', 'Midjourney'],
+      content: `Model: Nano Banana Pro · Aspect: 2.39:1
+Scene: Extreme close-up of [SUBJECT]'s eyes only. iris pattern visible.
+Key: Hard low-angle sun at 10° elevation, 3400K deep amber.
+Atmospheric: Subtle heat shimmer distortion; dust particulate visible on eyelashes.
+
+Casos de Uso: Duelos de tensão máxima, confrontos míticos, picos de suspense.`,
+      favorite: false
+    },
+    {
+      id: '51',
+      title: 'Aproximação Lenta',
+      description: 'A câmara move-se lentamente em direção ao sujeito. Cria uma sensação de realização, tensão crescente ou foco narrativo profundo.',
+      category: 'Motion & Camera Verbs',
+      models: ['Seedance 2.0', 'Runway'],
+      content: `Model: Seedance 2.0 · Aspect: 2.39:1 · Duration: 6s
+Camera move: Slow push-in on a direct linear axis toward [SUBJECT]. Travel distance ~2 meters.
+Speed: Constant, unhurried. No acceleration.
+Motion emphasis: [SUBJECT] remains still. The MOTION is the camera's attention closing in.
+
+Casos de Uso: Momentos de revelação de personagem, detalhe narrativo importante.`,
+      favorite: false
+    },
+    {
+      id: '52',
+      title: 'Trilha Lateral de Dolly',
+      description: 'A câmara desliza lateralmente, passando pelo sujeito. Este movimento elegante revela a profundidade do cenário através do efeito de paralaxe.',
+      category: 'Motion & Camera Verbs',
+      models: ['Seedance 2.0', 'Runway'],
+      content: `Model: Seedance 2.0 · Aspect: 2.39:1 · Duration: 8s
+Camera move: Linear lateral dolly, constant speed. Camera stays at the same distance from [SUBJECT].
+Parallax: Foreground and background elements move at different rates relative to the camera.
+Stock feel: Kodak Vision3 500T.
+
+Casos de Uso: Estabelecer relações espaciais, acompanhamento de diálogos, revelações laterais.`,
+      favorite: false
+    },
+    {
+      id: '53',
+      title: 'Mudança de Foco',
+      description: 'A focagem muda de um plano para outro (do fundo para a frente ou vice-versa) dentro de um plano estático, transferindo a atenção do espetador.',
+      category: 'Motion & Camera Verbs',
+      models: ['Seedance 2.0', 'Runway'],
+      content: `Model: Seedance 2.0 · Aspect: 16:9 · Duration: 5s
+Camera: Static tripod lock-off, no movement.
+Lens: 85mm at f/2. Shallow enough for crisp focal separation.
+Focus move: Transition smoothly from [SUBJECT_FOREGROUND] to [SUBJECT_BACKGROUND] (under 1 second).
+
+Casos de Uso: Revelar a importância de um elemento em segundo plano, trocas de foco em conversas.`,
+      favorite: false
+    },
+    {
+      id: '54',
+      title: 'Seguimento Flutuante Steadicam',
+      description: 'A câmara flutua suavemente acompanhando o movimento do sujeito pelo espaço. Um estilo imersivo que remete para a cinematografia de Malick ou Lubezki.',
+      category: 'Motion & Camera Verbs',
+      models: ['Seedance 2.0', 'Runway'],
+      content: `Model: Seedance 2.0 · Aspect: 2.39:1 · Duration: 10s
+Camera move: Steadicam-smooth glide, matching subject's pace. Matches walking speed.
+Lens: 35mm at f/2.8. Wide enough to include environmental context.
+Parallax: Rich. Foreground and background move at different rates as the subject walks past.
+
+Casos de Uso: Introdução de personagens em movimento, planos de acompanhamento longos e fluídos.`,
+      favorite: false
+    },
+    {
+      id: '55',
+      title: 'Revelação em Grua',
+      description: 'A câmara sobe, desce ou faz um arco para revelar o contexto envolvente, passando de um plano fechado para um plano de grande escala.',
+      category: 'Motion & Camera Verbs',
+      models: ['Seedance 2.0', 'Runway'],
+      content: `Model: Seedance 2.0 · Aspect: 2.39:1 · Duration: 10s
+Camera move: Smooth crane or aerial arc. Rising or descending.
+Action: Starts tight on [SUBJECT], then pulls back to show the larger surrounding context.
+Physical detail: A previously-hidden environmental element enters the frame as the new focal point.
+
+Casos de Uso: Mudanças de escala, revelação de cenários, planos de estabelecimento épicos.`,
+      favorite: false
+    },
+    {
+      id: '56',
+      title: 'Transição em Chicote',
+      description: 'Uma rotação rápida da câmara que cria um rasto de movimento (motion blur), ideal para transições energéticas entre cenas ou sujeitos.',
+      category: 'Motion & Camera Verbs',
+      models: ['Seedance 2.0', 'Runway'],
+      content: `Model: Seedance 2.0 · Aspect: 2.39:1 · Duration: 4s
+Camera move: Rapid rotation of the camera axis (~180°/second).
+Motion blur: Heavy during the whip phase. The frame becomes a horizontal streak of color.
+Audio: Whoosh / woosh sound effect synchronized with the motion.
+
+Casos de Uso: Transições rápidas, momentos de caos, timing cómico ou mudança de cena dinâmica.`,
+      favorite: false
+    },
+  ];
+
+    // Merge: carregar prompts do localStorage e adicionar novos defaults que não existem
+    const saved = localStorage.getItem('prompts');
+    if (saved && saved !== 'undefined' && saved !== 'null') {
+      try {
+        const savedPrompts: Prompt[] = JSON.parse(saved);
+        console.log('📂 Carregando prompts do localStorage. Total favoritos:', savedPrompts.filter(p => p.favorite === true).length);
+        const savedIds = new Set(savedPrompts.map(p => p.id));
+
+        // Adicionar novos prompts defaults que não existem no localStorage
+        const newPrompts = defaultPrompts.filter(p => !savedIds.has(p.id));
+        const merged = [...savedPrompts, ...newPrompts];
+        console.log('✅ Total de prompts após merge:', merged.length, 'Favoritos:', merged.filter(p => p.favorite === true).length);
+        return merged;
+      } catch (e) {
+        console.warn('Erro ao carregar prompts do localStorage:', e);
+        return defaultPrompts;
+      }
+    }
+
+    console.log('🆕 Usando prompts padrão (primeira vez)');
+    return defaultPrompts;
+  });
+
+  const [workflows, setWorkflows] = useState<WorkflowType[]>(() => {
+    const defaultWorkflows: WorkflowType[] = [
     {
       id: '1',
       title: 'Criação de Conteúdo End-to-End',
@@ -652,7 +1411,75 @@ Tamanho: 100-150 palavras máximo`,
       ],
       favorite: false
     },
-  ]);
+    {
+      id: '5',
+      title: 'Identificação de Estilo Visual da Marca',
+      description: 'Formulário interativo n8n que identifica e define o estilo visual completo da tua marca através de questões estratégicas.',
+      category: 'Marketing',
+      steps: [
+        { tool: 'n8n Form', status: 'pending', icon: 'layout' },
+        { tool: 'Análise IA', status: 'pending', icon: 'sparkles' },
+        { tool: 'Guia Visual', status: 'pending', icon: 'file-text' }
+      ],
+      favorite: false
+    },
+  ];
+
+    // Merge: carregar workflows do localStorage e adicionar novos defaults que não existem
+    const saved = localStorage.getItem('workflows');
+    if (saved && saved !== 'undefined' && saved !== 'null') {
+      try {
+        const savedWorkflows: WorkflowType[] = JSON.parse(saved);
+        console.log('📂 Carregando workflows do localStorage. Total:', savedWorkflows.length);
+        const savedIds = new Set(savedWorkflows.map(w => w.id));
+
+        // Adicionar novos workflows defaults que não existem no localStorage
+        const newWorkflows = defaultWorkflows.filter(w => !savedIds.has(w.id));
+        const merged = [...savedWorkflows, ...newWorkflows];
+        console.log('✅ Total de workflows após merge:', merged.length);
+        return merged;
+      } catch (e) {
+        console.warn('Erro ao carregar workflows do localStorage:', e);
+        return defaultWorkflows;
+      }
+    }
+
+    console.log('🆕 Usando workflows padrão (primeira vez)');
+    return defaultWorkflows;
+  });
+
+  // Guardar tools, prompts e workflows no localStorage sempre que mudarem
+  useEffect(() => {
+    try {
+      console.log('💾 Salvando tools no localStorage. Total favoritos:', tools.filter(t => t.favorite === true).length);
+      localStorage.setItem('tools', JSON.stringify(tools));
+    } catch (e) {
+      console.warn('Erro ao salvar tools no localStorage:', e);
+    }
+  }, [tools]);
+
+  useEffect(() => {
+    try {
+      // Remover imagens base64 antes de salvar (manter URLs do Supabase)
+      const promptsToSave = prompts.map(p => ({
+        ...p,
+        image: p.image && !p.image.startsWith('data:') ? p.image : undefined
+      }));
+      console.log('💾 Salvando prompts no localStorage. Total favoritos:', promptsToSave.filter(p => p.favorite === true).length);
+      localStorage.setItem('prompts', JSON.stringify(promptsToSave));
+    } catch (e: any) {
+      console.error('Erro ao salvar prompts:', e);
+    }
+  }, [prompts]);
+
+  useEffect(() => {
+    try {
+      console.log('💾 Salvando workflows no localStorage. Total favoritos:', workflows.filter(w => w.favorite === true).length);
+      localStorage.setItem('workflows', JSON.stringify(workflows));
+    } catch (e) {
+      console.warn('Erro ao salvar workflows no localStorage:', e);
+    }
+  }, [workflows]);
 
   const getCategoryCount = (category: string, type: 'tool' | 'prompt' | 'workflow') => {
     if (type === 'tool') {
@@ -678,66 +1505,68 @@ Tamanho: 100-150 palavras máximo`,
     }
   };
 
-  const toggleToolFavorite = async (id: string) => {
-    const tool = tools.find(t => t.id === id);
-    if (!tool) return;
-
-    const newFavoriteValue = !tool.favorite;
+  const toggleToolFavorite = (id: string) => {
     const updatedTools = tools.map(t =>
-      t.id === id ? { ...t, favorite: newFavoriteValue } : t
+      t.id === id ? { ...t, favorite: !t.favorite } : t
     );
-
-    console.log('Toggle favorite:', tool.name);
-    console.log('Before:', tool.favorite, 'After:', newFavoriteValue);
-    console.log('Total favorites after toggle:', updatedTools.filter(t => t.favorite === true).length);
-
+    console.log('⭐ Toggle tool favorite', id, '→', updatedTools.find(t => t.id === id)?.favorite);
     setTools(updatedTools);
-    await saveTools(updatedTools);
   };
 
-  const togglePromptFavorite = async (id: string) => {
-    const prompt = prompts.find(p => p.id === id);
-    if (!prompt) return;
-
-    const newFavoriteValue = !prompt.favorite;
+  const togglePromptFavorite = (id: string) => {
     const updatedPrompts = prompts.map(p =>
-      p.id === id ? { ...p, favorite: newFavoriteValue } : p
+      p.id === id ? { ...p, favorite: !p.favorite } : p
     );
-
+    console.log('⭐ Toggle prompt favorite', id, '→', updatedPrompts.find(p => p.id === id)?.favorite);
     setPrompts(updatedPrompts);
-    await savePrompts(updatedPrompts);
   };
 
-  const toggleWorkflowFavorite = async (id: string) => {
-    const workflow = workflows.find(w => w.id === id);
-    if (!workflow) return;
-
-    const newFavoriteValue = !workflow.favorite;
+  const toggleWorkflowFavorite = (id: string) => {
     const updatedWorkflows = workflows.map(w =>
-      w.id === id ? { ...w, favorite: newFavoriteValue } : w
+      w.id === id ? { ...w, favorite: !w.favorite } : w
     );
-
+    console.log('⭐ Toggle workflow favorite', id, '→', updatedWorkflows.find(w => w.id === id)?.favorite);
     setWorkflows(updatedWorkflows);
-    await saveWorkflows(updatedWorkflows);
   };
 
   const executeWorkflow = (workflow: WorkflowType) => {
+    // Workflow especial: Identificação de Estilo Visual da Marca (n8n)
+    if (workflow.id === '5') {
+      window.open('https://adminssssssssssssss.app.n8n.cloud/form-test/d36d97ec-bd58-4499-8b01-4b0a9ae23bbc', '_blank');
+      setExecutingWorkflow(workflow);
+      setWorkflowLogs([
+        `[${new Date().toLocaleTimeString()}] Abrindo formulário n8n de identificação de marca...`,
+        `[${new Date().toLocaleTimeString()}] Formulário aberto em nova aba.`,
+        `[${new Date().toLocaleTimeString()}] Preencha o formulário para receber o guia de estilo visual da sua marca.`,
+      ]);
+      return;
+    }
+
+    // Workflows simulados (demo)
     setExecutingWorkflow(workflow);
     setWorkflowLogs([
-      `[18:42:01] Iniciando workflow "${workflow.title}"...`,
-      `[18:42:02] Conectado ao ChatGPT (API v1)...`,
-      `[18:42:13] Artigo gerado com sucesso (458 palavras).`,
-      `[18:42:14] Extraindo prompt de imagem do artigo...`,
-      `[18:42:15] Enviando pedido para Midjourney API...`,
-      `[18:42:33] A aguardar geração de imagem (aprox. 30s)...`,
+      `[${new Date().toLocaleTimeString()}] Iniciando workflow "${workflow.title}"...`,
+      `[${new Date().toLocaleTimeString()}] Conectado ao ChatGPT (API v1)...`,
+      `[${new Date().toLocaleTimeString()}] Artigo gerado com sucesso (458 palavras).`,
+      `[${new Date().toLocaleTimeString()}] Extraindo prompt de imagem do artigo...`,
+      `[${new Date().toLocaleTimeString()}] Enviando pedido para Midjourney API...`,
+      `[${new Date().toLocaleTimeString()}] A aguardar geração de imagem (aprox. 30s)...`,
     ]);
   };
 
   const copyPromptToClipboard = (content: string) => {
     try {
+      // Filtrar linhas: remover "Model:" e "Casos de Uso:"
+      const lines = content.split('\n');
+      const filteredLines = lines.filter(line => {
+        const trimmed = line.trim();
+        return !trimmed.startsWith('Model:') && !trimmed.startsWith('Casos de Uso:');
+      });
+      const filteredContent = filteredLines.join('\n').trim();
+
       // Método alternativo que funciona mesmo quando a API está bloqueada
       const textarea = document.createElement('textarea');
-      textarea.value = content;
+      textarea.value = filteredContent;
       textarea.style.position = 'fixed';
       textarea.style.opacity = '0';
       document.body.appendChild(textarea);
@@ -749,6 +1578,54 @@ Tamanho: 100-150 palavras máximo`,
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error('Erro ao copiar:', err);
+    }
+  };
+
+  // Upload de imagem para Supabase Storage
+  const uploadImageToSupabase = async (base64Image: string): Promise<string | null> => {
+    try {
+      console.log('📤 Iniciando upload para Supabase...');
+
+      // Converter base64 para Blob
+      const base64Data = base64Image.split(',')[1];
+      const mimeType = base64Image.split(',')[0].split(':')[1].split(';')[0];
+      const byteCharacters = atob(base64Data);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: mimeType });
+
+      // Gerar nome único para o ficheiro
+      const fileName = `prompt-${Date.now()}-${Math.random().toString(36).substring(7)}.${mimeType.split('/')[1]}`;
+
+      console.log('📦 Tamanho do ficheiro:', (blob.size / 1024 / 1024).toFixed(2), 'MB');
+
+      // Fazer upload para Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('prompt-images')
+        .upload(fileName, blob, {
+          contentType: mimeType,
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (error) {
+        console.error('❌ Erro ao fazer upload:', error);
+        return null;
+      }
+
+      // Obter URL pública da imagem
+      const { data: publicUrlData } = supabase.storage
+        .from('prompt-images')
+        .getPublicUrl(fileName);
+
+      console.log('✅ Imagem guardada:', publicUrlData.publicUrl);
+      return publicUrlData.publicUrl;
+    } catch (error) {
+      console.error('❌ Erro ao processar imagem:', error);
+      return null;
     }
   };
 
@@ -794,10 +1671,24 @@ Tamanho: 100-150 palavras máximo`,
 
   const handleEdit = (type: 'tool' | 'prompt' | 'workflow', id: string) => {
     setOpenMenuId(null);
-    // Aqui você pode abrir um modal de edição ou navegar para uma página de edição
-    console.log(`Editar ${type} com id ${id}`);
-    // Por enquanto, apenas mostramos no console
-    alert(`Funcionalidade de editar ${type} em desenvolvimento`);
+
+    if (type === 'prompt') {
+      const prompt = prompts.find(p => p.id === id);
+      if (prompt) {
+        setEditingPromptId(id);
+        setNewPromptTitle(prompt.title);
+        setNewPromptDescription(prompt.description);
+        setNewPromptContent(prompt.content);
+        setNewPromptImage(prompt.image || '');
+        setNewPromptCategory(prompt.category);
+        setNewPromptModels(prompt.models.join(', '));
+        setActiveModal('prompt');
+        setActiveTab('item');
+      }
+    } else {
+      console.log(`Editar ${type} com id ${id}`);
+      alert(`Funcionalidade de editar ${type} em desenvolvimento`);
+    }
   };
 
   const handleAddCategory = async () => {
@@ -947,18 +1838,53 @@ Tamanho: 100-150 palavras máximo`,
 
     const modelsArray = newPromptModels.split(',').map(m => m.trim()).filter(m => m.length > 0);
 
-    const newPrompt: Prompt = {
-      id: Date.now().toString(),
-      title: newPromptTitle,
-      description: newPromptDescription,
-      category: newPromptCategory,
-      models: modelsArray,
-      content: newPromptContent,
-      image: newPromptImage || undefined,
-      favorite: false
-    };
+    // Upload de imagem para Supabase se existir e for base64
+    let imageUrl = newPromptImage;
+    if (newPromptImage && newPromptImage.startsWith('data:')) {
+      console.log('📸 Imagem detectada, enviando para Supabase Storage...');
+      const uploadedUrl = await uploadImageToSupabase(newPromptImage);
+      if (uploadedUrl) {
+        imageUrl = uploadedUrl;
+        console.log('✅ URL da imagem:', uploadedUrl);
+      } else {
+        console.warn('⚠️ Falha no upload. A imagem não será guardada.');
+        alert('Erro ao fazer upload da imagem para o Supabase. Verifica se o bucket "prompt-images" foi criado e é público.');
+        imageUrl = ''; // Limpar imagem se falhar
+      }
+    }
 
-    const updatedPrompts = [...prompts, newPrompt];
+    let updatedPrompts;
+
+    if (editingPromptId) {
+      // Modo edição: atualizar prompt existente
+      updatedPrompts = prompts.map(p =>
+        p.id === editingPromptId
+          ? {
+              ...p,
+              title: newPromptTitle,
+              description: newPromptDescription,
+              category: newPromptCategory,
+              models: modelsArray,
+              content: newPromptContent,
+              image: imageUrl || undefined
+            }
+          : p
+      );
+    } else {
+      // Modo criação: adicionar novo prompt
+      const newPrompt: Prompt = {
+        id: Date.now().toString(),
+        title: newPromptTitle,
+        description: newPromptDescription,
+        category: newPromptCategory,
+        models: modelsArray,
+        content: newPromptContent,
+        image: imageUrl || undefined,
+        favorite: false
+      };
+      updatedPrompts = [...prompts, newPrompt];
+    }
+
     setPrompts(updatedPrompts);
     await savePrompts(updatedPrompts);
 
@@ -969,6 +1895,7 @@ Tamanho: 100-150 palavras máximo`,
     setNewPromptImage('');
     setNewPromptCategory('Marketing');
     setNewPromptModels('ChatGPT, Claude');
+    setEditingPromptId(null);
     setActiveModal(null);
   };
 
@@ -1209,13 +2136,19 @@ Tamanho: 100-150 palavras máximo`,
                     {(() => {
                       const filtered = tools.filter(tool => {
                         let categoryMatch = true;
+
+                        // Debug: log das condições
                         if (selectedCategory === 'Favoritos') {
                           categoryMatch = tool.favorite === true;
+                          if (tool.favorite === true) {
+                            console.log('✅ Tool favorito encontrado:', tool.name, 'favorite:', tool.favorite);
+                          }
                         } else if (selectedSubcategory && selectedCategory) {
                           categoryMatch = tool.category === selectedCategory && tool.subcategory === selectedSubcategory;
                         } else if (selectedCategory) {
                           categoryMatch = tool.category === selectedCategory;
                         }
+
                         const badgeMatch = !selectedBadge || tool.badges.includes(selectedBadge);
                         const searchMatch = !searchTerm ||
                           tool.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -1226,10 +2159,14 @@ Tamanho: 100-150 palavras máximo`,
 
                       if (selectedCategory === 'Favoritos') {
                         console.log('=== FAVORITOS DEBUG ===');
-                        console.log('Selected category:', selectedCategory);
-                        console.log('Total tools:', tools.length);
-                        console.log('Tools with favorite=true:', tools.filter(t => t.favorite === true).map(t => ({ id: t.id, name: t.name, favorite: t.favorite })));
-                        console.log('Filtered favorites:', filtered.map(t => ({ id: t.id, name: t.name, favorite: t.favorite })));
+                        console.log('🔍 Selected category:', selectedCategory);
+                        console.log('🔍 Selected subcategory:', selectedSubcategory);
+                        console.log('🔍 Selected badge:', selectedBadge);
+                        console.log('🔍 Search term:', searchTerm);
+                        console.log('📊 Total tools:', tools.length);
+                        console.log('⭐ Tools with favorite=true:', tools.filter(t => t.favorite === true).map(t => ({ id: t.id, name: t.name, favorite: t.favorite })));
+                        console.log('📋 Filtered favorites:', filtered.map(t => ({ id: t.id, name: t.name, favorite: t.favorite })));
+                        console.log('======================');
                       }
 
                       return filtered;
@@ -2035,7 +2972,7 @@ Tamanho: 100-150 palavras máximo`,
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-[#1a1f2e] border border-gray-800/50 rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold">Adicionar Novo</h2>
+              <h2 className="text-xl font-semibold">{editingPromptId ? 'Editar Prompt' : 'Adicionar Novo'}</h2>
               <button onClick={() => {
                 setActiveModal(null);
                 setNewPromptTitle('');
@@ -2043,6 +2980,7 @@ Tamanho: 100-150 palavras máximo`,
                 setNewPromptContent('');
                 setNewPromptImage('');
                 setNewPromptModels('ChatGPT, Claude');
+                setEditingPromptId(null);
               }} className="text-gray-400 hover:text-gray-300">
                 <X className="w-5 h-5" />
               </button>
@@ -2089,34 +3027,11 @@ Tamanho: 100-150 palavras máximo`,
 
               <div>
                 <label className="block text-sm text-gray-400 mb-1.5">Imagem (opcional)</label>
-                <div className="space-y-2">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
-                          setNewPromptImage(reader.result as string);
-                        };
-                        reader.readAsDataURL(file);
-                      }
-                    }}
-                    className="w-full bg-[#0f1420] border border-gray-800/50 rounded-lg px-4 py-2.5 text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white file:cursor-pointer hover:file:bg-blue-700 focus:outline-none focus:border-blue-600 transition-colors"
-                  />
-                  {newPromptImage && (
-                    <div className="relative w-full h-32 bg-gray-800/50 rounded-lg overflow-hidden">
-                      <img src={newPromptImage} alt="Preview" className="w-full h-full object-cover" />
-                      <button
-                        onClick={() => setNewPromptImage('')}
-                        className="absolute top-2 right-2 p-1 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
-                      >
-                        <X className="w-4 h-4 text-white" />
-                      </button>
-                    </div>
-                  )}
-                </div>
+                <ImageUpload
+                  onImageUpload={setNewPromptImage}
+                  currentImage={newPromptImage}
+                  maxSizeMB={50}
+                />
               </div>
 
               <div>
@@ -2165,6 +3080,7 @@ Tamanho: 100-150 palavras máximo`,
                     setNewPromptContent('');
                     setNewPromptImage('');
                     setNewPromptModels('ChatGPT, Claude');
+                    setEditingPromptId(null);
                   }}
                   className="px-4 py-2.5 bg-transparent text-gray-400 hover:text-white transition-colors"
                 >
@@ -2174,7 +3090,7 @@ Tamanho: 100-150 palavras máximo`,
                   onClick={handleAddPrompt}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
-                  Guardar Prompt
+                  {editingPromptId ? 'Atualizar Prompt' : 'Guardar Prompt'}
                 </button>
               </div>
             </div>
@@ -2511,9 +3427,20 @@ Tamanho: 100-150 palavras máximo`,
 
             {/* Content */}
             <div className="flex-1 overflow-y-auto p-6">
+              <div className="mb-3 text-xs text-gray-500 flex items-center gap-2">
+                <span className="opacity-40 italic">Linhas a cinzento</span>
+                <span>não são copiadas (apenas para referência)</span>
+              </div>
               <div className="bg-[#0f1420] border border-gray-800 rounded-lg p-4">
                 <pre className="text-sm text-gray-300 whitespace-pre-wrap font-mono leading-relaxed">
-                  {selectedPrompt.content}
+                  {selectedPrompt.content.split('\n').map((line, index) => {
+                    const isMetadata = line.trim().startsWith('Model:') || line.trim().startsWith('Casos de Uso:');
+                    return (
+                      <span key={index} className={isMetadata ? 'opacity-40 italic' : ''}>
+                        {line}{index < selectedPrompt.content.split('\n').length - 1 ? '\n' : ''}
+                      </span>
+                    );
+                  })}
                 </pre>
               </div>
             </div>
