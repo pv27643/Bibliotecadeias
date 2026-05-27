@@ -3,6 +3,7 @@ import { Zap, Workflow, FileText, Library, Plus, X, Sparkles, Video, Pencil, Ima
 import { projectId, publicAnonKey } from '/utils/supabase/info';
 import { supabase } from '/utils/supabase/client';
 import ImageUpload from './components/ImageUpload';
+import BrandPostGenerator from './components/BrandPostGenerator';
 
 type View = 'biblioteca' | 'prompts' | 'workflows';
 type Modal = 'categoria' | 'ferramenta' | 'prompt' | 'workflow' | null;
@@ -43,12 +44,18 @@ interface WorkflowType {
   description: string;
   category: string;
   steps: WorkflowStep[];
+  image?: string;
   favorite?: boolean;
 }
 
 const API_BASE = `https://${projectId}.supabase.co/functions/v1/make-server-d8505aef`;
 
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return localStorage.getItem('isAuthenticated') === 'true';
+  });
+  const [passwordInput, setPasswordInput] = useState('');
+  
   const [currentView, setCurrentView] = useState<View>('biblioteca');
   const [activeModal, setActiveModal] = useState<Modal>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -61,6 +68,7 @@ export default function App() {
   const [searchWorkflowTerm, setSearchWorkflowTerm] = useState<string>('');
   const [executingWorkflow, setExecutingWorkflow] = useState<WorkflowType | null>(null);
   const [workflowLogs, setWorkflowLogs] = useState<string[]>([]);
+  const [showBrandGenerator, setShowBrandGenerator] = useState(false);
   const [selectedPrompt, setSelectedPrompt] = useState<Prompt | null>(null);
   const [copied, setCopied] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
@@ -90,6 +98,13 @@ export default function App() {
   const [newPromptCategory, setNewPromptCategory] = useState<string>('Marketing');
   const [newPromptModels, setNewPromptModels] = useState<string>('ChatGPT, Claude');
   const [editingPromptId, setEditingPromptId] = useState<string | null>(null);
+
+  // Form states para novo workflow
+  const [newWorkflowTitle, setNewWorkflowTitle] = useState<string>('');
+  const [newWorkflowDescription, setNewWorkflowDescription] = useState<string>('');
+  const [newWorkflowImage, setNewWorkflowImage] = useState<string>('');
+  const [newWorkflowCategory, setNewWorkflowCategory] = useState<string>('Marketing');
+  const [editingWorkflowId, setEditingWorkflowId] = useState<string | null>(null);
 
   // Carregar do localStorage ou usar defaults
   const [toolCategories, setToolCategories] = useState<string[]>(() => {
@@ -189,63 +204,234 @@ export default function App() {
     return map;
   });
 
-  // Supabase desativado - usando apenas localStorage
-  // useEffect(() => {
-  //   const loadData = async () => {
-  //     try {
-  //       const response = await fetch(`${API_BASE}/data`, {
-  //         headers: {
-  //           'Authorization': `Bearer ${publicAnonKey}`
-  //         }
-  //       });
-  //       if (!response.ok) {
-  //         throw new Error(`HTTP error! status: ${response.status}`);
-  //       }
-  //       const data = await response.json();
-  //       console.log('Dados carregados com sucesso da base de dados');
-  //     } catch (error) {
-  //       console.warn('Servidor Supabase ainda não foi deployado. A usar dados locais.', error);
-  //     }
-  //   };
-  //   loadData();
-  // }, []);
+  // Carregar dados da base de dados Supabase com fallback para localStorage
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        console.log('📡 Carregando dados da base de dados...');
+        const response = await fetch(`${API_BASE}/data`, {
+          headers: {
+            'Authorization': `Bearer ${publicAnonKey}`
+          }
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log('✅ Dados carregados com sucesso da base de dados:', data);
+        
+        // Sincronizar dados carregados da cloud com localStorage
+        if (data.tools && data.tools.length > 0) {
+          setTools(data.tools);
+          localStorage.setItem('tools', JSON.stringify(data.tools));
+        }
+        if (data.prompts && data.prompts.length > 0) {
+          setPrompts(data.prompts);
+          localStorage.setItem('prompts', JSON.stringify(data.prompts));
+        }
+        if (data.workflows && data.workflows.length > 0) {
+          setWorkflows(data.workflows);
+          localStorage.setItem('workflows', JSON.stringify(data.workflows));
+        }
+        if (data.toolCategories && data.toolCategories.length > 0) {
+          setToolCategories(data.toolCategories);
+        }
+        if (data.promptCategories && data.promptCategories.length > 0) {
+          setPromptCategories(data.promptCategories);
+        }
+        if (data.workflowCategories && data.workflowCategories.length > 0) {
+          setWorkflowCategories(data.workflowCategories);
+        }
+        if (data.subcategories && Object.keys(data.subcategories).length > 0) {
+          setSubcategoriesMap(data.subcategories);
+        }
+      } catch (error) {
+        console.warn('⚠️ Erro ao carregar da base de dados. A usar dados locais.', error);
+        // Fallback para localStorage - já carregado no useState
+      }
+    };
+    loadData();
+  }, []);
 
-  // Guardar categorias no localStorage sempre que mudarem
+  // Guardar dados no localStorage e na base de dados
   useEffect(() => {
     localStorage.setItem('toolCategories', JSON.stringify(toolCategories));
+    // Sincronizar com Supabase
+    fetch(`${API_BASE}/categories`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${publicAnonKey}`
+      },
+      body: JSON.stringify({ type: 'tool', categories: toolCategories })
+    }).catch(err => console.warn('Erro ao sincronizar toolCategories:', err));
   }, [toolCategories]);
 
   useEffect(() => {
     localStorage.setItem('promptCategories', JSON.stringify(promptCategories));
+    fetch(`${API_BASE}/categories`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${publicAnonKey}`
+      },
+      body: JSON.stringify({ type: 'prompt', categories: promptCategories })
+    }).catch(err => console.warn('Erro ao sincronizar promptCategories:', err));
   }, [promptCategories]);
 
   useEffect(() => {
     localStorage.setItem('workflowCategories', JSON.stringify(workflowCategories));
+    fetch(`${API_BASE}/categories`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${publicAnonKey}`
+      },
+      body: JSON.stringify({ type: 'workflow', categories: workflowCategories })
+    }).catch(err => console.warn('Erro ao sincronizar workflowCategories:', err));
   }, [workflowCategories]);
 
   useEffect(() => {
     localStorage.setItem('subcategoriesMap', JSON.stringify(subcategoriesMap));
+    fetch(`${API_BASE}/subcategories`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${publicAnonKey}`
+      },
+      body: JSON.stringify({ subcategories: subcategoriesMap })
+    }).catch(err => console.warn('Erro ao sincronizar subcategories:', err));
   }, [subcategoriesMap]);
 
-  // Save data helpers (Supabase desativado - usando apenas localStorage)
-  const saveTools = async (newTools: Tool[]) => {
-    // Dados salvos automaticamente via useEffect + localStorage
+  // Funções para salvar dados (localStorage + Supabase com retry)
+  const savePrompts = async (newPrompts: Prompt[]) => {
+    // 1. Salvar SEMPRE no localStorage primeiro
+    localStorage.setItem('prompts', JSON.stringify(newPrompts));
+    console.log('💾 Prompts guardados em localStorage');
+    
+    // 2. Tentar sincronizar com Supabase em background (com retry)
+    let attempts = 0;
+    const maxAttempts = 3;
+    
+    while (attempts < maxAttempts) {
+      try {
+        const response = await fetch(`${API_BASE}/prompts`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${publicAnonKey}`
+          },
+          body: JSON.stringify(newPrompts)
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        console.log('✅ Prompts sincronizados com sucesso na base de dados');
+        return; // Sucesso!
+      } catch (err) {
+        attempts++;
+        console.warn(`⚠️ Tentativa ${attempts}/${maxAttempts} falhou. Erro:`, err);
+        if (attempts < maxAttempts) {
+          // Esperar 1 segundo antes de retry
+          await new Promise(r => setTimeout(r, 1000));
+        }
+      }
+    }
+    console.warn('⚠️ Falha ao sincronizar prompts com Supabase após 3 tentativas, mas dados guardados em localStorage');
   };
 
-  const savePrompts = async (newPrompts: Prompt[]) => {
-    // Dados salvos automaticamente via useEffect + localStorage
+  const saveTools = async (newTools: Tool[]) => {
+    localStorage.setItem('tools', JSON.stringify(newTools));
+    console.log('💾 Tools guardadas em localStorage');
+    
+    let attempts = 0;
+    const maxAttempts = 3;
+    
+    while (attempts < maxAttempts) {
+      try {
+        const response = await fetch(`${API_BASE}/tools`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${publicAnonKey}`
+          },
+          body: JSON.stringify(newTools)
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        console.log('✅ Tools sincronizadas com sucesso na base de dados');
+        return;
+      } catch (err) {
+        attempts++;
+        console.warn(`⚠️ Tentativa ${attempts}/${maxAttempts} falhou:`, err);
+        if (attempts < maxAttempts) {
+          await new Promise(r => setTimeout(r, 1000));
+        }
+      }
+    }
+    console.warn('⚠️ Falha ao sincronizar tools, mas dados guardados em localStorage');
   };
 
   const saveWorkflows = async (newWorkflows: WorkflowType[]) => {
-    // Dados salvos automaticamente via useEffect + localStorage
+    localStorage.setItem('workflows', JSON.stringify(newWorkflows));
+    console.log('💾 Workflows guardados em localStorage');
+    
+    let attempts = 0;
+    const maxAttempts = 3;
+    
+    while (attempts < maxAttempts) {
+      try {
+        const response = await fetch(`${API_BASE}/workflows`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${publicAnonKey}`
+          },
+          body: JSON.stringify(newWorkflows)
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        console.log('✅ Workflows sincronizados com sucesso na base de dados');
+        return;
+      } catch (err) {
+        attempts++;
+        console.warn(`⚠️ Tentativa ${attempts}/${maxAttempts} falhou:`, err);
+        if (attempts < maxAttempts) {
+          await new Promise(r => setTimeout(r, 1000));
+        }
+      }
+    }
+    console.warn('⚠️ Falha ao sincronizar workflows, mas dados guardados em localStorage');
   };
 
   const saveCategories = async (type: 'tool' | 'prompt' | 'workflow', categories: string[]) => {
-    // Dados salvos automaticamente via useEffect + localStorage
+    try {
+      const response = await fetch(`${API_BASE}/categories`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${publicAnonKey}`
+        },
+        body: JSON.stringify({ type, categories })
+      });
+      if (!response.ok) throw new Error('Erro ao sincronizar categorias');
+      console.log(`✅ Categorias ${type} sincronizadas com sucesso`);
+    } catch (err) {
+      console.warn(`⚠️ Erro ao salvar categorias na base de dados:`, err);
+    }
   };
 
   const saveSubcategories = async (subcategories: Record<string, string[]>) => {
-    // Dados salvos automaticamente via useEffect + localStorage
+    try {
+      const response = await fetch(`${API_BASE}/subcategories`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${publicAnonKey}`
+        },
+        body: JSON.stringify({ subcategories })
+      });
+      if (!response.ok) throw new Error('Erro ao sincronizar subcategorias');
+      console.log('✅ Subcategorias sincronizadas com sucesso');
+    } catch (err) {
+      console.warn('⚠️ Erro ao salvar subcategorias na base de dados:', err);
+    }
   };
 
   const [tools, setTools] = useState<Tool[]>(() => {
@@ -1423,6 +1609,18 @@ Casos de Uso: Transições rápidas, momentos de caos, timing cómico ou mudanç
       ],
       favorite: false
     },
+    {
+      id: 'brand-post-generator',
+      title: '🎨 Brand Post Generator',
+      description: 'Gera posts de redes sociais mantendo a identidade visual da sua marca. Integração com n8n para análise automática.',
+      category: 'Marketing',
+      steps: [
+        { tool: 'Análise Visual', status: 'pending', icon: 'image' },
+        { tool: 'GPT-4o Vision', status: 'pending', icon: 'sparkles' },
+        { tool: 'DALL-E 3', status: 'pending', icon: 'image' }
+      ],
+      favorite: false
+    },
   ];
 
     // Merge: carregar workflows do localStorage e adicionar novos defaults que não existem
@@ -1530,6 +1728,13 @@ Casos de Uso: Transições rápidas, momentos de caos, timing cómico ou mudanç
   };
 
   const executeWorkflow = (workflow: WorkflowType) => {
+    // Workflow especial: Brand Post Generator (n8n)
+    if (workflow.id === 'brand-post-generator') {
+      setShowBrandGenerator(true);
+      setExecutingWorkflow(workflow);
+      return;
+    }
+
     // Workflow especial: Identificação de Estilo Visual da Marca (n8n)
     if (workflow.id === '5') {
       window.open('https://adminssssssssssssss.app.n8n.cloud/form-test/d36d97ec-bd58-4499-8b01-4b0a9ae23bbc', '_blank');
@@ -1683,6 +1888,17 @@ Casos de Uso: Transições rápidas, momentos de caos, timing cómico ou mudanç
         setNewPromptCategory(prompt.category);
         setNewPromptModels(prompt.models.join(', '));
         setActiveModal('prompt');
+        setActiveTab('item');
+      }
+    } else if (type === 'workflow') {
+      const workflow = workflows.find(w => w.id === id);
+      if (workflow) {
+        setEditingWorkflowId(id);
+        setNewWorkflowTitle(workflow.title);
+        setNewWorkflowDescription(workflow.description);
+        setNewWorkflowImage(workflow.image || '');
+        setNewWorkflowCategory(workflow.category);
+        setActiveModal('workflow');
         setActiveTab('item');
       }
     } else {
@@ -1899,6 +2115,68 @@ Casos de Uso: Transições rápidas, momentos de caos, timing cómico ou mudanç
     setActiveModal(null);
   };
 
+  const handleAddWorkflow = async () => {
+    if (!newWorkflowTitle.trim() || !newWorkflowDescription.trim()) {
+      alert('Por favor, preencha o título e a descrição');
+      return;
+    }
+
+    // Upload de imagem para Supabase se existir e for base64
+    let imageUrl = newWorkflowImage;
+    if (newWorkflowImage && newWorkflowImage.startsWith('data:')) {
+      console.log('📸 Imagem detectada, enviando para Supabase Storage...');
+      const uploadedUrl = await uploadImageToSupabase(newWorkflowImage);
+      if (uploadedUrl) {
+        imageUrl = uploadedUrl;
+        console.log('✅ URL da imagem:', uploadedUrl);
+      } else {
+        console.warn('⚠️ Falha no upload. A imagem não será guardada.');
+        alert('Erro ao fazer upload da imagem para o Supabase. Verifica se o bucket "prompt-images" foi criado e é público.');
+        imageUrl = '';
+      }
+    }
+
+    let updatedWorkflows;
+
+    if (editingWorkflowId) {
+      // Modo edição: atualizar workflow existente
+      updatedWorkflows = workflows.map(w =>
+        w.id === editingWorkflowId
+          ? {
+              ...w,
+              title: newWorkflowTitle,
+              description: newWorkflowDescription,
+              category: newWorkflowCategory,
+              image: imageUrl || undefined
+            }
+          : w
+      );
+    } else {
+      // Modo criação: adicionar novo workflow
+      const newWorkflow: WorkflowType = {
+        id: Date.now().toString(),
+        title: newWorkflowTitle,
+        description: newWorkflowDescription,
+        category: newWorkflowCategory,
+        steps: [],
+        image: imageUrl || undefined,
+        favorite: false
+      };
+      updatedWorkflows = [...workflows, newWorkflow];
+    }
+
+    setWorkflows(updatedWorkflows);
+    await saveWorkflows(updatedWorkflows);
+
+    // Limpar form
+    setNewWorkflowTitle('');
+    setNewWorkflowDescription('');
+    setNewWorkflowImage('');
+    setNewWorkflowCategory('Marketing');
+    setEditingWorkflowId(null);
+    setActiveModal(null);
+  };
+
   const availableIcons = [
     { name: 'sparkles', label: 'Sparkles', value: 'sparkles' },
     { name: 'layout', label: 'Layout', value: 'layout' },
@@ -1908,6 +2186,60 @@ Casos de Uso: Transições rápidas, momentos de caos, timing cómico ou mudanç
     { name: 'box', label: 'Box', value: 'box' },
     { name: 'message-square', label: 'Chat', value: 'message-square' },
   ];
+
+  const handleLogin = () => {
+    if (passwordInput.toLowerCase() === 'ivan') {
+      setIsAuthenticated(true);
+      localStorage.setItem('isAuthenticated', 'true');
+      setPasswordInput('');
+    } else {
+      alert('Senha incorreta!');
+      setPasswordInput('');
+    }
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    localStorage.setItem('isAuthenticated', 'false');
+    setPasswordInput('');
+  };
+
+  // Tela de Login
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-[#0a0e1a] text-white flex items-center justify-center">
+        <div className="w-full max-w-md">
+          <div className="bg-[#0f1420] border border-gray-800 rounded-lg p-8">
+            <div className="flex items-center justify-center gap-2 mb-8">
+              <Zap className="w-8 h-8 text-blue-500" />
+              <h1 className="text-2xl font-bold">Celeuma IA</h1>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-300">Senha</label>
+                <input
+                  type="password"
+                  value={passwordInput}
+                  onChange={(e) => setPasswordInput(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+                  placeholder="Digite a senha para desbloquear"
+                  className="w-full px-4 py-2 bg-[#0a0e1a] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                  autoFocus
+                />
+              </div>
+              <button
+                onClick={handleLogin}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition-colors"
+              >
+                Desbloquear
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -1919,9 +2251,18 @@ Casos de Uso: Transições rápidas, momentos de caos, timing cómico ou mudanç
     >
       {/* Sidebar */}
       <div className="w-64 bg-[#0f1420] border-r border-gray-800 p-4 flex flex-col">
-        <div className="flex items-center gap-2 mb-8 px-2">
-          <Zap className="w-6 h-6 text-blue-500" />
-          <span className="font-semibold text-lg">Celeuma IA</span>
+        <div className="flex items-center justify-between gap-2 mb-8 px-2">
+          <div className="flex items-center gap-2">
+            <Zap className="w-6 h-6 text-blue-500" />
+            <span className="font-semibold text-lg">Celeuma IA</span>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="text-gray-500 hover:text-red-400 transition-colors p-1"
+            title="Sair"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
         <nav className="space-y-1 flex-1">
@@ -2008,6 +2349,7 @@ Casos de Uso: Transições rápidas, momentos de caos, timing cómico ou mudanç
                       onClick={() => {
                         setSelectedCategory('Favoritos');
                         setSelectedSubcategory(null);
+                        setSelectedBadge(null);
                       }}
                       className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
                         selectedCategory === 'Favoritos'
@@ -2067,7 +2409,7 @@ Casos de Uso: Transições rápidas, momentos de caos, timing cómico ou mudanç
                     </div>
                   ))}
                 </div>
-              ) : selectedCategory && !selectedSubcategory ? (
+              ) : selectedCategory && !selectedSubcategory && selectedCategory !== 'Favoritos' ? (
                 <div className="grid grid-cols-4 gap-4">
                   {(subcategoriesMap[selectedCategory] || []).map(subcategory => (
                     <div
@@ -2518,7 +2860,13 @@ Casos de Uso: Transições rápidas, momentos de caos, timing cómico ou mudanç
                         workflow.description.toLowerCase().includes(searchWorkflowTerm.toLowerCase());
                       return categoryMatch && searchMatch;
                     }).map(workflow => (
-                  <div key={workflow.id} className="bg-[#151921] border border-gray-800/50 rounded-lg p-5 hover:border-gray-700 transition-colors relative">
+                  <div key={workflow.id} className="bg-[#151921] border border-gray-800/50 rounded-lg overflow-hidden hover:border-gray-700 transition-colors relative">
+                    {workflow.image && (
+                      <div className="w-full h-48 overflow-hidden bg-gray-800">
+                        <img src={workflow.image} alt={workflow.title} className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                    <div className="p-5">
                     <div className="mb-4 flex items-start justify-between">
                       <span className="px-2.5 py-1 bg-blue-600/20 text-blue-400 text-xs rounded uppercase font-medium">
                         {workflow.category}
@@ -2596,6 +2944,7 @@ Casos de Uso: Transições rápidas, momentos de caos, timing cómico ou mudanç
                         Executar
                         <ArrowRight className="w-3.5 h-3.5" />
                       </button>
+                    </div>
                     </div>
                   </div>
                 ))}
@@ -3200,6 +3549,8 @@ Casos de Uso: Transições rápidas, momentos de caos, timing cómico ou mudanç
                 <input
                   type="text"
                   placeholder="Ex: Análise de Dados Automatizada"
+                  value={newWorkflowTitle}
+                  onChange={(e) => setNewWorkflowTitle(e.target.value)}
                   className="w-full bg-[#0f1420] border border-gray-800/50 rounded-lg px-4 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-blue-600 transition-colors"
                 />
               </div>
@@ -3209,13 +3560,27 @@ Casos de Uso: Transições rápidas, momentos de caos, timing cómico ou mudanç
                 <textarea
                   placeholder="Descreva o que este workflow faz..."
                   rows={2}
+                  value={newWorkflowDescription}
+                  onChange={(e) => setNewWorkflowDescription(e.target.value)}
                   className="w-full bg-[#0f1420] border border-gray-800/50 rounded-lg px-4 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-blue-600 transition-colors resize-none"
                 />
               </div>
 
               <div>
+                <label className="block text-sm text-gray-400 mb-1.5">Imagem (opcional)</label>
+                <ImageUpload
+                  onImageUpload={setNewWorkflowImage}
+                  currentImage={newWorkflowImage}
+                  maxSizeMB={50}
+                />
+              </div>
+
+              <div>
                 <label className="block text-sm text-gray-400 mb-1.5">Categoria</label>
-                <select className="w-full bg-[#0f1420] border border-gray-800/50 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-600 transition-colors">
+                <select 
+                  value={newWorkflowCategory}
+                  onChange={(e) => setNewWorkflowCategory(e.target.value)}
+                  className="w-full bg-[#0f1420] border border-gray-800/50 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-600 transition-colors">
                   {workflowCategories.filter(cat => cat !== 'Todos').map(cat => (
                     <option key={cat}>{cat}</option>
                   ))}
@@ -3238,16 +3603,23 @@ Casos de Uso: Transições rápidas, momentos de caos, timing cómico ou mudanç
 
               <div className="flex gap-3 pt-3">
                 <button
-                  onClick={() => setActiveModal(null)}
+                  onClick={() => {
+                    setActiveModal(null);
+                    setNewWorkflowTitle('');
+                    setNewWorkflowDescription('');
+                    setNewWorkflowImage('');
+                    setNewWorkflowCategory('Marketing');
+                    setEditingWorkflowId(null);
+                  }}
                   className="px-4 py-2.5 text-gray-400 hover:text-white transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
-                  onClick={() => setActiveModal(null)}
+                  onClick={handleAddWorkflow}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
                 >
-                  Criar Workflow
+                  {editingWorkflowId ? 'Guardar Alterações' : 'Criar Workflow'}
                 </button>
               </div>
             </div>
@@ -3502,6 +3874,23 @@ Casos de Uso: Transições rápidas, momentos de caos, timing cómico ou mudanç
                 Eliminar
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {/* Modal: Brand Post Generator */}
+      {showBrandGenerator && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-[#1a1f2e] border border-gray-800/50 rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-semibold text-white">🎨 Brand Post Generator</h2>
+              <button 
+                onClick={() => setShowBrandGenerator(false)}
+                className="text-gray-400 hover:text-gray-300 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <BrandPostGenerator webhookUrl="https://ivannnnnn.app.n8n.cloud/webhook/brand-post-generator" />
           </div>
         </div>
       )}

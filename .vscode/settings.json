@@ -1,0 +1,17 @@
+{
+  "deno.enable": true,
+  "deno.config": "./deno.json",
+  "[typescript]": {
+    "defaultRuntimeVersion": "1.40"
+  },
+  "[javascript]": {
+    "defaultRuntimeVersion": "1.40"
+  },
+  "deno.lint": true,
+  "deno.fmt": {
+    "lineWidth": 100
+  },
+  "files.exclude": {
+    "**/node_modules": true
+  }
+}

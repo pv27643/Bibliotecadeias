@@ -1,7 +1,39 @@
-import { Hono } from "npm:hono";
+import { Hono, type Context } from "npm:hono";
 import { cors } from "npm:hono/cors";
 import { logger } from "npm:hono/logger";
-import * as kv from "./kv_store.tsx";
+import { createClient } from "jsr:@supabase/supabase-js@2.49.8";
+
+// ============ KV Store Functions ============
+const kvClient = () => createClient(
+  Deno.env.get("SUPABASE_URL") || "",
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "",
+);
+
+const kv = {
+  set: async (key: string, value: unknown): Promise<void> => {
+    const supabase = kvClient();
+    const { error } = await supabase.from("kv_store_d8505aef").upsert({
+      key,
+      value
+    });
+    if (error) throw new Error(error.message);
+  },
+  
+  get: async (key: string): Promise<unknown> => {
+    const supabase = kvClient();
+    const { data, error } = await supabase.from("kv_store_d8505aef").select("value").eq("key", key).maybeSingle();
+    if (error) throw new Error(error.message);
+    return data?.value;
+  },
+  
+  del: async (key: string): Promise<void> => {
+    const supabase = kvClient();
+    const { error } = await supabase.from("kv_store_d8505aef").delete().eq("key", key);
+    if (error) throw new Error(error.message);
+  },
+};
+
+// ============ Hono App ============
 const app = new Hono();
 
 // Enable logger
@@ -20,12 +52,12 @@ app.use(
 );
 
 // Health check endpoint
-app.get("/make-server-d8505aef/health", (c) => {
+app.get("/make-server-d8505aef/health", (c: Context) => {
   return c.json({ status: "ok" });
 });
 
 // Get all data
-app.get("/make-server-d8505aef/data", async (c) => {
+app.get("/make-server-d8505aef/data", async (c: Context) => {
   try {
     const [tools, prompts, workflows, toolCategories, promptCategories, workflowCategories, subcategories] = await Promise.all([
       kv.get("tools"),
@@ -48,48 +80,52 @@ app.get("/make-server-d8505aef/data", async (c) => {
     });
   } catch (error) {
     console.log('Error fetching data:', error);
-    return c.json({ error: error.message }, 500);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return c.json({ error: errorMessage }, 500);
   }
 });
 
 // Save tools
-app.post("/make-server-d8505aef/tools", async (c) => {
+app.post("/make-server-d8505aef/tools", async (c: Context) => {
   try {
     const tools = await c.req.json();
     await kv.set("tools", tools);
     return c.json({ success: true });
   } catch (error) {
     console.log('Error saving tools:', error);
-    return c.json({ error: error.message }, 500);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return c.json({ error: errorMessage }, 500);
   }
 });
 
 // Save prompts
-app.post("/make-server-d8505aef/prompts", async (c) => {
+app.post("/make-server-d8505aef/prompts", async (c: Context) => {
   try {
     const prompts = await c.req.json();
     await kv.set("prompts", prompts);
     return c.json({ success: true });
   } catch (error) {
     console.log('Error saving prompts:', error);
-    return c.json({ error: error.message }, 500);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return c.json({ error: errorMessage }, 500);
   }
 });
 
 // Save workflows
-app.post("/make-server-d8505aef/workflows", async (c) => {
+app.post("/make-server-d8505aef/workflows", async (c: Context) => {
   try {
     const workflows = await c.req.json();
     await kv.set("workflows", workflows);
     return c.json({ success: true });
   } catch (error) {
     console.log('Error saving workflows:', error);
-    return c.json({ error: error.message }, 500);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return c.json({ error: errorMessage }, 500);
   }
 });
 
 // Save categories
-app.post("/make-server-d8505aef/categories", async (c) => {
+app.post("/make-server-d8505aef/categories", async (c: Context) => {
   try {
     const { type, categories } = await c.req.json();
     const key = type === 'tool' ? 'toolCategories' : type === 'prompt' ? 'promptCategories' : 'workflowCategories';
@@ -97,19 +133,21 @@ app.post("/make-server-d8505aef/categories", async (c) => {
     return c.json({ success: true });
   } catch (error) {
     console.log('Error saving categories:', error);
-    return c.json({ error: error.message }, 500);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return c.json({ error: errorMessage }, 500);
   }
 });
 
 // Save subcategories
-app.post("/make-server-d8505aef/subcategories", async (c) => {
+app.post("/make-server-d8505aef/subcategories", async (c: Context) => {
   try {
     const { subcategories } = await c.req.json();
     await kv.set("subcategories", subcategories);
     return c.json({ success: true });
   } catch (error) {
     console.log('Error saving subcategories:', error);
-    return c.json({ error: error.message }, 500);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return c.json({ error: errorMessage }, 500);
   }
 });
 
