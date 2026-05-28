@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Zap, Workflow, FileText, Library, Plus, X, Sparkles, Video, Pencil, Image, MessageSquare, Clock, Play, Circle, CheckCircle2, ArrowRight, MoreVertical, Copy, Check, Layout, Box, PenTool, Smartphone, ClipboardList, Linkedin, Mail, BarChart3, Edit, Trash2, Star, ArrowLeft, Search } from 'lucide-react';
-import { projectId, publicAnonKey } from '/utils/supabase/info';
-import { supabase } from '/utils/supabase/client';
+import { Zap, Workflow, FileText, Library, Plus, X, Sparkles, Layout, Box, Smartphone, ClipboardList, Linkedin, Mail, BarChart3, Edit, Trash2, Star, ArrowLeft, Search, MoreVertical, Clock, ArrowRight, CheckCircle2, MessageSquare, Circle, Video, Image, PenTool } from 'lucide-react';
+import { projectId, publicAnonKey } from '../utils/supabase/info';
+import { supabase } from '../utils/supabase/client';
 import ImageUpload from './components/ImageUpload';
 import BrandPostGenerator from './components/BrandPostGenerator';
 
@@ -1703,28 +1703,17 @@ Casos de Uso: Transições rápidas, momentos de caos, timing cómico ou mudanç
     }
   };
 
-  const toggleToolFavorite = (id: string) => {
-    const updatedTools = tools.map(t =>
-      t.id === id ? { ...t, favorite: !t.favorite } : t
-    );
-    console.log('⭐ Toggle tool favorite', id, '→', updatedTools.find(t => t.id === id)?.favorite);
-    setTools(updatedTools);
-  };
+  const toggleFavorite = (type: 'tool' | 'prompt' | 'workflow', id: string) => {
+    const updateItem = <T extends { id: string; favorite?: boolean }>(item: T) =>
+      item.id === id ? { ...item, favorite: !item.favorite } : item;
 
-  const togglePromptFavorite = (id: string) => {
-    const updatedPrompts = prompts.map(p =>
-      p.id === id ? { ...p, favorite: !p.favorite } : p
-    );
-    console.log('⭐ Toggle prompt favorite', id, '→', updatedPrompts.find(p => p.id === id)?.favorite);
-    setPrompts(updatedPrompts);
-  };
-
-  const toggleWorkflowFavorite = (id: string) => {
-    const updatedWorkflows = workflows.map(w =>
-      w.id === id ? { ...w, favorite: !w.favorite } : w
-    );
-    console.log('⭐ Toggle workflow favorite', id, '→', updatedWorkflows.find(w => w.id === id)?.favorite);
-    setWorkflows(updatedWorkflows);
+    if (type === 'tool') {
+      setTools(tools.map(updateItem));
+    } else if (type === 'prompt') {
+      setPrompts(prompts.map(updateItem));
+    } else {
+      setWorkflows(workflows.map(updateItem));
+    }
   };
 
   const executeWorkflow = (workflow: WorkflowType) => {
@@ -2482,9 +2471,6 @@ Casos de Uso: Transições rápidas, momentos de caos, timing cómico ou mudanç
                         // Debug: log das condições
                         if (selectedCategory === 'Favoritos') {
                           categoryMatch = tool.favorite === true;
-                          if (tool.favorite === true) {
-                            console.log('✅ Tool favorito encontrado:', tool.name, 'favorite:', tool.favorite);
-                          }
                         } else if (selectedSubcategory && selectedCategory) {
                           categoryMatch = tool.category === selectedCategory && tool.subcategory === selectedSubcategory;
                         } else if (selectedCategory) {
@@ -2500,15 +2486,7 @@ Casos de Uso: Transições rápidas, momentos de caos, timing cómico ou mudanç
                       });
 
                       if (selectedCategory === 'Favoritos') {
-                        console.log('=== FAVORITOS DEBUG ===');
-                        console.log('🔍 Selected category:', selectedCategory);
-                        console.log('🔍 Selected subcategory:', selectedSubcategory);
-                        console.log('🔍 Selected badge:', selectedBadge);
-                        console.log('🔍 Search term:', searchTerm);
-                        console.log('📊 Total tools:', tools.length);
-                        console.log('⭐ Tools with favorite=true:', tools.filter(t => t.favorite === true).map(t => ({ id: t.id, name: t.name, favorite: t.favorite })));
-                        console.log('📋 Filtered favorites:', filtered.map(t => ({ id: t.id, name: t.name, favorite: t.favorite })));
-                        console.log('======================');
+                        // Removed debug logs for cleaner output
                       }
 
                       return filtered;
@@ -2522,7 +2500,7 @@ Casos de Uso: Transições rápidas, momentos de caos, timing cómico ou mudanç
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                toggleToolFavorite(tool.id);
+                                toggleFavorite('tool', tool.id);
                               }}
                               className="text-gray-500 hover:text-yellow-400 transition-colors"
                             >
@@ -2708,7 +2686,7 @@ Casos de Uso: Transições rápidas, momentos de caos, timing cómico ou mudanç
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              togglePromptFavorite(prompt.id);
+                              toggleFavorite('prompt', prompt.id);
                             }}
                             className="text-gray-500 hover:text-yellow-400 transition-colors"
                           >
@@ -2875,7 +2853,7 @@ Casos de Uso: Transições rápidas, momentos de caos, timing cómico ou mudanç
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            toggleWorkflowFavorite(workflow.id);
+                            toggleFavorite('workflow', workflow.id);
                           }}
                           className="text-gray-500 hover:text-yellow-400 transition-colors"
                         >

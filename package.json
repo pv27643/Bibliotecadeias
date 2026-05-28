@@ -41,7 +41,6 @@
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
-    "husky": "^9.1.7",
     "lint-staged": "^17.0.5",
     "tailwindcss": "4.1.12",
     "vite": "^6.4.2"
