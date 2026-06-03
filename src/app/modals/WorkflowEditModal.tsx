@@ -18,7 +18,7 @@ export const WorkflowEditModal = memo((props: WorkflowEditModalProps) => {
       description: '',
       category: 'Marketing',
       tags: [],
-      webhookId: '',
+      webhookUrl: '',
       icon: 'sparkles',
       favorite: false
     }
@@ -73,13 +73,13 @@ export const WorkflowEditModal = memo((props: WorkflowEditModalProps) => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Webhook ID</label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Webhook URL</label>
               <input
-                type="text"
-                value={formData.webhookId}
-                onChange={(e) => setFormData({ ...formData, webhookId: e.target.value })}
+                type="url"
+                value={formData.webhookUrl}
+                onChange={(e) => setFormData({ ...formData, webhookUrl: e.target.value })}
                 className="w-full bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-2 text-white font-mono text-sm focus:outline-none focus:border-green-600"
-                placeholder="webhook_..."
+                placeholder="https://ivannnnnn.app.n8n.cloud/webhook/nome-do-webhook"
               />
             </div>
           </div>

@@ -32,7 +32,7 @@ export interface WorkflowType {
   description: string;
   category: string;
   tags?: string[];
-  webhookId?: string;
+  webhookUrl?: string;
   icon?: string;
   favorite?: boolean;
 }

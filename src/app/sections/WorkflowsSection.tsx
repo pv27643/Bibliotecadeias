@@ -19,10 +19,10 @@ interface WorkflowsSectionProps {
 }
 
 // Componente do card de workflow
-const WorkflowCard = memo(({ 
-  workflow, 
-  onToggleFavorite, 
-  onEdit, 
+const WorkflowCard = memo(({
+  workflow,
+  onToggleFavorite,
+  onEdit,
   onDelete,
   onExecute
 }: any) => (
@@ -53,7 +53,7 @@ const WorkflowCard = memo(({
     <div className="mb-4">
       <p className="text-xs text-gray-500 mb-2">Webhook:</p>
       <p className="text-xs font-mono bg-gray-800/50 p-2 rounded text-gray-300 truncate">
-        {workflow.webhookId || 'N/A'}
+        {workflow.webhookUrl || 'N/A'}
       </p>
     </div>
 

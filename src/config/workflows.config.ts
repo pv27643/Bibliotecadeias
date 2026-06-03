@@ -16,7 +16,7 @@ export interface WorkflowConfig {
 
 export interface WorkflowInput {
   name: string;
-  type: 'text' | 'textarea' | 'select' | 'file' | 'email';
+  type: 'text' | 'textarea' | 'select' | 'image' | 'email';
   label: string;
   required?: boolean;
   options?: string[];
@@ -44,7 +44,7 @@ export const WORKFLOWS: WorkflowConfig[] = [
     inputs: [
       {
         name: 'images',
-        type: 'file',
+        type: 'image',
         label: 'Imagens de Referência',
         required: true,
         placeholder: 'Carregar 3-5 imagens da marca'
@@ -168,18 +168,18 @@ export const WORKFLOWS: WorkflowConfig[] = [
   {
     id: 'bulk-photo-generation',
     name: 'Bulk Photo Generator',
-    description: 'Gera fotos de produtos em bulk a partir de URLs',
+    description: 'Gera fotos de produtos em bulk a partir de imagens',
     category: 'Operações',
     icon: '📸',
     color: 'from-rose-500 to-pink-500',
     webhookUrl: 'https://ivannnnnn.app.n8n.cloud/webhook/execute-workflow',
     inputs: [
       {
-        name: 'imageUrls',
-        type: 'textarea',
-        label: 'URLs de Imagens (uma por linha)',
+        name: 'images',
+        type: 'image',
+        label: 'Imagens dos Produtos',
         required: true,
-        placeholder: 'https://example.com/image1.jpg\nhttps://example.com/image2.jpg'
+        placeholder: 'Carregar fotos dos produtos'
       },
       {
         name: 'style',

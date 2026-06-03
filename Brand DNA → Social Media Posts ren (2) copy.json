@@ -1,0 +1,3590 @@
+{
+  "name": "Brand DNA → Social Media Posts ren",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "imageID"
+            },
+            {
+              "name": "prompt"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -2480,
+        -320
+      ],
+      "id": "783248ac-a4a9-4c34-b1cc-2172dff35524",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "name": "createdImage",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1rrdo_-_j_2FsGBEkUcTuTQRHfG0-AXHF",
+          "mode": "list",
+          "cachedResultName": "Imagens n8n",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1rrdo_-_j_2FsGBEkUcTuTQRHfG0-AXHF"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -1344,
+        -480
+      ],
+      "id": "ccbc9863-9cdd-4414-a3e0-cdb877a147f7",
+      "name": "Upload image",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Cg3ECPi3RaQMD99o",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.imageID }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -1920,
+        -480
+      ],
+      "id": "a663f4b5-7e34-4695-9713-eca7c3283e70",
+      "name": "Download image",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Cg3ECPi3RaQMD99o",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Edit image\nFrom another image",
+        "height": 280,
+        "width": 840,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1984,
+        -560
+      ],
+      "id": "f382d11c-a4ad-4780-b005-aabdf1f1b361",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Create image\nFrom scratch",
+        "height": 280,
+        "width": 620,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1984,
+        -176
+      ],
+      "id": "b4d8c4c8-f738-4ad4-a25d-318280588b70",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.imageID }}",
+                    "rightValue": "edit",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEmpty",
+                      "singleValue": true
+                    },
+                    "id": "1b2ee465-c9f5-4441-8b43-b1f33960fb53"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "7c9a6a75-a34e-47ad-9d67-8b97552d3875",
+                    "leftValue": "={{ $json.imageID }}",
+                    "rightValue": "create",
+                    "operator": {
+                      "type": "string",
+                      "operation": "empty",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -2224,
+        -320
+      ],
+      "id": "08e42e5f-110a-46c4-a895-ea353dc150fe",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "data[0].b64_json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        -1536,
+        -480
+      ],
+      "id": "356fa3a0-0f27-4cc0-b05e-02f600793511",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "name": "createdImage",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1rrdo_-_j_2FsGBEkUcTuTQRHfG0-AXHF",
+          "mode": "list",
+          "cachedResultName": "Imagens n8n",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1rrdo_-_j_2FsGBEkUcTuTQRHfG0-AXHF"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -1536,
+        -80
+      ],
+      "id": "941f67c1-03be-4612-ba6b-ee8f5060b2d8",
+      "name": "Upload image1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Cg3ECPi3RaQMD99o",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "data[0].b64_json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        -1712,
+        -80
+      ],
+      "id": "ebf785c6-e591-4f79-97c9-19a11ada2c44",
+      "name": "Convert to File1"
+    },
+    {
+      "parameters": {
+        "content": "## Switcher\nPick if it's an edit or a creation from scratch",
+        "height": 280,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2272,
+        -432
+      ],
+      "id": "e51f2d32-a648-4199-aeb3-018cb39f6e1b",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/images/edits",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "prompt",
+              "value": "={{ $json.prompt }}"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "image[]",
+              "inputDataFieldName": "data"
+            },
+            {
+              "name": "model",
+              "value": "=gpt-image-1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1712,
+        -480
+      ],
+      "id": "08ae2966-e6c1-417a-a595-53823983be67",
+      "name": "Create Image Reference",
+      "credentials": {
+        "openAiApi": {
+          "id": "OIjFOfOxsF0y07Uk",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/images/generations",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"model\": \"gpt-image-1\",\n    \"prompt\": \"{{ $json.prompt }}\",\n    \"n\": 1,\n    \"size\": \"1024x1024\"\n  }",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1904,
+        -80
+      ],
+      "id": "86b38c2a-3dd1-4397-b5df-e0dff8c4c55e",
+      "name": "Create Image Scratch"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=USER MESSAGE: \"{{ $('When chat message received').item.json.chatInput }}\"\n\nIMAGE ID (OPTIONAL): \"{{ $json.id }}\"",
+        "options": {
+          "systemMessage": "You are an assistant designed to edit/create images using an image editing/creation API tool.\n\nYour tool called \"Edit create image\" will let you do this, for this you will require an image ID (sometimes this image ID will be available via a URL a user sends in messages, in this case you'd have to extract it) and/or a prompt (the instructions of how to edit/create an image).\n\nDo your best."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -1696,
+        640
+      ],
+      "id": "391d4148-e871-4d8d-9eaa-38c63be76779",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -1744,
+        832
+      ],
+      "id": "7581843d-b11c-4f2e-b959-0ca7f06ab983",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "OIjFOfOxsF0y07Uk",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('When chat message received').item.json.sessionId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -1600,
+        832
+      ],
+      "id": "8f2a3a29-8f45-497f-9fa0-c92abc5f5d63",
+      "name": "Window Buffer Memory"
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "data0",
+        "name": "image",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1rrdo_-_j_2FsGBEkUcTuTQRHfG0-AXHF",
+          "mode": "list",
+          "cachedResultName": "Imagens n8n",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1rrdo_-_j_2FsGBEkUcTuTQRHfG0-AXHF"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -2032,
+        512
+      ],
+      "id": "2a25214c-5bb0-4f3c-8de1-e3b840642665",
+      "name": "Google Drive",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Cg3ECPi3RaQMD99o",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "allowFileUploads": true
+        }
+      },
+      "id": "94ef0b76-49cf-42a9-bed6-0fe7380214ab",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -2592,
+        672
+      ],
+      "webhookId": "cd3eb5a6-a274-451b-883d-0d3139c16155"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -2032,
+        688
+      ],
+      "id": "9db64994-e832-4ac2-bbd2-ae559a815c59",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "name": "Edit_create_image",
+        "description": "Call this tool to edit or create an image using AI. The required input should be an image id and a prompt/instructions.",
+        "workflowId": {
+          "__rl": true,
+          "value": "iFLiHOWUZj3yrh4S",
+          "mode": "list",
+          "cachedResultName": "GPT IMAGE API tool"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "imageID": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('imageID', `The ID of the image.`, 'string') }}",
+            "prompt": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('prompt', `The prompt/instructions from the user on how to edit/create an image.`, 'string') }}"
+          },
+          "matchingColumns": [
+            "imageURL"
+          ],
+          "schema": [
+            {
+              "id": "imageID",
+              "displayName": "imageID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "prompt",
+              "displayName": "prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2,
+      "position": [
+        -1440,
+        800
+      ],
+      "id": "68e845bd-9547-488d-923f-c16fe6afe5a1",
+      "name": "Edit Create Image"
+    },
+    {
+      "parameters": {
+        "content": "## Checker\nCheck if user message has an image or not",
+        "height": 280,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2432,
+        544
+      ],
+      "id": "861165f4-56cc-43c4-b042-9284ef94f9b4",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Upload image to GDrive\nFor easy image transport\n",
+        "height": 260,
+        "width": 300,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2144,
+        400
+      ],
+      "id": "aebdaa7c-3826-428d-890b-d43e027fec43",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $binary.data0}}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "object",
+                      "operation": "exists",
+                      "singleValue": true
+                    },
+                    "id": "7ec84136-6513-49ec-89dc-82d18de522c1"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "81e6295d-1898-49fc-9a75-5c0aa09c32b5",
+                    "leftValue": "={{ $binary.data0 }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "object",
+                      "operation": "notExists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -2384,
+        672
+      ],
+      "id": "b89c67ea-7056-4a1c-bf24-d8bd1fe7ba86",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2720,
+        1824
+      ],
+      "id": "a0f1bd11-1ee6-4170-880f-61404f50c2ff",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1YMaoZFyn82K_bzyisrdQ7BGV_RDymd8Y1of-9WguFTs",
+          "mode": "list",
+          "cachedResultName": "Fotos de Produtos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1YMaoZFyn82K_bzyisrdQ7BGV_RDymd8Y1of-9WguFTs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Folha1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1YMaoZFyn82K_bzyisrdQ7BGV_RDymd8Y1of-9WguFTs/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -2416,
+        1648
+      ],
+      "id": "1dcf7ff5-5033-4f91-b524-45db73c0aa0e",
+      "name": "Read GSheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LoCMIabxjRVP3CLZ",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5e3b0bea-72c1-44fe-8ebf-afb1b18f8322",
+              "name": "inputImageUrl",
+              "value": "={{ $json['Product Image URL'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2256,
+        1648
+      ],
+      "id": "b62a3af5-c8b3-450a-830e-103f24324eae",
+      "name": "Set Image URL"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "data[0].b64_json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        -912,
+        1680
+      ],
+      "id": "8e42d065-b64b-41b2-a56e-1902d93f652d",
+      "name": "Convert to Binary"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1YMaoZFyn82K_bzyisrdQ7BGV_RDymd8Y1of-9WguFTs",
+          "mode": "list",
+          "cachedResultName": "Fotos de Produtos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1YMaoZFyn82K_bzyisrdQ7BGV_RDymd8Y1of-9WguFTs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Folha1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1YMaoZFyn82K_bzyisrdQ7BGV_RDymd8Y1of-9WguFTs/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Product Image URL": "={{ $('Read GSheet').item.json['Product Image URL'] }}",
+            "Generated Image": "={{ $('Upload image2').item.json.webViewLink }}",
+            "Generated Prompt": "={{ $('Create Image Gen Prompt').item.json.message.content }}"
+          },
+          "matchingColumns": [
+            "Product Image URL"
+          ],
+          "schema": [
+            {
+              "id": "Product Image URL",
+              "displayName": "Product Image URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Generated Prompt",
+              "displayName": "Generated Prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Generated Image",
+              "displayName": "Generated Image",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -848,
+        1312
+      ],
+      "id": "cc8b7920-dd11-463b-8ca0-891b864098be",
+      "name": "Send to GSheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LoCMIabxjRVP3CLZ",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Set Image URL').item.json.inputImageUrl }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1424,
+        1600
+      ],
+      "id": "aecba8fe-b481-4e76-9512-3647cfad7ea7",
+      "name": "Download Image"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Create a short prompt for an AI image generator that will be fed a photo of a product, to ultimately have professional product photography. \n\n- If the product is wearable you have to include the product worn by a human model, if it's not wearable then include a model holding it or doing something with it. The product should ALWAYS be with a human model, and with the model's face visible.\n\n- Make sure to include instructions to get the best realism, the best lighting, the best angle, the best colors, the best model positioning, etc. according to the type of product.\n\n- Always prompt it as referring to the product, eg. \"this [PRODUCT]\" so that the AI image generator knows that it's gonna be sent an input photo of the product.\n\n- Make sure to always instruct to include subtle grain for a cinematic look.\n\nThe description of the product will be sent to you. Only reply with the final prompt, nothing else, not even double quotes.",
+              "role": "system"
+            },
+            {
+              "content": "=Description of product:\n\n{{ $json.content }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -1856,
+        1664
+      ],
+      "id": "b2186f35-4b19-46ea-b3bc-b1d2d88d8e66",
+      "name": "Create Image Gen Prompt",
+      "credentials": {
+        "openAiApi": {
+          "id": "OIjFOfOxsF0y07Uk",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "text": "Super briefly describe what's in this image.",
+        "imageUrls": "={{ $json.inputImageUrl }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -2032,
+        1664
+      ],
+      "id": "799741c6-f077-46e3-883a-91e6c4ee7c97",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "OIjFOfOxsF0y07Uk",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/images/edits",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "prompt",
+              "value": "={{ $json.message.content }}"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "image[]",
+              "inputDataFieldName": "data"
+            },
+            {
+              "name": "model",
+              "value": "=gpt-image-1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1072,
+        1680
+      ],
+      "id": "62295437-9425-4ae6-b65d-8d00b705a2e6",
+      "name": "GPT Image API",
+      "credentials": {
+        "openAiApi": {
+          "id": "OIjFOfOxsF0y07Uk",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -1232,
+        1600
+      ],
+      "id": "98181650-9bb4-476f-b447-73a4ba9c0755",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "name": "createdImage",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1rrdo_-_j_2FsGBEkUcTuTQRHfG0-AXHF",
+          "mode": "list",
+          "cachedResultName": "Imagens n8n",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1rrdo_-_j_2FsGBEkUcTuTQRHfG0-AXHF"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -752,
+        1680
+      ],
+      "id": "fe18a6f3-3944-4e1f-b354-4f684024ec64",
+      "name": "Upload image2",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Cg3ECPi3RaQMD99o",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Get Image URLS",
+        "height": 260,
+        "width": 340,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2448,
+        1600
+      ],
+      "id": "09181640-032b-4442-94d7-a57508cd79cb",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "## Create image gen prompt",
+        "height": 260,
+        "width": 500,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2064,
+        1600
+      ],
+      "id": "f91a94bf-3796-4253-9b52-1813d0d1a278",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "## Generate images and upload",
+        "height": 380,
+        "width": 920,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1504,
+        1520
+      ],
+      "id": "dc686227-ce7b-42ac-81a9-a17fcf19128c",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "## Send to GSheet",
+        "height": 220,
+        "width": 220,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -912,
+        1248
+      ],
+      "id": "a59155ef-4aef-4075-b77e-7f5b5e4d9530",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "# ⚙️ WORKFLOW GERAL: Ferramenta API de Imagens\n\n**Ordem de Execução:**\n1️⃣ Recebe o ID da imagem e as instruções do Agente.\n2️⃣ Roteador: Decide se é uma Edição ou Criação do zero.\n3️⃣ Comunica com a OpenAI para processar a imagem.\n4️⃣ Converte, guarda no Google Drive e devolve o link final.",
+        "height": 768,
+        "width": 1776
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2864,
+        -608
+      ],
+      "typeVersion": 1,
+      "id": "ceb08270-9cd7-423c-b606-71aa39da279a",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "content": "# 🤖 WORKFLOW GERAL: Agente Criativo de Imagens\n\n**Ordem de Execução:**\n1️⃣ Ouve o Chat (se enviares imagem, faz logo upload para o Drive).\n2️⃣ O Cérebro (GPT) analisa o teu pedido e lê a memória da conversa.\n3️⃣ Se precisares de uma imagem, o Agente chama a ferramenta externa (API Tool) para fazer o trabalho pesado.\n4️⃣ Responde-te no chat com o resultado.",
+        "height": 832,
+        "width": 1792
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2864,
+        272
+      ],
+      "typeVersion": 1,
+      "id": "9c6d9962-b9f0-401e-a5b5-34dbe0172328",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "content": "# 📸 WORKFLOW GERAL: Automação de Fotografia em Massa\n\n**Ordem de Execução:**\n1️⃣ Lê a lista de links de produtos no Google Sheets.\n2️⃣ A IA analisa o produto e escreve um Prompt fotográfico perfeito.\n3️⃣ A API gera as novas imagens (em loop, uma a uma).\n4️⃣ Grava o novo link e o prompt de volta na linha certa do Google Sheets.",
+        "height": 848,
+        "width": 2368
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2880,
+        1168
+      ],
+      "typeVersion": 1,
+      "id": "f2351a9d-a017-4a3d-b3c0-4f09fc6b23e8",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "folderId": "1rrdo_-_j_2FsGBEkUcTuTQRHfG0-AXHF",
+        "title": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Title', `The title for the ads insight report.`, 'string') }}"
+      },
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        -1504,
+        -1072
+      ],
+      "id": "cdbab187-8d41-44b9-9561-9c899b8be13a",
+      "name": "Create google doc",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "DaKiLEKurudLyMoW",
+          "name": "Google Docs OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Doc_ID_or_URL', `The previously created google doc id or url to now update.`, 'string') }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "insert",
+              "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Text', `The body of the report.`, 'string') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        -1344,
+        -1072
+      ],
+      "id": "a391094f-e14a-4d7b-9f53-1fdafc9099f7",
+      "name": "Update google doc",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "DaKiLEKurudLyMoW",
+          "name": "Google Docs OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "FB_Ads_Scraper",
+        "description": "Call this tool to scrape the FB ads library. The input should be a keyword to filter by. Also, this tool will generate a google sheet with the ads.",
+        "workflowId": {
+          "__rl": true,
+          "value": "JadokRAy9j2A0blI",
+          "mode": "list",
+          "cachedResultName": "FB/IG ads tool"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "keyword": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('keyword', `The keyword to filter by to search the FB ads library. If it's separated by spaces then replace each space with %20`, 'string') }}"
+          },
+          "matchingColumns": [
+            "keyword"
+          ],
+          "schema": [
+            {
+              "id": "keyword",
+              "displayName": "keyword",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2,
+      "position": [
+        -1664,
+        -1072
+      ],
+      "id": "a935f87c-b623-4cab-b97d-285ce8f21555",
+      "name": "Scrape FB ads"
+    },
+    {
+      "parameters": {
+        "name": "Edit_create_image",
+        "description": "Call this tool to edit or create an image using AI.\n\nIf it's to edit an image then it requires the image URL and instructions/prompt.\n\nIf it's to create an image then it just requires instructions/prompt.",
+        "workflowId": {
+          "__rl": true,
+          "value": "iFLiHOWUZj3yrh4S",
+          "mode": "list",
+          "cachedResultName": "GPT IMAGE API tool"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "prompt": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('prompt', `The instructions for the image editing/creation depending on what the user said.`, 'string') }}",
+            "imageID": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('imageID', `The ID of the image. If none exist then leave empty.`, 'string') }}"
+          },
+          "matchingColumns": [
+            "imageURL"
+          ],
+          "schema": [
+            {
+              "id": "imageID",
+              "displayName": "imageID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "prompt",
+              "displayName": "prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2,
+      "position": [
+        -1184,
+        -1072
+      ],
+      "id": "c199c3f5-d204-4225-9017-b6d6e8d4d4f4",
+      "name": "Edit create image"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('When chat message received').item.json.sessionId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -1824,
+        -1072
+      ],
+      "id": "4fda3e5b-b342-490c-acea-cac06d12f8f4",
+      "name": "Window Buffer Memory1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=USER MESSAGE: \"{{ $('When chat message received').item.json.chatInput }}\"\n\nIMAGE ID (OPTIONAL): \"{{ $json.id }}\"",
+        "options": {
+          "systemMessage": "You are a marketing strategist and ad analyst focused on decoding what makes Facebook Ads perform. Your job is to extract insights from ads in the Facebook Ads Library based on a keyword search and turn them into clear, actionable marketing intelligence. Your end goal is to identify patterns and trends across ads, provide strategic recommendations on what’s working, suggest copywriting formulas and design principles to test, and—if requested—create a new ad creative based on those insights. Quick warning: Some ads you see will no be related to the user's mentioned topic, so ignore those.\n\nYou should think before using tools, focus on repeatable patterns over one-off examples, and always ask for clarification if the user’s request isn’t fully clear. Only use the tools when needed or explicitly asked.\n\nYou have access to four tools:\n\nTool 1: Facebook Ads Library Scraper & Analyzer — Use this to search and analyze Facebook ads by keyword. Your analysis should include:\n\nAd Copy: Identify common hooks, persuasive techniques (e.g., urgency, emotional appeal, social proof), CTAs, tone of voice, and power words.\n\nCreative (Images/Videos): Describe visual styles, recurring elements (like product shots, lifestyle imagery, overlays), branding cues, color schemes, and design trends.\n\nPerformance Patterns: Highlight dominant copy structures (short/punchy vs. long/detailed), frequent creative styles, and any industry-specific patterns.\n\nTool 2: Google Doc Creator — Use this to create a blank document for your report when a written summary is requested.\n\nTool 3: Google Doc Updater — Use this to fill in the created document with your structured insights and recommendations.\n\nTool 4: Strategy-Based Creative Generator — Use this to generate ad creatives based on the patterns uncovered during analysis. This tool is not for generic design. Instead, it is meant to translate strategic insights into example ads tailored to the user's product. If the user provides an asset—such as a product photo, packaging image, or brand reference—you should use the patterns observed in successful ads (e.g., layout, color use, text overlays, tone) and apply them to create a relevant, high-performing mockup. Think of this tool as a way to bridge competitor intelligence with on-brand execution.\n\nYour mission is to extract what works in Facebook Ads and translate it into strategic recommendations, reports, or creatives that drive better marketing outcomes."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -1680,
+        -1312
+      ],
+      "id": "c1e95566-bcb6-4143-b4f3-796f9cc6c3f4",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -2000,
+        -1072
+      ],
+      "id": "52536320-e26f-4039-9017-f75181d77957",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "OIjFOfOxsF0y07Uk",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "data0",
+        "name": "image",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1rrdo_-_j_2FsGBEkUcTuTQRHfG0-AXHF",
+          "mode": "list",
+          "cachedResultName": "Imagens n8n",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1rrdo_-_j_2FsGBEkUcTuTQRHfG0-AXHF"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -2128,
+        -1488
+      ],
+      "id": "9ca44fe4-7d9a-4b7a-ac1d-385e93ca466c",
+      "name": "Google Drive1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Cg3ECPi3RaQMD99o",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -2128,
+        -1280
+      ],
+      "id": "90022e27-1460-4efc-849f-e7d76a0bc4d6",
+      "name": "No Operation, do nothing1"
+    },
+    {
+      "parameters": {
+        "content": "## Checker\nCheck if user message has an image or not",
+        "height": 280,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2544,
+        -1488
+      ],
+      "id": "a707d5e4-a00f-4d71-85f1-2e6838ba6987",
+      "name": "Sticky Note12"
+    },
+    {
+      "parameters": {
+        "content": "## Upload image to GDrive\nFor easy image transport\n",
+        "height": 260,
+        "width": 300,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2224,
+        -1584
+      ],
+      "id": "696d6304-e424-490c-a0dc-ad96a70b749d",
+      "name": "Sticky Note13"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $binary.data0}}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "object",
+                      "operation": "exists",
+                      "singleValue": true
+                    },
+                    "id": "7ec84136-6513-49ec-89dc-82d18de522c1"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "81e6295d-1898-49fc-9a75-5c0aa09c32b5",
+                    "leftValue": "={{ $binary.data0 }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "object",
+                      "operation": "notExists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -2480,
+        -1360
+      ],
+      "id": "612817b5-6c82-4d5c-9db1-286ee93e4504",
+      "name": "Switch2"
+    },
+    {
+      "parameters": {
+        "sendTo": "ricardo.astrino@gmail.com",
+        "subject": "Newsletter test!",
+        "message": "={{ $json.cleanedHTML }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -736,
+        -2304
+      ],
+      "id": "e8158379-4869-439b-a73f-417a2414bc0d",
+      "name": "Send newsletter",
+      "webhookId": "683e1369-6bb1-481b-91be-133a2691d909",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "EqB6h79cNxB8tshX",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/clockworks~free-tiktok-scraper/run-sync-get-dataset-items?token=YOUR_API_KEY",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"excludePinnedPosts\": true,\n    \"maxProfilesPerQuery\": 5,\n    \"newestPostDate\": \"{{ $today.format('yyyy-MM-dd') }}\",\n    \"oldestPostDate\": \"{{ $today.format('yyyy-MM-dd') }}\",\n    \"profileScrapeSections\": [\n        \"videos\"\n    ],\n    \"profiles\": [\n        \"iamkylebalmer\",\n        \"brandnat\",\n        \"rileybrown.ai\",\n        \"sabrina_ramonov\"\n    ],\n    \"resultsPerPage\": 10,\n    \"shouldDownloadCovers\": false,\n    \"shouldDownloadSlideshowImages\": false,\n    \"shouldDownloadSubtitles\": false,\n    \"shouldDownloadVideos\": false\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -2512,
+        -3152
+      ],
+      "id": "0b87b380-a555-4caa-9f6c-bac57a7c595a",
+      "name": "Tiktok profile videos"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/trudax~reddit-scraper-lite/run-sync-get-dataset-items?token=YOUR_API_KEY",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n    \"debugMode\": false,\n    \"includeNSFW\": false,\n    \"maxComments\": 10,\n    \"maxCommunitiesCount\": 2,\n    \"maxItems\": 20,\n    \"maxPostCount\": 10,\n    \"maxUserCount\": 2,\n    \"proxy\": {\n        \"useApifyProxy\": true,\n        \"apifyProxyGroups\": [\n            \"RESIDENTIAL\"\n        ]\n    },\n    \"scrollTimeout\": 40,\n    \"searchComments\": false,\n    \"searchCommunities\": false,\n    \"searchPosts\": true,\n    \"searchUsers\": false,\n    \"searches\": [\n        \"ai tools\"\n    ],\n    \"skipComments\": true,\n    \"skipCommunity\": false,\n    \"skipUserPosts\": false,\n    \"sort\": \"top\",\n    \"time\": \"day\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -2064,
+        -2672
+      ],
+      "id": "31a31a73-fa5d-4910-b7c3-36c6a0c677c4",
+      "name": "Reddit top posts"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/wilcode~fast-tiktok-downloader-without-watermark/run-sync-get-dataset-items?token=YOUR_API_KEY",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"url\": \"{{ $json.webVideoUrl }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -2080,
+        -3152
+      ],
+      "id": "a30482c2-0afc-4da5-9b06-707cd3db8bf1",
+      "name": "Get download URL"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.result.video }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          },
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "file",
+              "outputPropertyName": "={{ $json.result.video }}"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1568,
+        -2976
+      ],
+      "id": "f9f3a1e2-ec00-446f-8c9a-049e4b5a8915",
+      "name": "Download Tiktok",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "edc5e048-018e-4195-9f83-86ca99176b97",
+              "leftValue": "={{ $json.webVideoUrl }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -2320,
+        -3152
+      ],
+      "id": "eeec7a08-88e7-4d33-92b0-ba818d00b826",
+      "name": "Video exists?"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "binaryPropertyName": "={{ $('Get download URL').item.json.result.video }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -1632,
+        -3152
+      ],
+      "id": "e3ad67da-6a71-42ad-b6d1-be1e43e61efb",
+      "name": "Get transcription",
+      "credentials": {
+        "openAiApi": {
+          "id": "OIjFOfOxsF0y07Uk",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "message.content.news",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -1792,
+        -2384
+      ],
+      "id": "190f08e4-5746-4760-824d-ccfa11bff4f2",
+      "name": "Split news articles"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "Read this list of news articles. Separate each news in this JSON format, with their respective citation URLs.\n\n\nOnly keep the news list (do not shorten it, copy the news as it is) and each respective citation URL, delete any intro, outro, etc.\n\nExample output:\n\n[\n  { \"news\": \"news 1\", \"citation\": \"https://example.com/1\" },\n  { \"news\": \"news 2\", \"citation\": \"https://example.com/2\" },\n  { \"news\": \"news 3\", \"citation\": \"https://example.com/3\" }\n]\n\n\n\n\n\n\n\n",
+              "role": "system"
+            },
+            {
+              "content": "={{ $json.choices[0].message.content }}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -2128,
+        -2384
+      ],
+      "id": "2090513d-3fe5-48ee-a06f-e357f896a774",
+      "name": "Format news articles",
+      "credentials": {
+        "openAiApi": {
+          "id": "OIjFOfOxsF0y07Uk",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -1744,
+        -2976
+      ],
+      "id": "e9b61259-8926-46dd-bab9-d90cbacb4090",
+      "name": "Wait",
+      "webhookId": "a30c1dfb-5cb0-4da4-bc05-4bfe4a3cffd4"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a6770c09-fd23-478d-bebb-8d5380c4f1ea",
+              "name": "article",
+              "value": "=TITLE:\n{{ $json.title }}\n\nCONTENT:\n{{ $json.body }}",
+              "type": "string"
+            },
+            {
+              "id": "28a5f4bb-e7d9-4508-84ad-2a26674dfb1d",
+              "name": "url",
+              "value": "={{ $json.url }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1248,
+        -2768
+      ],
+      "id": "2266faa3-ee87-42cc-b91b-80ee6dc76190",
+      "name": "Set Reddit list"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "44dcc7e6-e181-4ef9-9278-2f28a5b3a6d0",
+              "name": "article",
+              "value": "=DESCRIPTION:\n{{ $('Tiktok profile videos').item.json.text }}\n\nCONTENT:\n{{ $json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "f4a9aafb-468c-4fc8-98e8-89fc4c5047d1",
+              "name": "url",
+              "value": "={{ $('Tiktok profile videos').item.json.webVideoUrl }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1248,
+        -3072
+      ],
+      "id": "71ccd242-b13b-456c-884a-b3405574564f",
+      "name": "Set Tiktok list"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.perplexity.ai/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"sonar-pro\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Be precise and concise.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Provide a list of the most recent AI news and new AI tool announcements from the last 24 hours (today's date: {{$now.format('yyyy-MM-dd')}}). Focus on major breakthroughs, new product releases, research advancements, and industry updates. Ensure the news is current and sourced from credible outlets. And make sure to include the citation URLs for each item , not just the '[4]' references, but the actual full URLs.\"\n    }\n  ]\n}",
+        "options": {
+          "allowUnauthorizedCerts": false
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -2304,
+        -2384
+      ],
+      "id": "fbcfcb22-264c-4da3-a441-0da364a269dd",
+      "name": "Perplexity search (browse internet)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "41c38fc1-510b-4e7e-91d4-29d3537bad80",
+              "name": "article",
+              "value": "={{ $json.news }}",
+              "type": "string"
+            },
+            {
+              "id": "576fce12-9d32-4687-bcfb-66387b5e88ea",
+              "name": "url",
+              "value": "={{ $json.citation }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1248,
+        -2464
+      ],
+      "id": "3165bd25-ff97-4c26-b8c1-bd05854007d4",
+      "name": "Set Perplexity list"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "487e5dc8-3829-4b3d-985b-a8d7bd84eb91",
+              "name": "article",
+              "value": "={{ $('Merge lists').item.json.article }}",
+              "type": "string"
+            },
+            {
+              "id": "4e250b6f-14fb-4972-8884-be33d07aaa14",
+              "name": "url",
+              "value": "={{ $('Merge lists').item.json.url }}",
+              "type": "string"
+            },
+            {
+              "id": "bd281c01-d526-4458-8c35-5b766911c3d6",
+              "name": "verify",
+              "value": "={{ $json.message.content.verify }}",
+              "type": "string"
+            },
+            {
+              "id": "993b386d-2e59-4f46-b8b7-1f22e60c23c0",
+              "name": "verifyExplanation",
+              "value": "={{ $json.message.content.explanation }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -416,
+        -2944
+      ],
+      "id": "320094d5-606e-4b3b-8327-732e19935153",
+      "name": "Pre-verification list"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an AI-powered content filter designed to identify high-quality social media articles specifically about AI tools and AI news. Your task is to select only the most relevant and valuable articles while filtering out those that are misleading, low-quality, or unrelated.\n\nAn article should be selected if it is directly related to AI tools or AI news. This includes topics such as new AI tools, breakthroughs in AI research, major announcements from AI companies, government regulations on AI, and industry trends in AI adoption.\n\nArticles should be filtered out if they are not specifically about AI tools or AI news. Avoid content that is clickbait, misinformation, spam, promotional material, or only loosely related to AI. Do not select memes, exaggerated speculation, or overly basic explanations that lack real information.\n\nFor each article, analyze and determine whether it should be included or filtered out based on these criteria. If it should be included, provide a brief justification.\n\nYour response should be in JSON format, something like this:\n\n[\n  { \"verify\": \"YES\", \"explanation\": \"The explanation is because of blah blah\" },\n  { \"verify\": \"NO\", \"explanation\": \"The reason is because of blah blah\"\" },\n  { \"verify\": \"NO\", \"explanation\": \"It's because of blah blah\"\" }\n]",
+              "role": "system"
+            },
+            {
+              "content": "=SOCIAL MEDIA ARTICLE:\n\n{{ $json.article }}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {
+          "temperature": 0.6
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -752,
+        -2944
+      ],
+      "id": "c28b75cd-fef6-4ebc-b264-89a4cc55acfd",
+      "name": "Tag items filtering",
+      "notesInFlow": false,
+      "credentials": {
+        "openAiApi": {
+          "id": "OIjFOfOxsF0y07Uk",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        -992,
+        -2736
+      ],
+      "id": "3cd70270-454d-4517-8a25-a63d2f6c09bf",
+      "name": "Merge lists"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "5fd45f9a-462a-4f7a-b2b1-31d90d233df8",
+              "leftValue": "={{ $json.verify }}",
+              "rightValue": "YES",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -176,
+        -2944
+      ],
+      "id": "4aa9cf98-9908-48c4-b7d9-ebf55e962f95",
+      "name": "Filter final list"
+    },
+    {
+      "parameters": {
+        "url": "https://r.jina.ai/https://www.testingcatalog.com/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -2352,
+        -2096
+      ],
+      "id": "4d823e89-5f56-4595-a62d-0211fe528272",
+      "name": "Scrape TestingCatalog"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You will receive some scraped data of a website about AI news.\n\nYour job is to only get the articles from today: {{ $now.format('yyyy-MM-dd')}} (YYYY-mm-dd), with their specific URL.\n\nThen save it into a JSON list like the following:\n\n[\n  { \"news\": \"news 1\", \"citation\": \"https://example.com/1\" },\n  { \"news\": \"news 2\", \"citation\": \"https://example.com/2\" },\n  { \"news\": \"news 3\", \"citation\": \"https://example.com/3\" }\n]",
+              "role": "system"
+            },
+            {
+              "content": "=SCRAPED DATA:\n\n{{ $json.data }}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -2128,
+        -2096
+      ],
+      "id": "ad845541-394c-4264-8060-d26b1717dfbc",
+      "name": "Get latest articles",
+      "credentials": {
+        "openAiApi": {
+          "id": "OIjFOfOxsF0y07Uk",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "message.content.articles",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -1760,
+        -2096
+      ],
+      "id": "9e38f185-117b-4585-8a36-48ecf4be1ff2",
+      "name": "Split articles"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "494cde73-1b95-4276-87cb-36448064e707",
+              "name": "article",
+              "value": "={{ $json.news }}",
+              "type": "string"
+            },
+            {
+              "id": "aae15195-c378-4f00-b26e-4dab81312ea4",
+              "name": "url",
+              "value": "={{ $json.citation }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1248,
+        -2176
+      ],
+      "id": "1a48fe7e-502f-4e94-9b0e-c59a9042b66a",
+      "name": "Set TestingCatalog list"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You will read a news article and create a one-word keyword that best represents it, this keyword will later be used for to search for an image for its thumbnail.\n\nThe keyword should represent the main topic that the article talks about.\n\nBy the way, you cannot use \"AI\" or \"Artificial Intelligence\" as a keyword.\n\nOnly reply with the keyword, nothing else.",
+              "role": "system"
+            },
+            {
+              "content": "=ARTICLE:\n\n{{ $json.article }}"
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -752,
+        -2752
+      ],
+      "id": "6f084523-8c37-4eab-a512-f81ec264ec88",
+      "name": "Create img keyword",
+      "credentials": {
+        "openAiApi": {
+          "id": "OIjFOfOxsF0y07Uk",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "454eeb6b-43a6-44c1-8bc8-28957b9fb21f",
+              "name": "article",
+              "value": "={{ $('Filter final list').item.json.article }}",
+              "type": "string"
+            },
+            {
+              "id": "e426082f-d932-418a-89be-41f8b0cf88ec",
+              "name": "url",
+              "value": "={{ $('Filter final list').item.json.url }}",
+              "type": "string"
+            },
+            {
+              "id": "53260084-d424-4a32-91b3-9c81fad9b034",
+              "name": "imgUrl",
+              "value": "={{ $json.photos[0].src.landscape }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -176,
+        -2752
+      ],
+      "id": "c50f460e-914d-405b-99b3-82accef79425",
+      "name": "Final list w/ imgs"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.pexels.com/v1/search?query={{ $json.message.content }}&per_page=1",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "YOUR_API_KEY"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -400,
+        -2752
+      ],
+      "id": "57f8a1f9-4400-4157-8334-2d332886dbcb",
+      "name": "Get thumbnail imgs (Pexels)"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a professional at creating HTML newsletters.\n\nYou will receive a list of AI-related articles with:\n- Description\n- Thumbnail image URL\n- Source URL\n\nYour task is to generate a well-formatted HTML email newsletter based on that content.\n\n\nINSTRUCTIONS:\n- The title of each article should be bold and clickable (linked to the source URL).\n- Use the thumbnail image as a preview.\n- The description of each article should be a shortened version, but a complete sentence, so it CANNOT end in '...'.\n- Maintain a clean and cohesive layout, with modern fonts\n\nFixed Elements (Do NOT change):\n- Profile image:\nhttps://media.licdn.com/dms/image/v2/D4D03AQFI7_1YtaVJeQ/profile-displayphoto-shrink_200_200/profile-displayphoto-shrink_200_200/0/1701197932266?e=2147483647&v=beta&t=-Vvk5mDcMfqzQJGKaapCN46aRi8S2cyD8sn3LLArJ6A\n- Author name: Ricardo Taipe's Agent\n- Top banner image: https://t3.ftcdn.net/jpg/04/67/96/14/360_F_467961418_UnS1ZAwAqbvVVMKExxqUNi0MUFTEJI83.jpg}\n- Main title: LATEST AI NEWS\n\nOnly reply with the HTML code. Please include all of the articles. Do your best.\n\n--------------------------------------------------------------\n\nUse this HTML code as example for the main structure:\n\n<!DOCTYPE html>\n<html>\n<head>\n  <title>AI NEWSLETTER</title>\n  <style>\n    body {\n      margin: 0;\n      padding: 0;\n      background-color: #f4f4f4;\n      font-family: \"Inter\", sans-serif;\n    }\n  </style>\n</head>\n<body>\n  <table width=\"100%\" bgcolor=\"#f4f4f4\" cellpadding=\"0\" cellspacing=\"0\">\n    <tr>\n      <td align=\"center\">\n        <!-- Main Container -->\n        <table width=\"600\" bgcolor=\"#ffffff\" cellpadding=\"20\" cellspacing=\"0\" style=\"border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1);\">\n          <!-- Banner Image -->\n          <tr>\n            <td align=\"center\">\n              <img src=\"\" alt=\"Banner Image\" width=\"100%\" height=\"100\" style=\"border-radius:10px 10px 0 0; object-fit: cover;\">\n            </td>\n          </tr>\n          <!-- Title & Author -->\n          <tr>\n            <td align=\"center\">\n              <h1 style=\"color:#333; font-weight:600; letter-spacing: 1px;\">LOREM IPSUN</h1>\n              <table cellpadding=\"5\" cellspacing=\"0\" style=\"display:inline-table;\">\n                <tr>\n                  <td>\n                    <img src=\"\" alt=\"Profile Image\" width=\"40\" height=\"40\" style=\"border-radius:50%;\">\n                  </td>\n                  <td style=\"vertical-align:middle;\">\n                    <p style=\"margin:0; color:#777; font-size:16px;\">by Lorem Ipsum 🧠</p>\n                  </td>\n                </tr>\n              </table>\n            </td>\n          </tr>\n          <!-- Article List -->\n          <tr>\n            <td>\n              <!-- Article Item -->\n              <table width=\"100%\" cellpadding=\"10\">\n                <tr>\n                  <td width=\"30%\">\n                    <img src=\"\" alt=\"Article Image\" width=\"100%\" style=\"border-radius:5px;\">\n                  </td>\n                  <td width=\"70%\" style=\"padding-left: 15px;\">\n                    <h3 style=\"margin:0; font-weight:600; font-size:18px;\">LOREM IPSUM DOLOR</h3>\n                    <p style=\"margin:0; color:#555; font-size:15px; line-height:1.5;\">\n                      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam at nisl id quam faucibus aliquet. Duis varius libero at neque gravida, vel luctus lorem faucibus.\n                    </p>\n                  </td>\n                </tr>\n              </table>\n              <hr style=\"border:0; border-top:1px solid #ddd;\">\n              <!-- Another Article -->\n              <table width=\"100%\" cellpadding=\"10\">\n                <tr>\n                  <td width=\"30%\">\n                    <img src=\"\" alt=\"Article Image\" width=\"100%\" style=\"border-radius:5px;\">\n                  </td>\n                  <td width=\"70%\" style=\"padding-left: 15px;\">\n                    <h3 style=\"margin:0; font-weight:600; font-size:18px;\">SED UT PERSPICIATIS</h3>\n                    <p style=\"margin:0; color:#555; font-size:15px; line-height:1.5;\">\n                      Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet.\n                    </p>\n                  </td>\n                </tr>\n              </table>\n            </td>\n          </tr>\n          <!-- Bottom Spacing -->\n          <tr>\n            <td style=\"height: 30px;\"></td>\n          </tr>\n        </table>\n      </td>\n    </tr>\n  </table>\n</body>\n</html>\n",
+              "role": "system"
+            },
+            {
+              "content": "=LIST OF ARTICLES:\n\n{{ JSON.stringify($json.listForHTML) }}\n"
+            }
+          ]
+        },
+        "simplify": false,
+        "options": {
+          "maxTokens": 16000,
+          "topP": 0.7
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -560,
+        -2528
+      ],
+      "id": "79646ec3-92be-4049-a162-3e0661c6f091",
+      "name": "Create HTML w/content",
+      "credentials": {
+        "openAiApi": {
+          "id": "OIjFOfOxsF0y07Uk",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "listForHTML",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -736,
+        -2528
+      ],
+      "id": "9ef2512f-5755-4760-b799-342216cbdd1a",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the input string\nconst input = $input.first().json.choices[0].message.content;\n\n// Clean up the text by removing backslashes before 'n' and triple backticks\nconst cleanedString = input\n    .replace(/^```[a-z]*\\n?/, '') // Remove starting triple backticks with optional language\n    .replace(/```$/, ''); // Remove ending triple backticks\n\n// Return the cleaned text\nreturn [{ cleanedHTML: cleanedString }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -240,
+        -2528
+      ],
+      "id": "118d3840-8763-43b0-b361-724e3a79b0c6",
+      "name": "Format HTML code"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9b320a00-a937-42c5-a7dc-3cc88803c7dc",
+              "name": "result",
+              "value": "The AI news have been sent to your email.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -576,
+        -2304
+      ],
+      "id": "ce53c218-04ec-4bd2-bc32-9f57d73961cf",
+      "name": "Notification for agent"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You will read a news article and create a prompt for an AI image generator, so it can create a MINIMALISTIC, informative and attention grabbing image about the news article, kind of like for its thumbnail. This output image should always include some text as well.\n\nMake sure the prompt states that the  background of the images don't have a transparent blocky texture, and that no elements get cropped on the sides (so preferably the text and icons a bit more in the center, away from the edges).\n\nIMPORTANT: YOUR RESPONSE SHOULD HAVE NO DOUBLE QUOTES, IF YOU NEED TO USE DOUBLE QUOTES THEN USE HYPHENS INSTEAD (-) and no hashtags.\n\nOnly reply with the prompt, nothing else.",
+              "role": "system"
+            },
+            {
+              "content": "=ARTICLE:\n\n{{ $json.article }}"
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        208,
+        -2848
+      ],
+      "id": "a4a9ed1d-e24c-43a2-97ed-560569b53b4b",
+      "name": "Create img creation prompt",
+      "credentials": {
+        "openAiApi": {
+          "id": "OIjFOfOxsF0y07Uk",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/images/generations",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"model\": \"gpt-image-1\",\n    \"prompt\": \"{{ $json.message.content }}\",\n    \"n\": 1,\n    \"size\": \"1024x1024\"\n  }",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        736,
+        -2688
+      ],
+      "id": "b7096e0a-c416-4113-95d2-b4937056d290",
+      "name": "Create Image"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        624,
+        -2848
+      ],
+      "id": "0c54635d-31e3-456e-becb-db0ced47803c",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -2112,
+        -2976
+      ],
+      "id": "3f2f1ce3-651c-467f-91d9-763ce7ca28a9",
+      "name": "No Operation, do nothing2"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -1872,
+        -3152
+      ],
+      "id": "1679137c-4696-49ef-871a-ffa376e52f7e",
+      "name": "Loop Over Items2"
+    },
+    {
+      "parameters": {
+        "content": "## Research TikTok\nScrape videos (transcript + description) from creators of a specific niche within the past 24hrs.",
+        "height": 460,
+        "width": 1220,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2592,
+        -3232
+      ],
+      "id": "b004c838-f2d6-4f94-95fb-98ff7e085bff",
+      "name": "Sticky Note14"
+    },
+    {
+      "parameters": {
+        "content": "## Research Reddit\nScrape best reddit post via certain search keyword from the past 24 hrs.",
+        "height": 220,
+        "width": 1220,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2592,
+        -2736
+      ],
+      "id": "e29e35b1-dc49-4e4e-b997-99e93ffe010c",
+      "name": "Sticky Note15"
+    },
+    {
+      "parameters": {
+        "content": "## Research internet (Perplexity)\nDoes a perplexity search of the internet.",
+        "height": 260,
+        "width": 1220,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2592,
+        -2464
+      ],
+      "id": "2d051e52-fc6d-4b7b-839a-fb340868a2c2",
+      "name": "Sticky Note16"
+    },
+    {
+      "parameters": {
+        "content": "## Research specific website (testingcatalog.com)\nScrape a specific website via the free Jina reader API, to get the news from the past 24 hrs.",
+        "height": 260,
+        "width": 1220,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2592,
+        -2176
+      ],
+      "id": "1cf5938e-50d6-4f87-b6f0-271425e8c134",
+      "name": "Sticky Note17"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 1180,
+        "width": 500,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1328,
+        -3152
+      ],
+      "id": "7da785e2-400c-49e1-adb4-5dfea06ab0e9",
+      "name": "Sticky Note18"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 200,
+        "width": 380,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -784,
+        -2352
+      ],
+      "id": "5c0c464c-48f8-4e00-9c83-286d73055f12",
+      "name": "Sticky Note19"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 580,
+        "width": 760,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -784,
+        -2976
+      ],
+      "id": "6690fa39-1ee8-416c-82bb-d323bd0ec39f",
+      "name": "Sticky Note20"
+    },
+    {
+      "parameters": {
+        "name": "createdImage",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "13GGGyY-bEJiNqRMmPf8F_leGOvMfbsox",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1056,
+        -2688
+      ],
+      "id": "f222b086-384a-42a7-b35d-e9defb25ae88",
+      "name": "Upload image3",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Cg3ECPi3RaQMD99o",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "data[0].b64_json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        896,
+        -2688
+      ],
+      "id": "3264aa4c-ce44-443b-b270-7d6a07321157",
+      "name": "Convert to File2"
+    },
+    {
+      "parameters": {
+        "content": "## Create image\nFrom scratch",
+        "height": 480,
+        "width": 700,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        560,
+        -2944
+      ],
+      "id": "b298857a-bbcb-454d-8715-aeaae818e66a",
+      "name": "Sticky Note21"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $binary.data0 }}",
+                    "operator": {
+                      "type": "object",
+                      "operation": "exists"
+                    }
+                  }
+                ],
+                "combinator": "and",
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                }
+              }
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $binary.data0 }}",
+                    "operator": {
+                      "type": "object",
+                      "operation": "notExists"
+                    }
+                  }
+                ],
+                "combinator": "and",
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                }
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c9370319-70fb-4832-8ff5-3ac6074c54e6",
+      "name": "Tem imagem de referência?",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        2256,
+        -2544
+      ]
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "data0",
+        "name": "brand_reference",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1rrdo_-_j_2FsGBEkUcTuTQRHfG0-AXHF",
+          "mode": "list",
+          "cachedResultName": "Imagens n8n",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1rrdo_-_j_2FsGBEkUcTuTQRHfG0-AXHF"
+        },
+        "options": {}
+      },
+      "id": "37df6dea-59ab-4c4f-bc5b-d8d254c2fc96",
+      "name": "Upload imagem referência",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2448,
+        -2656
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Cg3ECPi3RaQMD99o",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "f70cefca-b057-4957-a80d-9badb253381c",
+      "name": "Sem imagem (só texto)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2448,
+        -2448
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=PEDIDO DO UTILIZADOR: {{ $('When chat message received').item.json.chatInput }}\n\nID DA IMAGEM DE REFERÊNCIA (se existir): {{ $json.id ?? '' }}",
+        "options": {
+          "systemMessage": "You are a brand identity extraction and social media post creation specialist.\n\nYou have TWO missions depending on what the user sends:\n\n---\n## MISSION 1 — EXTRACT BRAND DNA\n\nIf the user sends reference images of a brand, analyze them and extract the full brand DNA using EXACTLY this prompt:\n\nYour job is to describe the brand's visual DNA with enough precision that another AI image model can generate new posts that feel consistent with this brand.\n\nAnalyze only what is visible in the reference. If something is uncertain, mark it as inferred.\n\nExtract the following:\n\nBrand feeling\nDescribe the brand's emotional tone in 3 to 6 precise words.\n\nVisual category\nIdentify the visual world this brand belongs to: luxury, playful, editorial, tech, wellness, streetwear, educational, creator-led, minimal, chaotic, cinematic, corporate, handcrafted, futuristic, etc.\n\nColor system\nExtract the main palette with approximate HEX colors:\nPrimary color\nSecondary color\nAccent color\nBackground color\nText color\nHighlight color\nAlso describe saturation, contrast, warmth, and whether the palette feels soft, bold, muted, glossy, earthy, neon, pastel, monochrome, or high contrast.\n\nTypography and text style\nDescribe the visible typography:\nFont category\nWeight\nLetter spacing\nCase style\nHierarchy\nText placement\nText-to-image ratio\nHow headlines are treated\nHow secondary text is treated\n\nLayout system\nDescribe the composition rules:\nGrid style\nAlignment\nMargins\nNegative space\nImage placement\nText placement\nUse of frames, borders, cards, overlays, stickers, labels, or badges\nHow crowded or spacious the design feels\n\nImage style\nDescribe the imagery:\nPhotography, illustration, 3D, collage, flat graphics, mixed media, UI screenshot, editorial, UGC, cinematic, product-focused, character-focused, abstract\nSubject framing\nCamera angle\nDepth of field\nCropping style\nTexture and sharpness\n\nLighting and surface treatment\nDescribe:\nLighting direction\nLighting quality\nShadow softness\nHighlight style\nGloss, grain, blur, noise, gradients, glass, paper, metal, fabric, or other visible materials\n\nGraphic elements\nList recurring visual motifs:\nShapes\nIcons\nLines\nArrows\nPatterns\nGradients\nTexture overlays\nDecorative marks\nMotion cues\nUI elements\n\nSocial media adaptation rules\nExplain how to create new posts in this identity:\nHow a quote post should look\nHow an announcement post should look\nHow a carousel cover should look\nHow a product or feature post should look\nHow a story or vertical post should look\n\nAnti-drift rules\nList the visual choices that must stay consistent so future generations do not drift away from the brand.\n\nOutput the final result as:\nA. Short Brand DNA Summary\nB. Detailed Visual Identity Notes\nC. Reusable Brand Identity Block in JSON:\n{\n  \"brand_style\": {\n    \"name\": \"\",\n    \"mood\": [],\n    \"color_palette\": {\n      \"primary\": \"\",\n      \"secondary\": \"\",\n      \"accent\": \"\",\n      \"background\": \"\",\n      \"text\": \"\",\n      \"highlight\": \"\"\n    },\n    \"typography\": {\n      \"font_category\": \"\",\n      \"weight\": \"\",\n      \"case_style\": \"\",\n      \"hierarchy\": \"\",\n      \"text_placement\": \"\"\n    },\n    \"layout\": {\n      \"composition\": \"\",\n      \"alignment\": \"\",\n      \"spacing\": \"\",\n      \"graphic_system\": \"\"\n    },\n    \"imagery\": {\n      \"style\": \"\",\n      \"cameraorrendering\": \"\",\n      \"subject_framing\": \"\",\n      \"texture\": \"\"\n    },\n    \"lighting\": {\n      \"direction\": \"\",\n      \"quality\": \"\",\n      \"shadow_style\": \"\",\n      \"highlight_style\": \"\"\n    },\n    \"social_rules\": {\n      \"quote_post\": \"\",\n      \"announcement_post\": \"\",\n      \"carousel_cover\": \"\",\n      \"feature_post\": \"\",\n      \"story_post\": \"\"\n    },\n    \"antidriftrules\": []\n  }\n}\nD. One reusable generation prompt template that uses this identity block.\n\nSave the brand_style JSON in memory — it will be used in Mission 2 to generate posts.\n\n---\n## MISSION 2 — GENERATE SOCIAL MEDIA POSTS\n\nWhen the user asks to create posts, call the tool 'Gerar_Posts_Sociais' for EACH format needed.\n\nFor each call, build the full prompt using EXACTLY this template:\n\nUsing the brand identity block below, create a new social media post image for:\n\nPost type: [quote post / announcement / carousel cover / feature post / story post]\n\nTopic: [INSERT TOPIC]\n\nMain message: [INSERT TEXT]\n\nFormat: [1:1 / 4:5 / 9:16 / 16:9]\n\nPreserve the brand's visual identity exactly:\n\n[PASTE FULL brand_style JSON HERE]\n\nGenerate a new design that follows the same color system, typography style, layout logic, image treatment, lighting, textures, and graphic motifs. Make it feel like part of the same social feed, while creating a fresh composition for this specific post.\n\nUse the main message as the headline:\n\"[INSERT HEADLINE]\"\n\nIf secondary text is needed, use:\n\"[INSERT SECONDARY TEXT]\"\n\nOutput as a finished social media image, clean composition, readable text, brand-consistent spacing, strong visual hierarchy.\n\n---\nIMPORTANT RULES:\n- Always generate ALL 3 formats unless the user says otherwise: 1:1 (feed), 9:16 (story), 16:9 (landscape)\n- Always leave imageID empty — these are always created from scratch, not edits\n- If brand DNA has not been extracted yet, ask the user to send reference images first"
+        }
+      },
+      "id": "0986eba0-3a03-4896-99d4-a403079e507a",
+      "name": "Agente Brand DNA",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        2752,
+        -2544
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o"
+        },
+        "options": {}
+      },
+      "id": "84b03304-9101-40ac-836e-a53317c367da",
+      "name": "GPT-4o (Agente)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        2560,
+        -2336
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "OIjFOfOxsF0y07Uk",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('When chat message received').item.json.sessionId }}"
+      },
+      "id": "59230983-1ca2-4d7e-a0bb-0936d46982e8",
+      "name": "Memória do Agente",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        2752,
+        -2336
+      ]
+    },
+    {
+      "parameters": {
+        "name": "Gerar_Posts_Sociais",
+        "description": "Call this tool to generate a social media post image using the brand DNA. Pass the complete generation prompt (with brand_style JSON pasted in), the post type, topic, headline, and the format ratio. Call this tool once per format (1:1, 9:16, 16:9). Always leave imageID empty — images are always created from scratch.",
+        "workflowId": {
+          "__rl": true,
+          "value": "iFLiHOWUZj3yrh4S",
+          "mode": "list",
+          "cachedResultName": "GPT IMAGE API tool"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "imageID": "",
+            "prompt": "={{ $fromAI('prompt', 'The complete image generation prompt with the full brand_style JSON block pasted in, following the exact template. Must include: Post type, Topic, Main message, Format (1:1 or 9:16 or 16:9), the full brand identity JSON, the headline, and optional secondary text.', 'string') }}"
+          },
+          "matchingColumns": [
+            "imageID"
+          ],
+          "schema": [
+            {
+              "id": "imageID",
+              "displayName": "imageID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "prompt",
+              "displayName": "prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "id": "f932a277-7cee-4d31-b000-d886e8fcb264",
+      "name": "Gerar_Posts_Sociais",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2,
+      "position": [
+        2960,
+        -2336
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# 🎨 WORKFLOW: Brand DNA → Social Posts\n\n**Ordem de Execução:**\n1️⃣ Recebe imagens de referência da marca via chat\n2️⃣ Faz upload para a pasta 'Imagens n8n' no Drive (mesma do workflow original)\n3️⃣ O Agente extrai o Brand DNA completo (usa os teus prompts exactos)\n4️⃣ Quando pedires posts, o Agente chama o 'GPT IMAGE API tool' (iFLiHOWUZj3yrh4S) — o mesmo workflow que já tens — com imageID vazio (criar do zero)\n5️⃣ Gera 3 formatos de uma vez: 1:1, 9:16, 16:9\n6️⃣ As imagens ficam guardadas na pasta 'Imagens n8n' no Drive (mesma do workflow original)",
+        "height": 768,
+        "width": 1604
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2048,
+        -2848
+      ],
+      "id": "950031e9-1aa8-4df6-93c0-b208b625db17",
+      "name": "Nota Principal"
+    },
+    {
+      "parameters": {
+        "content": "## ✅ Ligação ao workflow original\nEste nó chama directamente\n**iFLiHOWUZj3yrh4S** (GPT IMAGE API tool)\ncom imageID vazio → vai pelo\ncaminho 'Create Image Scratch'\nexactamente como já fazias.",
+        "height": 220,
+        "width": 280,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3264,
+        -2544
+      ],
+      "id": "74c5c653-7dda-44b7-b57a-f275bd90a88e",
+      "name": "Nota Tool"
+    },
+    {
+      "parameters": {
+        "content": "## Credenciais já configuradas\nDrive: Cg3ECPi3RaQMD99o\nOpenAI: OIjFOfOxsF0y07Uk\n(as mesmas do teu workflow original)",
+        "width": 280,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3280,
+        -2784
+      ],
+      "id": "934f5a05-7161-4a3c-b285-30d586bc57bd",
+      "name": "Nota Credenciais"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "e5fdf70f-c650-4822-9095-e86e1e8f9746",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "cc8cba9c-adfd-422f-a98e-c319869b7398",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -2720,
+        1648
+      ],
+      "webhookId": "e5fdf70f-c650-4822-9095-e86e1e8f9746"
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "imageID": "",
+          "prompt": "An adorable bulldog riding a skateboard in a park. The bulldog is wearing cool sunglasses and a bandana, with a bright blue sky and green trees in the background."
+        }
+      }
+    ],
+    "Webhook Trigger": [
+      {
+        "json": {
+          "name": "First item",
+          "code": 1
+        }
+      },
+      {
+        "json": {
+          "name": "Second item",
+          "code": 2
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download image": {
+      "main": [
+        [
+          {
+            "node": "Create Image Reference",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Download image",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Image Scratch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Upload image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File1": {
+      "main": [
+        [
+          {
+            "node": "Upload image1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Image Reference": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Image Scratch": {
+      "main": [
+        [
+          {
+            "node": "Convert to File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Create Image": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Read GSheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read GSheet": {
+      "main": [
+        [
+          {
+            "node": "Set Image URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Image URL": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to Binary": {
+      "main": [
+        [
+          {
+            "node": "Upload image2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Image": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Image Gen Prompt": {
+      "main": [
+        [
+          {
+            "node": "Download Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Create Image Gen Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT Image API": {
+      "main": [
+        [
+          {
+            "node": "Convert to Binary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Send to GSheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "GPT Image API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload image2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create google doc": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update google doc": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scrape FB ads": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit create image": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch2": {
+      "main": [
+        [
+          {
+            "node": "Google Drive1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send newsletter": {
+      "main": [
+        [
+          {
+            "node": "Notification for agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tiktok profile videos": {
+      "main": [
+        [
+          {
+            "node": "Video exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get download URL": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Tiktok": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Video exists?": {
+      "main": [
+        [
+          {
+            "node": "Get download URL",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get transcription": {
+      "main": [
+        [
+          {
+            "node": "Set Tiktok list",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split news articles": {
+      "main": [
+        [
+          {
+            "node": "Set Perplexity list",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format news articles": {
+      "main": [
+        [
+          {
+            "node": "Split news articles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reddit top posts": {
+      "main": [
+        [
+          {
+            "node": "Set Reddit list",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Download Tiktok",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Perplexity search (browse internet)": {
+      "main": [
+        [
+          {
+            "node": "Format news articles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Tiktok list": {
+      "main": [
+        [
+          {
+            "node": "Merge lists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Reddit list": {
+      "main": [
+        [
+          {
+            "node": "Merge lists",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Set Perplexity list": {
+      "main": [
+        [
+          {
+            "node": "Merge lists",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Pre-verification list": {
+      "main": [
+        [
+          {
+            "node": "Filter final list",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag items filtering": {
+      "main": [
+        [
+          {
+            "node": "Pre-verification list",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge lists": {
+      "main": [
+        [
+          {
+            "node": "Tag items filtering",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter final list": {
+      "main": [
+        [
+          {
+            "node": "Create img keyword",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create img creation prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scrape TestingCatalog": {
+      "main": [
+        [
+          {
+            "node": "Get latest articles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get latest articles": {
+      "main": [
+        [
+          {
+            "node": "Split articles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split articles": {
+      "main": [
+        [
+          {
+            "node": "Set TestingCatalog list",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set TestingCatalog list": {
+      "main": [
+        [
+          {
+            "node": "Merge lists",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Create img keyword": {
+      "main": [
+        [
+          {
+            "node": "Get thumbnail imgs (Pexels)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get thumbnail imgs (Pexels)": {
+      "main": [
+        [
+          {
+            "node": "Final list w/ imgs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Final list w/ imgs": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Create HTML w/content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create HTML w/content": {
+      "main": [
+        [
+          {
+            "node": "Format HTML code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format HTML code": {
+      "main": [
+        [
+          {
+            "node": "Send newsletter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create img creation prompt": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Image": {
+      "main": [
+        [
+          {
+            "node": "Convert to File2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Create Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items2": {
+      "main": [
+        [
+          {
+            "node": "Get transcription",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload image3": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File2": {
+      "main": [
+        [
+          {
+            "node": "Upload image3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tem imagem de referência?": {
+      "main": [
+        [
+          {
+            "node": "Upload imagem referência",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Sem imagem (só texto)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload imagem referência": {
+      "main": [
+        [
+          {
+            "node": "Agente Brand DNA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sem imagem (só texto)": {
+      "main": [
+        [
+          {
+            "node": "Agente Brand DNA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT-4o (Agente)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente Brand DNA",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memória do Agente": {
+      "ai_memory": [
+        [
+          {
+            "node": "Agente Brand DNA",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gerar_Posts_Sociais": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente Brand DNA",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Read GSheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "a7f85316-6e88-474d-bbb6-4857dc753f74",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9ad7d933d1475da5d4ebd8ae3c94283f04cc5ca6dd718940d45ceb3055b163d8"
+  },
+  "id": "DteWIhs9n9tKJZU6",
+  "tags": []
+}

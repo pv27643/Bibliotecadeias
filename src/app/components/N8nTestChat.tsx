@@ -13,6 +13,23 @@ export default function N8nTestChat() {
   const [messages, setMessages] = useState<Array<{ role: 'user' | 'bot'; content: string }>>([]);
   const [inputValue, setInputValue] = useState('');
 
+  const buildReadableResponse = (data: any) => {
+    if (!data || typeof data !== 'object') {
+      return String(data ?? 'Resposta recebida');
+    }
+
+    return data.message
+      || data.output
+      || data.text
+      || data.caption
+      || data.title
+      || data.summary
+      || data.fileName
+      || data.viewLink
+      || data.downloadLink
+      || 'Resposta recebida com sucesso';
+  };
+
   const { isLoading, error, sendData, clearError } = useN8nWebhook({
     webhookUrl: 'https://ivannnnnn.app.n8n.cloud/webhook/execute-workflow',
     onSuccess: (data) => {
@@ -22,7 +39,7 @@ export default function N8nTestChat() {
         ...prev,
         {
           role: 'bot',
-          content: data.message || JSON.stringify(data)
+          content: buildReadableResponse(data)
         }
       ]);
     },
@@ -86,11 +103,10 @@ export default function N8nTestChat() {
             className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`max-w-xs px-4 py-2 rounded-lg ${
-                msg.role === 'user'
-                  ? 'bg-blue-600 text-white rounded-br-none'
-                  : 'bg-gray-200 text-gray-900 rounded-bl-none'
-              }`}
+              className={`max-w-xs px-4 py-2 rounded-lg ${msg.role === 'user'
+                ? 'bg-blue-600 text-white rounded-br-none'
+                : 'bg-gray-200 text-gray-900 rounded-bl-none'
+                }`}
             >
               <p className="text-sm">{msg.content}</p>
             </div>
