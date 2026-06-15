@@ -1,17 +1,26 @@
 /**
  * Configuração dos Workflows disponíveis
- * Baseia-se na estrutura que viste no Celeuma IA
+ * Inclui os workflows do N8N configurados em testtt.json
  */
+
+// URL base do N8N - pode ser configurada dinamicamente
+export let N8N_BASE_URL = localStorage.getItem('n8nBaseUrl') || 'https://ivannnnnn.app.n8n.cloud/webhook';
+
+export const setN8nBaseUrl = (url: string) => {
+  N8N_BASE_URL = url;
+  localStorage.setItem('n8nBaseUrl', url);
+};
 
 export interface WorkflowConfig {
   id: string;
   name: string;
   description: string;
-  category: 'Marketing' | 'Operações' | 'Vendas' | 'Criativo';
+  category: 'Marketing' | 'Operações' | 'Vendas' | 'Criativo' | 'N8N';
   icon: string;
   color: string;
   inputs: WorkflowInput[];
-  webhookUrl: string;
+  webhookPath: string; // caminho do webhook sem a URL base
+  isN8nWorkflow?: boolean;
 }
 
 export interface WorkflowInput {
@@ -21,6 +30,7 @@ export interface WorkflowInput {
   required?: boolean;
   options?: string[];
   placeholder?: string;
+  maxImages?: number;
 }
 
 export interface ExecuteWorkflowPayload {
@@ -30,7 +40,7 @@ export interface ExecuteWorkflowPayload {
 
 /**
  * Workflows disponíveis
- * Copia aqui os teus workflows do Celeuma IA
+ * Inclui workflows placeholder + os 3 workflows do N8N
  */
 export const WORKFLOWS: WorkflowConfig[] = [
   {
@@ -189,6 +199,108 @@ export const WORKFLOWS: WorkflowConfig[] = [
         options: ['Professional', 'Lifestyle', 'Product', 'Minimalist']
       }
     ]
+  },
+  // ===== N8N WORKFLOWS =====
+  {
+    id: 'n8n-brand-posts',
+    name: '🎨 Gerador de Posts com Identidade Visual',
+    description: 'Analisa imagem de marca e gera novos posts mantendo identidade visual',
+    category: 'N8N',
+    icon: '🎨',
+    color: 'from-purple-500 to-pink-500',
+    webhookPath: 'identidadevisual18',
+    isN8nWorkflow: true,
+    inputs: [
+      {
+        name: 'file',
+        type: 'image',
+        label: 'Imagem de Referência',
+        required: true,
+        placeholder: 'Carregar imagem com identidade visual'
+      },
+      {
+        name: 'post_type',
+        type: 'select',
+        label: 'Tipo de Post',
+        required: true,
+        options: ['quote post', 'story post', 'carousel post', 'reel cover'],
+        placeholder: 'Selecciona o tipo'
+      },
+      {
+        name: 'topic',
+        type: 'text',
+        label: 'Tema/Tópico',
+        required: true,
+        placeholder: 'ex: Lançamento de novo produto'
+      },
+      {
+        name: 'main_message',
+        type: 'textarea',
+        label: 'Mensagem Principal',
+        required: true,
+        placeholder: 'Texto principal do post'
+      },
+      {
+        name: 'format',
+        type: 'select',
+        label: 'Formato da Imagem',
+        required: true,
+        options: ['1:1', '9:16', '16:9'],
+        placeholder: 'ex: 1:1'
+      },
+      {
+        name: 'headline',
+        type: 'text',
+        label: 'Headline',
+        required: false,
+        placeholder: 'Título em destaque'
+      },
+      {
+        name: 'secondary_text',
+        type: 'text',
+        label: 'Texto Secundário',
+        required: false,
+        placeholder: 'Texto de suporte'
+      }
+    ]
+  },
+  {
+    id: 'n8n-product-photo',
+    name: '📸 Fotografia de Produto',
+    description: 'Transforma foto do produto em fotografia profissional com modelo',
+    category: 'N8N',
+    icon: '📸',
+    color: 'from-blue-500 to-cyan-500',
+    webhookPath: 'generate-product-photo1',
+    isN8nWorkflow: true,
+    inputs: [
+      {
+        name: 'file',
+        type: 'image',
+        label: 'Foto do Produto',
+        required: true,
+        placeholder: 'Carregar foto do produto'
+      }
+    ]
+  },
+  {
+    id: 'n8n-remove-background',
+    name: '✨ Remover Fundo',
+    description: 'Remove o fundo de uma imagem e retorna PNG com transparência',
+    category: 'N8N',
+    icon: '✨',
+    color: 'from-green-500 to-emerald-500',
+    webhookPath: 'removerfundo',
+    isN8nWorkflow: true,
+    inputs: [
+      {
+        name: 'file',
+        type: 'image',
+        label: 'Imagem',
+        required: true,
+        placeholder: 'Carregar imagem para remover fundo'
+      }
+    ]
   }
 ];
 
@@ -201,5 +313,16 @@ export const getWorkflowsByCategory = (category: string): WorkflowConfig[] => {
 };
 
 export const getCategories = (): string[] => {
-  return ['Marketing', 'Operações', 'Vendas', 'Criativo'];
+  return ['Marketing', 'Operações', 'Vendas', 'Criativo', 'N8N'];
+};
+
+/**
+ * Obter URL completa do webhook para um workflow
+ */
+export const getWebhookUrl = (workflow: WorkflowConfig): string => {
+  if (workflow.isN8nWorkflow) {
+    return `${N8N_BASE_URL}/${workflow.webhookPath}`;
+  }
+  // Para workflows antigos que têm webhookUrl (backwards compatibility)
+  return (workflow as any).webhookUrl || N8N_BASE_URL;
 };

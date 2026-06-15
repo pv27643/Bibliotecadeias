@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { ArrowLeft, Send, Loader, AlertCircle, CheckCircle, Upload, X, ExternalLink, Image as ImageIcon, FileSpreadsheet, HardDrive } from 'lucide-react';
+import { getWebhookUrl } from '@/config/workflows.config';
 
 /**
  * WorkflowExecutor — Executa workflows reais via webhook do n8n.
@@ -378,7 +379,8 @@ export default function WorkflowExecutor({ workflow, onClose }: WorkflowExecutor
       }
     }
 
-    if (!workflow.webhookUrl) {
+    const webhookUrl = getWebhookUrl(workflow as any);
+    if (!webhookUrl) {
       setError('Este workflow não tem um webhook configurado.\nEdita o workflow e adiciona o Webhook URL no campo correspondente.');
       return;
     }
@@ -403,9 +405,9 @@ export default function WorkflowExecutor({ workflow, onClose }: WorkflowExecutor
           }
         }
         body.append('imagesBase64', JSON.stringify(imagesPayload));
-        response = await fetch(workflow.webhookUrl, { method: 'POST', body });
+        response = await fetch(webhookUrl, { method: 'POST', body });
       } else {
-        response = await fetch(workflow.webhookUrl, {
+        response = await fetch(webhookUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ workflowId: workflow.id, ...formData }),

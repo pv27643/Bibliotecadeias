@@ -2,6 +2,19 @@
   "nodes": [
     {
       "parameters": {
+        "jsCode": "const item = $input.first();\n\nconst debugInfo = {\n  jsonKeys: Object.keys(item.json || {}),\n  binaryKeys: Object.keys(item.binary || {}),\n  bodyKeys: Object.keys(item.json?.body || {}),\n  filesKeys: Object.keys(item.json?.files || {}),\n};\n\nconst body = item.json.body || item.json || {};\nconst files = item.json.files || {};\n\nconst uploadedFile =\n  item.binary?.file ||\n  item.binary?.data ||\n  item.binary?.image ||\n  files.file?.[0] ||\n  files.data?.[0] ||\n  files.image?.[0];\n\nif (!uploadedFile) {\n  throw new Error('File not found. Debug: ' + JSON.stringify(debugInfo));\n}\n\nreturn [{\n  json: {\n    postType: body.postType || body.post_type || 'quote post',\n    topic: body.topic || '',\n    mainMessage: body.mainMessage || body.main_message || body.message || '',\n    format: body.format || '1:1',\n    headline: body.headline || body.mainMessage || body.message || '',\n    secondaryText: body.secondaryText || body.secondary_text || ''\n  },\n  binary: {\n    data: uploadedFile\n  }\n}];"
+      },
+      "id": "ddaed503-e686-4f87-8f46-edd09970b503",
+      "name": "Extract Form Data1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -5408,
+        2880
+      ]
+    },
+    {
+      "parameters": {
         "httpMethod": "POST",
         "path": "identidadevisual18",
         "responseMode": "lastNode",
@@ -9,66 +22,15 @@
           "rawBody": false
         }
       },
-      "id": "a04d63ae-2d5c-4101-8cdf-589a10932425",
+      "id": "e40672f1-d160-4332-9e7c-7e84cb9beb67",
       "name": "Webhook6",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -2864,
-        5840
+        -5632,
+        2880
       ],
-      "webhookId": "generate-product-photo"
-    },
-    {
-      "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "name": "brandReferenceImageUrl",
-              "value": "={{ ($json.body?.imagesBase64 ? (JSON.parse($json.body.imagesBase64).brandReferenceImageUrl?.[0] || JSON.parse($json.body.imagesBase64).images?.[0] || JSON.parse($json.body.imagesBase64).image?.[0]) : null) || ($binary?.data ? 'data:' + $binary.data.mimeType + ';base64,' + $binary.data.data : null) || $json.body?.brandReferenceImageUrl || $json.body?.inputImageUrl || $json.body?.imageUrl || $json.body?.url || $json.brandReferenceImageUrl || $json.inputImageUrl || $json.imageUrl || $json.url || '' }}",
-              "type": "string"
-            },
-            {
-              "name": "postType",              "value": "={{ $json.body?.postType || $json.body?.post_type || $json.postType || 'quote post' }}",
-              "type": "string"
-            },
-            {
-              "name": "topic",
-              "value": "={{ $json.body?.topic || $json.topic || '' }}",
-              "type": "string"
-            },
-            {
-              "name": "mainMessage",
-              "value": "={{ $json.body?.mainMessage || $json.body?.main_message || $json.body?.message || $json.mainMessage || '' }}",
-              "type": "string"
-            },
-            {
-              "name": "format",
-              "value": "={{ $json.body?.format || $json.format || '1:1' }}",
-              "type": "string"
-            },
-            {
-              "name": "headline",
-              "value": "={{ $json.body?.headline || $json.headline || $json.body?.mainMessage || $json.body?.message || $json.mainMessage || '' }}",
-              "type": "string"
-            },
-            {
-              "name": "secondaryText",
-              "value": "={{ $json.body?.secondaryText || $json.body?.secondary_text || $json.secondaryText || '' }}",
-              "type": "string"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "id": "dadd0a14-8866-488b-8765-1a034e9b7e4c",
-      "name": "Set Image URL5",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        -2608,
-        5840
-      ]
+      "webhookId": "5b8b3440-bec1-43ae-958b-f491dadfe934"
     },
     {
       "parameters": {
@@ -83,20 +45,14 @@
         "inputType": "base64",
         "options": {}
       },
-      "id": "1b348377-56da-4154-969a-a07f430b5ad6",
+      "id": "6e74bc1c-5a36-4055-9205-6c2711e2d189",
       "name": "Analyze Product Image4",
       "type": "@n8n/n8n-nodes-langchain.openAi",
-      "typeVersion": 1.8,
+      "typeVersion": 2.3,
       "position": [
-        -2352,
-        5840
-      ],
-      "credentials": {
-        "openAiApi": {
-          "id": "OIjFOfOxsF0y07Uk",
-          "name": "OpenAI account"
-        }
-      }
+        -5184,
+        2880
+      ]
     },
     {
       "parameters": {
@@ -112,26 +68,20 @@
               "role": "system"
             },
             {
-              "content": "=Using the brand identity block below, create a new social media post image for:\n\nPost type: {{ $('Set Image URL5').item.json.postType }}\nTopic: {{ $('Set Image URL5').item.json.topic }}\nMain message: {{ $('Set Image URL5').item.json.mainMessage }}\nFormat: {{ $('Set Image URL5').item.json.format }}\n\nPreserve the brand's visual identity exactly:\n\n{{ $('Analyze Product Image4').item.json.content || $('Analyze Product Image4').item.json.message?.content || '' }}\n\nGenerate a new design that follows the same color system, typography style, layout logic, image treatment, lighting, textures, and graphic motifs. Make it feel like part of the same social feed, while creating a fresh composition for this specific post.\n\nUse the main message as the headline:\n\"{{ $('Set Image URL5').item.json.headline }}\"\n\nIf secondary text is needed, use:\n\"{{ $('Set Image URL5').item.json.secondaryText }}\""
+              "content": "=Using the brand identity block below, create a new social media post image for:\n\nPost type: {{ $(\"Extract Form Data1\").item.json.postType }}\nTopic: {{ $(\"Extract Form Data1\").item.json.topic }}\nMain message: {{ $(\"Extract Form Data1\").item.json.mainMessage }}\nFormat: {{ $(\"Extract Form Data1\").item.json.format }}\n\nPreserve the brand's visual identity exactly:\n\n{{ $(\"Analyze Product Image4\").item.json.content || $(\"Analyze Product Image4\").item.json.message?.content || \"\" }}\n\nGenerate a new design that follows the same color system, typography style, layout logic, image treatment, lighting, textures, and graphic motifs. Make it feel like part of the same social feed, while creating a fresh composition for this specific post.\n\nUse the main message as the headline:\n\"{{ $(\"Extract Form Data1\").item.json.headline }}\"\n\nIf secondary text is needed, use:\n\"{{ $(\"Extract Form Data1\").item.json.secondaryText }}\""
             }
           ]
         },
         "options": {}
       },
-      "id": "a907395f-eef4-4a9c-9b5d-4e6431f7758e",
+      "id": "3416f4ee-48ed-4a45-9e47-09fc98c09acc",
       "name": "Create Image Prompt4",
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        -2048,
-        5840
-      ],
-      "credentials": {
-        "openAiApi": {
-          "id": "OIjFOfOxsF0y07Uk",
-          "name": "OpenAI account"
-        }
-      }
+        -4960,
+        2880
+      ]
     },
     {
       "parameters": {
@@ -151,25 +101,19 @@
         "sendBody": true,
         "contentType": "raw",
         "rawContentType": "application/json",
-        "body": "={{ JSON.stringify({ model: 'gpt-image-2', prompt: $json.message.content, n: 1, size: (() => { const f = $('Set Image URL5').item.json.format || '1:1'; if (f === '9:16') return '1024x1792'; if (f === '16:9') return '1792x1024'; if (f === '4:5') return '1024x1280'; return '1024x1024'; })() }) }}",
+        "body": "={{ JSON.stringify({ model: \"gpt-image-2\", prompt: $json.message.content, n: 1, size: (() => { const f = $(\"Extract Form Data1\").item.json.format || \"1:1\"; if (f === \"9:16\") return \"1024x1792\"; if (f === \"16:9\") return \"1792x1024\"; if (f === \"4:5\") return \"1024x1280\"; return \"1024x1024\"; })() }) }}",
         "options": {
           "timeout": 120000
         }
       },
-      "id": "02666561-da90-4e4b-99f3-2335c29b39b9",
+      "id": "c6b75a06-5b04-40fd-9190-9e64ed3ea793",
       "name": "GPT Image API5",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -1584,
-        5840
-      ],
-      "credentials": {
-        "openAiApi": {
-          "id": "OIjFOfOxsF0y07Uk",
-          "name": "OpenAI account"
-        }
-      }
+        -4608,
+        2880
+      ]
     },
     {
       "parameters": {
@@ -177,13 +121,13 @@
         "sourceProperty": "data[0].b64_json",
         "options": {}
       },
-      "id": "bcc9d6d1-5053-4031-8501-40207338dfde",
+      "id": "f5724b27-e3c9-4ed0-a67f-1c0010e060ff",
       "name": "Convert To Binary5",
       "type": "n8n-nodes-base.convertToFile",
       "typeVersion": 1.1,
       "position": [
-        -1328,
-        5840
+        -4384,
+        2880
       ]
     },
     {
@@ -203,13 +147,280 @@
         },
         "options": {}
       },
-      "id": "8b86d0e6-bf6f-4c9f-83d5-7911e25aae83",
+      "id": "a24d7244-9a26-41e0-8dd3-f3a6874677f0",
       "name": "Upload Image5",
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        -1072,
-        5840
+        -4160,
+        2880
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "success",
+              "value": "=true",
+              "type": "boolean",
+              "id": "a1"
+            },
+            {
+              "name": "fileId",
+              "value": "={{ $json.id }}",
+              "type": "string",
+              "id": "a2"
+            },
+            {
+              "name": "fileName",
+              "value": "={{ $json.name }}",
+              "type": "string",
+              "id": "a3"
+            },
+            {
+              "name": "viewLink",
+              "value": "={{ $json.webViewLink }}",
+              "type": "string",
+              "id": "a4"
+            },
+            {
+              "name": "downloadLink",
+              "value": "={{ $json.webContentLink }}",
+              "type": "string",
+              "id": "a5"
+            },
+            {
+              "name": "thumbnailLink",
+              "value": "={{ $json.thumbnailLink }}",
+              "type": "string",
+              "id": "a6"
+            },
+            {
+              "name": "createdAt",
+              "value": "={{ $json.createdTime }}",
+              "type": "string",
+              "id": "a7"
+            },
+            {
+              "name": "imagePrompt",
+              "value": "={{ $('Create Image Prompt4').item.json.message.content }}",
+              "type": "string",
+              "id": "a8"
+            },
+            {
+              "name": "brandIdentityAnalysis",
+              "value": "={{ $('Analyze Product Image4').item.json.content || $('Analyze Product Image4').item.json.message?.content || '' }}",
+              "type": "string",
+              "id": "a9"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b63c4f00-b64e-48fb-b153-c7f9e249794f",
+      "name": "Format Response6",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3936,
+        2880
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# 📸 WORKFLOW: Gerador de Posts com Identidade Visual\n\n## 🔄 FLUXO:\n1. Webhook recebe multipart/form-data\n2. Extract extrai campos + binary do ficheiro\n3. Analyze analisa identidade visual da imagem\n4. Create gera prompt para nova imagem\n5. GPT Image API cria a imagem\n6. Convert converte para binary\n7. Upload para Google Drive\n8. Retorna links e metadados",
+        "height": 400,
+        "width": 2368,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -5824,
+        2688
+      ],
+      "typeVersion": 1,
+      "id": "89b8572b-aa5e-46c4-8ce7-39ae49c6c001",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first();\n\nconst debugInfo = {\n  jsonKeys: Object.keys(item.json || {}),\n  binaryKeys: Object.keys(item.binary || {}),\n  bodyKeys: Object.keys(item.json?.body || {}),\n  filesKeys: Object.keys(item.json?.files || {}),\n};\n\nconst files = item.json.files || {};\n\nconst uploadedFile =\n  item.binary?.file ||\n  item.binary?.data ||\n  item.binary?.image ||\n  files.file?.[0] ||\n  files.data?.[0] ||\n  files.image?.[0];\n\nif (!uploadedFile) {\n  throw new Error('File not found. Debug: ' + JSON.stringify(debugInfo));\n}\n\nreturn [{\n  json: {},\n  binary: {\n    data: uploadedFile\n  }\n}];"
+      },
+      "id": "748c1258-950d-4fb6-9477-8bf5fc60d08f",
+      "name": "Extract File",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -5552,
+        3280
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "generate-product-photo1",
+        "responseMode": "lastNode",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "id": "de4b3bba-4c93-4fd0-a383-0963221e163d",
+      "name": "Webhook7",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -5808,
+        3280
+      ],
+      "webhookId": "generate-product-photo"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list"
+        },
+        "text": "Super briefly describe what's in this image.",
+        "inputType": "base64",
+        "options": {}
+      },
+      "id": "c68dcb58-6762-49cd-abd5-71f6bd0037b4",
+      "name": "Analyze Product Image5",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        -5328,
+        3280
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "OIjFOfOxsF0y07Uk",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Create a short prompt for an AI image generator that will be fed a photo of a product, to ultimately have professional product photography.\n\n- If the product is wearable you have to include the product worn by a human model.\n- If it's not wearable then include a human model holding or using it.\n- The model's face should always be visible.\n- Include realistic lighting, cinematic subtle grain, professional colors, strong realism and professional composition.\n- Always refer to the uploaded item as 'this product'.\n\nOnly output the final prompt.",
+              "role": "system"
+            },
+            {
+              "content": "=Description of product:\\n\\n{{ $json.content || $json.message?.content }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fc680b4d-9b44-4c16-a2bf-bd057c63249b",
+      "name": "Create Image Prompt5",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -5088,
+        3280
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "OIjFOfOxsF0y07Uk",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/images/edits",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "prompt",
+              "value": "={{ $('Create Image Prompt5').item.json.message.content }}"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "image[]",
+              "inputDataFieldName": "data"
+            },
+            {
+              "name": "model",
+              "value": "gpt-image-1"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "58403880-1185-441e-9109-b9f72e906c89",
+      "name": "GPT Image API6",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -4736,
+        3280
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "OIjFOfOxsF0y07Uk",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "data[0].b64_json",
+        "options": {}
+      },
+      "id": "d4465f3c-3e5c-4942-a9c7-3d72bc8b5ce6",
+      "name": "Convert To Binary6",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        -4272,
+        3280
+      ]
+    },
+    {
+      "parameters": {
+        "name": "createdImage",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1rrdo_-_j_2FsGBEkUcTuTQRHfG0-AXHF",
+          "mode": "list",
+          "cachedResultName": "Imagens n8n",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1rrdo_-_j_2FsGBEkUcTuTQRHfG0-AXHF"
+        },
+        "options": {}
+      },
+      "id": "1f974a8b-d10c-4fc4-9076-138408104e46",
+      "name": "Upload Image6",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -4016,
+        3280
       ],
       "credentials": {
         "googleDriveOAuth2Api": {
@@ -259,60 +470,250 @@
             },
             {
               "name": "imagePrompt",
-              "value": "={{ $('Create Image Prompt4').item.json.message.content }}",
-              "type": "string"
-            },
-            {
-              "name": "brandIdentityAnalysis",
-              "value": "={{ $('Analyze Product Image4').item.json.content || $('Analyze Product Image4').item.json.message?.content || '' }}",
+              "value": "={{ $('Create Image Prompt5').item.json.message.content }}",
               "type": "string"
             }
           ]
         },
         "options": {}
       },
-      "id": "91c4c062-4f8e-46e2-858f-8da7e11aae14",
-      "name": "Format Response6",
+      "id": "609d7d24-a384-4382-bcce-6992cbe098e9",
+      "name": "Format Response7",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -816,
-        5840
+        -3760,
+        3280
       ]
     },
     {
       "parameters": {
-        "content": "# 📸 WORKFLOW GERAL: Gerador de Posts com Identidade Visual (Clonagem de Estilo)\n\n⚠️ MODO: Upload de ficheiro via multipart/form-data (campo: 'file')\n",
+        "content": "# 📸 WORKFLOW: Fotografia de Produto (upload de ficheiro)",
         "height": 320,
         "width": 2368
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        -2928,
-        5712
+        -5872,
+        3152
       ],
       "typeVersion": 1,
-      "id": "52d68dca-e08b-44f3-894c-3ac23b414dc6",
-      "name": "Sticky Note4"
+      "id": "96d02d73-d537-454a-9fea-12f3b1c6c29d",
+      "name": "Sticky Note25"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "removerfundo",
+        "responseMode": "lastNode",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "id": "f8b3af7d-621e-49d1-adcc-a55fc6e5bf7d",
+      "name": "Webhook8",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -5792,
+        3680
+      ],
+      "webhookId": "removerfundo"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first();\n\nconst debugInfo = {\n  jsonKeys: Object.keys(item.json || {}),\n  binaryKeys: Object.keys(item.binary || {}),\n  bodyKeys: Object.keys(item.json?.body || {}),\n  filesKeys: Object.keys(item.json?.files || {}),\n};\n\nconst files = item.json.files || {};\n\nconst uploadedFile =\n  item.binary?.file ||\n  item.binary?.data ||\n  item.binary?.image ||\n  files.file?.[0] ||\n  files.data?.[0] ||\n  files.image?.[0];\n\nif (!uploadedFile) {\n  throw new Error('File not found. Debug: ' + JSON.stringify(debugInfo));\n}\n\nreturn [{\n  json: {},\n  binary: {\n    data: uploadedFile\n  }\n}];"
+      },
+      "id": "993fa730-d21b-49bf-8ff6-d9129e983071",
+      "name": "Extract File1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -5536,
+        3680
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/images/edits",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "prompt",
+              "value": "Remove the background from the image and return a PNG with a transparent background (alpha). Keep the main subject exactly the same, centered, with clean edges. Do not add any new objects or text."
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "image[]",
+              "inputDataFieldName": "data"
+            },
+            {
+              "name": "model",
+              "value": "gpt-image-1"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "dd7bbbdc-61c4-499b-b20d-eb43d2183484",
+      "name": "GPT Image API7",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -4656,
+        3680
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "OIjFOfOxsF0y07Uk",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "data[0].b64_json",
+        "options": {}
+      },
+      "id": "1f3b5450-4a15-4b48-a780-67f811d16665",
+      "name": "Convert To Binary7",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        -4304,
+        3680
+      ]
+    },
+    {
+      "parameters": {
+        "name": "createdImage",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1rrdo_-_j_2FsGBEkUcTuTQRHfG0-AXHF",
+          "mode": "list",
+          "cachedResultName": "Imagens n8n",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1rrdo_-_j_2FsGBEkUcTuTQRHfG0-AXHF"
+        },
+        "options": {}
+      },
+      "id": "637c4d33-b3ba-41a4-94a9-49a0cb07bdb5",
+      "name": "Upload Image7",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -4000,
+        3680
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Cg3ECPi3RaQMD99o",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "success",
+              "value": "=true",
+              "type": "boolean"
+            },
+            {
+              "name": "fileId",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "name": "fileName",
+              "value": "={{ $json.name }}",
+              "type": "string"
+            },
+            {
+              "name": "viewLink",
+              "value": "={{ $json.webViewLink }}",
+              "type": "string"
+            },
+            {
+              "name": "downloadLink",
+              "value": "={{ $json.webContentLink }}",
+              "type": "string"
+            },
+            {
+              "name": "thumbnailLink",
+              "value": "={{ $json.thumbnailLink }}",
+              "type": "string"
+            },
+            {
+              "name": "createdAt",
+              "value": "={{ $json.createdTime }}",
+              "type": "string"
+            },
+            {
+              "name": "imagePrompt",
+              "value": "=Remove the background from the image and return a PNG with a transparent background (alpha). Keep the main subject exactly the same, centered, with clean edges. Do not add any new objects or text.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3f1cb2e2-9e47-471d-b11d-0da471336506",
+      "name": "Format Response8",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3744,
+        3680
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# 📸 WORKFLOW: Remover Fundo (upload de ficheiro)",
+        "height": 320,
+        "width": 2368
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -5856,
+        3552
+      ],
+      "typeVersion": 1,
+      "id": "679fc291-1f09-4b5a-8a0d-d26c775d35fb",
+      "name": "Sticky Note26"
     }
   ],
   "connections": {
-    "Webhook6": {
+    "Extract Form Data1": {
       "main": [
         [
           {
-            "node": "Set Image URL5",
+            "node": "Analyze Product Image4",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Set Image URL5": {
+    "Webhook6": {
       "main": [
         [
           {
-            "node": "Analyze Product Image4",
+            "node": "Extract Form Data1",
             "type": "main",
             "index": 0
           }
@@ -368,6 +769,138 @@
         [
           {
             "node": "Format Response6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract File": {
+      "main": [
+        [
+          {
+            "node": "Analyze Product Image5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook7": {
+      "main": [
+        [
+          {
+            "node": "Extract File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Product Image5": {
+      "main": [
+        [
+          {
+            "node": "Create Image Prompt5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Image Prompt5": {
+      "main": [
+        [
+          {
+            "node": "GPT Image API6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT Image API6": {
+      "main": [
+        [
+          {
+            "node": "Convert To Binary6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert To Binary6": {
+      "main": [
+        [
+          {
+            "node": "Upload Image6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Image6": {
+      "main": [
+        [
+          {
+            "node": "Format Response7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook8": {
+      "main": [
+        [
+          {
+            "node": "Extract File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract File1": {
+      "main": [
+        [
+          {
+            "node": "GPT Image API7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT Image API7": {
+      "main": [
+        [
+          {
+            "node": "Convert To Binary7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert To Binary7": {
+      "main": [
+        [
+          {
+            "node": "Upload Image7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Image7": {
+      "main": [
+        [
+          {
+            "node": "Format Response8",
             "type": "main",
             "index": 0
           }

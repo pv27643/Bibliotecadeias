@@ -1,6 +1,6 @@
-import { createContext, ReactNode, useState, useEffect } from 'react';
+import { createContext, ReactNode, useState, useEffect, useContext } from 'react';
 import { Tool, Prompt, WorkflowType } from '@/app/App';
-import { projectId, publicAnonKey } from '/utils/supabase/info';
+import { projectId, publicAnonKey } from '../utils/supabase/info';
 import {
   DEFAULT_TOOL_CATEGORIES,
   DEFAULT_PROMPT_CATEGORIES,
@@ -8,7 +8,7 @@ import {
   DEFAULT_SUBCATEGORIES_MAP
 } from '@/data/categories';
 
-const API_BASE = `https://${projectId}.supabase.co/rest/v1`;
+const API_BASE = `https://${projectId}.supabase.co/functions/v1/make-server-d8505aef`;
 
 interface AppContextType {
   // Estado das ferramentas
@@ -232,5 +232,3 @@ export function useAppContext() {
   }
   return context;
 }
-
-import { useContext } from 'react';
