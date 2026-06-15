@@ -5,6 +5,12 @@
 
 import { supabase } from './client';
 import { publicAnonKey, supabaseUrl } from './info';
+import {
+  DEFAULT_TOOL_CATEGORIES,
+  DEFAULT_PROMPT_CATEGORIES,
+  DEFAULT_WORKFLOW_CATEGORIES,
+  DEFAULT_SUBCATEGORIES_MAP
+} from '../../data/categories';
 
 const FUNCTION_API_BASE = `${supabaseUrl}/functions/v1/make-server-d8505aef`;
 const DEFAULT_HEADERS = {
@@ -29,6 +35,7 @@ interface Prompt {
   title: string;
   description: string;
   category: string;
+  subcategory?: string;
   models: string[];
   content: string;
   image?: string;
@@ -313,22 +320,6 @@ const clearMigratedLocalStorage = (keys: string[]) => {
   });
 };
 
-// Defaults para dados iniciais
-const DEFAULT_TOOL_CATEGORIES = ['Todas', 'Texto', 'Negócios', '3D', 'Audio', 'Outros', 'Vídeo', 'Código', 'Imagem', 'Prompts'];
-const DEFAULT_PROMPT_CATEGORIES = ['Todos', 'Engenharia de Prompts', 'Aspect Ratio & Frame', 'Backgrounds & Surfaces', 'Camera Profiles', 'Lighting Setups', 'UGC Poses & Scenes', 'Hands & Models', 'Atmospheric Effects', 'Director Signatures', 'Motion & Camera Verbs'];
-const DEFAULT_WORKFLOW_CATEGORIES = ['Todos', 'Marketing', 'Operações', 'Vendas'];
-const DEFAULT_SUBCATEGORIES: SubcategoryMap = {
-  'Texto': ['Copywriting', 'SEO', 'Tradução', 'Resumo', 'Redação'],
-  'Negócios': ['CRM', 'Analytics', 'Automação', 'Produtividade', 'Finanças'],
-  '3D': ['Geração de Modelos 3D & WebGL', 'Fotogrametria & Ambientes 360º', 'Captura de Movimento & Animação', 'Texturas & Materiais'],
-  'Audio': ['Geração de Voz', 'Música', 'Edição', 'Transcrição'],
-  'Outros': ['Geral', 'Educação', 'Saúde', 'Lifestyle'],
-  'Vídeo': ['Geração', 'Edição', 'Animação', 'Legendas', 'Personalização'],
-  'Código': ['Geração', 'Revisão', 'Debugging', 'Documentação', 'SQL', 'Planilhas', 'Assistente de Código', 'Low-Code & Integrações', 'Desenvolvimento Elite'],
-  'Imagem': ['Geração', 'Edição', 'Upscaling', 'Avatar', 'Logo', 'Assistente Design'],
-  'Prompts': ['Gestão & Produção', 'Biblioteca & Pesquisa', 'Observabilidade']
-};
-
 // ===== FUNÇÕES COM DEFAULTS =====
 export const loadToolCategoriesWithDefaults = async (): Promise<string[]> => {
   const fromDB = await loadCategoriesFromSupabase('tool');
@@ -347,7 +338,7 @@ export const loadWorkflowCategoriesWithDefaults = async (): Promise<string[]> =>
 
 export const loadSubcategoriesWithDefaults = async (): Promise<SubcategoryMap> => {
   const fromDB = await loadSubcategoriesFromSupabase();
-  return (fromDB && Object.keys(fromDB).length > 0) ? fromDB : DEFAULT_SUBCATEGORIES;
+  return (fromDB && Object.keys(fromDB).length > 0) ? fromDB : DEFAULT_SUBCATEGORIES_MAP;
 };
 
 export const migrateLocalStorageToSupabase = async () => {

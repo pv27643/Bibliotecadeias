@@ -1,3 +1,25 @@
+export const PROMPT_ROOT_CATEGORY = 'Prompts';
+
+export const DEFAULT_PROMPT_SUBCATEGORIES = [
+  'Engenharia de Prompts',
+  'Aspect Ratio & Frame',
+  'Backgrounds & Surfaces',
+  'Camera Profiles',
+  'Lighting Setups',
+  'UGC Poses & Scenes',
+  'Hands & Models',
+  'Atmospheric Effects',
+  'Director Signatures',
+  'Motion & Camera Verbs',
+  'Gestão & Produção',
+  'Biblioteca & Pesquisa',
+  'Observabilidade'
+];
+
+export const PROTECTED_TOOL_CATEGORIES = ['Todas'];
+export const PROTECTED_PROMPT_CATEGORIES = ['Todos', PROMPT_ROOT_CATEGORY];
+export const PROTECTED_WORKFLOW_CATEGORIES = ['Todos'];
+
 // Categorias de ferramentas
 export const DEFAULT_TOOL_CATEGORIES = [
   'Todas',
@@ -15,16 +37,7 @@ export const DEFAULT_TOOL_CATEGORIES = [
 // Categorias de prompts
 export const DEFAULT_PROMPT_CATEGORIES = [
   'Todos',
-  'Engenharia de Prompts',
-  'Aspect Ratio & Frame',
-  'Backgrounds & Surfaces',
-  'Camera Profiles',
-  'Lighting Setups',
-  'UGC Poses & Scenes',
-  'Hands & Models',
-  'Atmospheric Effects',
-  'Director Signatures',
-  'Motion & Camera Verbs'
+  PROMPT_ROOT_CATEGORY
 ];
 
 // Categorias de workflows
@@ -45,5 +58,5 @@ export const DEFAULT_SUBCATEGORIES_MAP: Record<string, string[]> = {
   'Vídeo': ['Geração', 'Edição', 'Animação', 'Legendas', 'Personalização'],
   'Código': ['Geração', 'Revisão', 'Debugging', 'Documentação', 'SQL', 'Planilhas', 'Assistente de Código', 'Low-Code & Integrações', 'Desenvolvimento Elite'],
   'Imagem': ['Geração', 'Edição', 'Upscaling', 'Avatar', 'Logo', 'Assistente Design'],
-  'Prompts': ['Gestão & Produção', 'Biblioteca & Pesquisa', 'Observabilidade']
+  [PROMPT_ROOT_CATEGORY]: DEFAULT_PROMPT_SUBCATEGORIES
 };

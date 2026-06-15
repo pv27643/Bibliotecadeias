@@ -1,6 +1,6 @@
 /**
  * Configuração dos Workflows disponíveis
- * Inclui os workflows do N8N configurados em testtt.json
+ * Inclui os workflows do N8N usados pela aplicação
  */
 
 // URL base do N8N - pode ser configurada dinamicamente

@@ -21,6 +21,7 @@ export interface Prompt {
   title: string;
   description: string;
   category: string;
+  subcategory?: string;
   models?: string[]; // Ex: ['Midjourney', 'Stable Diffusion']
   content?: string;
   favorite?: boolean;

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Zap, Workflow, FileText, Library, Plus, X, Sparkles, Layout, Box, Smartphone, ClipboardList, Linkedin, Mail, BarChart3, Edit, Trash2, Star, ArrowLeft, Search, MoreVertical, Clock, ArrowRight, CheckCircle2, Check, Copy, MessageSquare, Circle, Video, Image, PenTool, Settings } from 'lucide-react';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
 import { useApp } from '../hooks/useApp';
@@ -8,6 +8,20 @@ import ImageUpload from './components/ImageUpload';
 import BrandPostGenerator from './components/BrandPostGenerator';
 import WorkflowExecutor from './components/WorkflowExecutor';
 import N8nConfigModal from './components/N8nConfigModal';
+import {
+  DEFAULT_PROMPT_SUBCATEGORIES,
+  PROMPT_ROOT_CATEGORY,
+  PROTECTED_PROMPT_CATEGORIES,
+  PROTECTED_TOOL_CATEGORIES,
+  PROTECTED_WORKFLOW_CATEGORIES
+} from '../data/categories';
+import {
+  getPromptCategory,
+  getPromptCategorySubcategories as resolvePromptCategorySubcategories,
+  getPromptMainCategories,
+  getPromptRootSubcategories,
+  getPromptSubcategory
+} from '../utils/promptCategoryHelpers';
 import {
   loadToolsFromSupabase,
   loadPromptsFromSupabase,
@@ -49,6 +63,7 @@ export interface Prompt {
   title: string;
   description: string;
   category: string;
+  subcategory?: string;
   models: string[];
   content: string;
   image?: string;
@@ -111,7 +126,8 @@ export default function App() {
   const [newPromptDescription, setNewPromptDescription] = useState('');
   const [newPromptContent, setNewPromptContent] = useState('');
   const [newPromptImage, setNewPromptImage] = useState('');
-  const [newPromptCategory, setNewPromptCategory] = useState('Marketing');
+  const [newPromptCategory, setNewPromptCategory] = useState(PROMPT_ROOT_CATEGORY);
+  const [newPromptSubcategory, setNewPromptSubcategory] = useState<string | undefined>(DEFAULT_PROMPT_SUBCATEGORIES[0]);
   const [newPromptModels, setNewPromptModels] = useState('ChatGPT');
 
   const [editingWorkflowId, setEditingWorkflowId] = useState<string | null>(null);
@@ -132,6 +148,7 @@ export default function App() {
   const [searchTerm, setSearchTerm] = useState('');
 
   const [selectedPromptCategory, setSelectedPromptCategory] = useState<string | null>(null);
+  const [selectedPromptSubcategory, setSelectedPromptSubcategory] = useState<string | null>(null);
   const [searchPromptTerm, setSearchPromptTerm] = useState('');
   const [selectedPrompt, setSelectedPrompt] = useState<Prompt | null>(null);
 
@@ -145,12 +162,35 @@ export default function App() {
   const [categoryTab, setCategoryTab] = useState<'categoria' | 'subcategoria'>('categoria');
   const [selectedCategoryForSubcategory, setSelectedCategoryForSubcategory] = useState<string>('');
 
+  const promptRootSubcategories = useMemo(
+    () => getPromptRootSubcategories(promptCategories, subcategoriesMap),
+    [promptCategories, subcategoriesMap]
+  );
+
+  const getPromptCategorySubcategories = (category: string) => (
+    resolvePromptCategorySubcategories(category, promptRootSubcategories, subcategoriesMap)
+  );
+  const promptMainCategories = useMemo(
+    () => getPromptMainCategories(promptCategories, promptRootSubcategories),
+    [promptCategories, promptRootSubcategories]
+  );
+  const getProtectedCategories = (type: 'tool' | 'prompt' | 'workflow') => (
+    type === 'tool'
+      ? PROTECTED_TOOL_CATEGORIES
+      : type === 'prompt'
+        ? PROTECTED_PROMPT_CATEGORIES
+        : PROTECTED_WORKFLOW_CATEGORIES
+  );
+  const isProtectedCategory = (type: 'tool' | 'prompt' | 'workflow', category: string) =>
+    getProtectedCategories(type).includes(category);
+
   useEffect(() => {
-    if (!selectedCategoryForSubcategory && toolCategories.length > 0) {
-      const defaultCategory = toolCategories.find(cat => cat !== 'Todas') || toolCategories[0];
+    if (!selectedCategoryForSubcategory) {
+      const availableCategories = activeModal === 'prompt' ? promptMainCategories : toolCategories;
+      const defaultCategory = availableCategories.find(cat => cat !== 'Todas' && cat !== 'Todos') || availableCategories[0];
       setSelectedCategoryForSubcategory(defaultCategory);
     }
-  }, [toolCategories, selectedCategoryForSubcategory]);
+  }, [activeModal, promptMainCategories, toolCategories, selectedCategoryForSubcategory]);
 
   // Guardar tools, prompts e workflows no localStorage sempre que mudarem
   // Removida persistência local de tools/prompts/workflows. Supabase agora é a fonte de verdade para esses dados.
@@ -159,7 +199,7 @@ export default function App() {
     if (type === 'tool') {
       return tools.filter(tool => tool.category === category).length;
     } else if (type === 'prompt') {
-      return prompts.filter(prompt => prompt.category === category).length;
+      return prompts.filter(prompt => getPromptCategory(prompt) === category).length;
     } else {
       return workflows.filter(workflow => workflow.category === category).length;
     }
@@ -167,6 +207,12 @@ export default function App() {
 
   const getSubcategoryCount = (category: string, subcategory: string) => {
     return tools.filter(tool => tool.category === category && tool.subcategory === subcategory).length;
+  };
+
+  const getPromptSubcategoryCount = (category: string, subcategory: string) => {
+    return prompts.filter(prompt =>
+      getPromptCategory(prompt) === category && getPromptSubcategory(prompt) === subcategory
+    ).length;
   };
 
   
@@ -323,7 +369,8 @@ export default function App() {
         setNewPromptDescription(prompt.description);
         setNewPromptContent(prompt.content);
         setNewPromptImage(prompt.image || '');
-        setNewPromptCategory(prompt.category);
+        setNewPromptCategory(getPromptCategory(prompt));
+        setNewPromptSubcategory(getPromptSubcategory(prompt) || subcategoriesMap[getPromptCategory(prompt)]?.[0] || '');
         setNewPromptModels(prompt.models.join(', '));
         setActiveModal('prompt');
         setActiveTab('item');
@@ -361,32 +408,41 @@ export default function App() {
   };
 
   const handleAddCategory = async () => {
-    if (!newCategoryName.trim()) return;
+    const categoryName = newCategoryName.trim();
+    if (!categoryName) return;
 
     if (activeModal === 'ferramenta') {
-      if (!toolCategories.includes(newCategoryName)) {
-        const updated = [...toolCategories, newCategoryName];
+      if (!toolCategories.includes(categoryName)) {
+        const updated = [...toolCategories, categoryName];
         setToolCategories(updated);
         await saveCategories('tool', updated);
         // Inicializar subcategorias vazias para nova categoria
-        if (!subcategoriesMap[newCategoryName]) {
+        if (!subcategoriesMap[categoryName]) {
           const updatedSubcategories = {
             ...subcategoriesMap,
-            [newCategoryName]: []
+            [categoryName]: []
           };
           setSubcategoriesMap(updatedSubcategories);
           await saveSubcategories(updatedSubcategories);
         }
       }
     } else if (activeModal === 'prompt') {
-      if (!promptCategories.includes(newCategoryName)) {
-        const updated = [...promptCategories, newCategoryName];
+      if (!promptCategories.includes(categoryName)) {
+        const updated = [...promptCategories, categoryName];
         setPromptCategories(updated);
         await saveCategories('prompt', updated);
+        if (!subcategoriesMap[categoryName]) {
+          const updatedSubcategories = {
+            ...subcategoriesMap,
+            [categoryName]: []
+          };
+          setSubcategoriesMap(updatedSubcategories);
+          await saveSubcategories(updatedSubcategories);
+        }
       }
     } else if (activeModal === 'workflow') {
-      if (!workflowCategories.includes(newCategoryName)) {
-        const updated = [...workflowCategories, newCategoryName];
+      if (!workflowCategories.includes(categoryName)) {
+        const updated = [...workflowCategories, categoryName];
         setWorkflowCategories(updated);
         await saveCategories('workflow', updated);
       }
@@ -396,6 +452,8 @@ export default function App() {
   };
 
   const handleDeleteCategory = async (type: 'tool' | 'prompt' | 'workflow', categoryName: string) => {
+    if (isProtectedCategory(type, categoryName)) return;
+
     if (type === 'tool') {
       const updated = toolCategories.filter(cat => cat !== categoryName);
       setToolCategories(updated);
@@ -412,8 +470,13 @@ export default function App() {
       const updated = promptCategories.filter(cat => cat !== categoryName);
       setPromptCategories(updated);
       await saveCategories('prompt', updated);
+      const updatedSubcategories = { ...subcategoriesMap };
+      delete updatedSubcategories[categoryName];
+      setSubcategoriesMap(updatedSubcategories);
+      await saveSubcategories(updatedSubcategories);
       if (selectedPromptCategory === categoryName) {
         setSelectedPromptCategory(null);
+        setSelectedPromptSubcategory(null);
       }
     } else if (type === 'workflow') {
       const updated = workflowCategories.filter(cat => cat !== categoryName);
@@ -426,13 +489,18 @@ export default function App() {
   };
 
   const handleAddSubcategory = async () => {
-    if (!newSubcategoryName.trim() || !selectedCategoryForSubcategory) return;
+    const subcategoryName = newSubcategoryName.trim();
+    if (!subcategoryName || !selectedCategoryForSubcategory) return;
 
-    const currentSubcategories = subcategoriesMap[selectedCategoryForSubcategory] || [];
-    if (!currentSubcategories.includes(newSubcategoryName)) {
+    const currentSubcategories = activeModal === 'prompt'
+      ? getPromptCategorySubcategories(selectedCategoryForSubcategory)
+      : (subcategoriesMap[selectedCategoryForSubcategory] || []);
+
+    if (!currentSubcategories.includes(subcategoryName)) {
+      const storedSubcategories = subcategoriesMap[selectedCategoryForSubcategory] || [];
       const updated = {
         ...subcategoriesMap,
-        [selectedCategoryForSubcategory]: [...currentSubcategories, newSubcategoryName]
+        [selectedCategoryForSubcategory]: [...storedSubcategories, subcategoryName]
       };
       setSubcategoriesMap(updated);
       await saveSubcategories(updated);
@@ -449,8 +517,18 @@ export default function App() {
     };
     setSubcategoriesMap(updated);
     await saveSubcategories(updated);
+
+    if (category === PROMPT_ROOT_CATEGORY && promptCategories.includes(subcategoryName)) {
+      const updatedPromptCategories = promptCategories.filter(cat => cat !== subcategoryName);
+      setPromptCategories(updatedPromptCategories);
+      await saveCategories('prompt', updatedPromptCategories);
+    }
+
     if (selectedSubcategory === subcategoryName) {
       setSelectedSubcategory(null);
+    }
+    if (selectedPromptSubcategory === subcategoryName) {
+      setSelectedPromptSubcategory(null);
     }
   };
 
@@ -538,6 +616,7 @@ export default function App() {
             title: newPromptTitle,
             description: newPromptDescription,
             category: newPromptCategory,
+            subcategory: newPromptSubcategory,
             models: modelsArray,
             content: newPromptContent,
             image: imageUrl || undefined
@@ -551,6 +630,7 @@ export default function App() {
         title: newPromptTitle,
         description: newPromptDescription,
         category: newPromptCategory,
+        subcategory: newPromptSubcategory,
         models: modelsArray,
         content: newPromptContent,
         image: imageUrl || undefined,
@@ -567,7 +647,8 @@ export default function App() {
     setNewPromptDescription('');
     setNewPromptContent('');
     setNewPromptImage('');
-    setNewPromptCategory('Marketing');
+    setNewPromptCategory(PROMPT_ROOT_CATEGORY);
+    setNewPromptSubcategory(DEFAULT_PROMPT_SUBCATEGORIES[0]);
     setNewPromptModels('ChatGPT, Claude');
     setEditingPromptId(null);
     setActiveModal(null);
@@ -1007,8 +1088,12 @@ export default function App() {
                   {selectedPromptCategory ? (
                     <button
                       onClick={() => {
-                        setSelectedPromptCategory(null);
-                        setSearchPromptTerm('');
+                        if (selectedPromptSubcategory) {
+                          setSelectedPromptSubcategory(null);
+                        } else {
+                          setSelectedPromptCategory(null);
+                          setSearchPromptTerm('');
+                        }
                       }}
                       className="px-4 py-2 rounded-lg transition-colors bg-gray-800/50 text-gray-400 hover:bg-gray-800 flex items-center gap-2"
                     >
@@ -1017,7 +1102,10 @@ export default function App() {
                     </button>
                   ) : (
                     <button
-                      onClick={() => setSelectedPromptCategory('Favoritos')}
+                      onClick={() => {
+                        setSelectedPromptCategory('Favoritos');
+                        setSelectedPromptSubcategory(null);
+                      }}
                       className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${selectedPromptCategory === 'Favoritos'
                         ? 'bg-blue-600 text-white'
                         : 'bg-gray-800/50 text-gray-400 hover:bg-gray-800'
@@ -1027,7 +1115,7 @@ export default function App() {
                       Favoritos ({getFavoritesCount('prompt')})
                     </button>
                   )}
-                  {selectedPromptCategory && (
+                  {(selectedPromptSubcategory || selectedPromptCategory === 'Favoritos') && (
                     <div className="relative flex-1 max-w-md">
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                       <input
@@ -1044,6 +1132,9 @@ export default function App() {
                   onClick={() => {
                     setActiveModal('prompt');
                     setActiveTab('item');
+                    setEditingPromptId(null);
+                    setNewPromptCategory(PROMPT_ROOT_CATEGORY);
+                    setNewPromptSubcategory(getPromptCategorySubcategories(PROMPT_ROOT_CATEGORY)[0] || DEFAULT_PROMPT_SUBCATEGORIES[0]);
                   }}
                   className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap ml-4"
                 >
@@ -1054,10 +1145,13 @@ export default function App() {
 
               {!selectedPromptCategory && !searchPromptTerm ? (
                 <div className="grid grid-cols-4 gap-4">
-                  {promptCategories.filter(cat => cat !== 'Todos').map(category => (
+                  {promptMainCategories.map(category => (
                     <div
                       key={category}
-                      onClick={() => setSelectedPromptCategory(category)}
+                      onClick={() => {
+                        setSelectedPromptCategory(category);
+                        setSelectedPromptSubcategory(null);
+                      }}
                       className="bg-[#151921] border border-gray-800/50 rounded-lg p-6 hover:border-blue-600 transition-colors cursor-pointer"
                     >
                       <div className="flex items-center justify-between mb-4">
@@ -1072,10 +1166,44 @@ export default function App() {
                     </div>
                   ))}
                 </div>
+              ) : selectedPromptCategory && !selectedPromptSubcategory && selectedPromptCategory !== 'Favoritos' ? (
+                <div className="grid grid-cols-4 gap-4">
+                  {getPromptCategorySubcategories(selectedPromptCategory).map(subcategory => (
+                    <div
+                      key={subcategory}
+                      onClick={() => setSelectedPromptSubcategory(subcategory)}
+                      className="bg-[#151921] border border-gray-800/50 rounded-lg p-6 hover:border-blue-600 transition-colors cursor-pointer"
+                    >
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="w-12 h-12 bg-gray-800/50 rounded-lg flex items-center justify-center text-gray-300">
+                          <FileText className="w-6 h-6" />
+                        </div>
+                        <span className="text-2xl font-semibold text-gray-500">
+                          {getPromptSubcategoryCount(selectedPromptCategory, subcategory)}
+                        </span>
+                      </div>
+                      <h3 className="text-white font-semibold text-lg">{subcategory}</h3>
+                    </div>
+                  ))}
+                  {getPromptCategorySubcategories(selectedPromptCategory).length === 0 && (
+                    <div className="col-span-4 text-center py-12">
+                      <p className="text-gray-400">Nenhuma subcategoria encontrada</p>
+                    </div>
+                  )}
+                </div>
               ) : (
                 <div className="grid grid-cols-3 gap-4">
                   {prompts.filter(prompt => {
-                    const categoryMatch = selectedPromptCategory === 'Favoritos' ? prompt.favorite === true : prompt.category === selectedPromptCategory;
+                    let categoryMatch = true;
+
+                    if (selectedPromptCategory === 'Favoritos') {
+                      categoryMatch = prompt.favorite === true;
+                    } else if (selectedPromptCategory && selectedPromptSubcategory) {
+                      categoryMatch = getPromptCategory(prompt) === selectedPromptCategory && getPromptSubcategory(prompt) === selectedPromptSubcategory;
+                    } else if (selectedPromptCategory) {
+                      categoryMatch = getPromptCategory(prompt) === selectedPromptCategory;
+                    }
+
                     const searchMatch = !searchPromptTerm ||
                       prompt.title.toLowerCase().includes(searchPromptTerm.toLowerCase()) ||
                       prompt.description.toLowerCase().includes(searchPromptTerm.toLowerCase()) ||
@@ -1095,7 +1223,7 @@ export default function App() {
                       <div className="p-5">
                         <div className="flex items-start justify-between mb-4">
                           <span className="px-2.5 py-1 bg-blue-600/20 text-blue-400 text-xs rounded uppercase font-medium">
-                            {prompt.category}
+                            {getPromptSubcategory(prompt) || getPromptCategory(prompt)}
                           </span>
                           <div className="flex items-center gap-2">
                             <button
@@ -1625,16 +1753,16 @@ export default function App() {
                           .map(cat => (
                             <div key={cat} className="flex items-center justify-between bg-[#0f1420] border border-gray-800/50 rounded-lg px-4 py-2.5">
                               <span className="text-white">{cat}</span>
-                              <button
-                                onClick={() => handleDeleteCategory(
-                                  activeModal === 'ferramenta' ? 'tool' :
-                                    activeModal === 'prompt' ? 'prompt' : 'workflow',
-                                  cat
-                                )}
-                                className="text-red-400 hover:text-red-300 transition-colors"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
+                              {isProtectedCategory('prompt', cat) ? (
+                                <span className="text-xs text-gray-500">Base</span>
+                              ) : (
+                                <button
+                                  onClick={() => handleDeleteCategory('prompt', cat)}
+                                  className="text-red-400 hover:text-red-300 transition-colors"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              )}
                             </div>
                           ))}
                         {(activeModal === 'ferramenta' ? toolCategories :
@@ -1738,6 +1866,8 @@ export default function App() {
                 setNewPromptDescription('');
                 setNewPromptContent('');
                 setNewPromptImage('');
+                setNewPromptCategory(PROMPT_ROOT_CATEGORY);
+                setNewPromptSubcategory(DEFAULT_PROMPT_SUBCATEGORIES[0]);
                 setNewPromptModels('ChatGPT, Claude');
                 setEditingPromptId(null);
               }} className="text-gray-400 hover:text-gray-300">
@@ -1753,7 +1883,10 @@ export default function App() {
                 Prompt
               </button>
               <button
-                onClick={() => setActiveTab('categoria')}
+                onClick={() => {
+                  setActiveTab('categoria');
+                  setCategoryTab('categoria');
+                }}
                 className={`px-4 py-2 ${activeTab === 'categoria' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-white'}`}
               >
                 Categoria
@@ -1793,17 +1926,36 @@ export default function App() {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm text-gray-400 mb-1.5">Categoria</label>
-                  <select
-                    value={newPromptCategory}
-                    onChange={(e) => setNewPromptCategory(e.target.value)}
-                    className="w-full bg-[#0f1420] border border-gray-800/50 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-600 transition-colors"
-                  >
-                    {promptCategories.filter(cat => cat !== 'Todos').map(cat => (
-                      <option key={cat}>{cat}</option>
-                    ))}
-                  </select>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm text-gray-400 mb-1.5">Categoria Principal</label>
+                    <select
+                      value={newPromptCategory}
+                      onChange={(e) => {
+                        setNewPromptCategory(e.target.value);
+                        const firstSubcategory = getPromptCategorySubcategories(e.target.value)[0] || '';
+                        setNewPromptSubcategory(firstSubcategory);
+                      }}
+                      className="w-full bg-[#0f1420] border border-gray-800/50 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-600 transition-colors"
+                    >
+                      {promptMainCategories.map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm text-gray-400 mb-1.5">Subcategoria</label>
+                    <select
+                      value={newPromptSubcategory}
+                      onChange={(e) => setNewPromptSubcategory(e.target.value)}
+                      className="w-full bg-[#0f1420] border border-gray-800/50 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-600 transition-colors"
+                    >
+                      {getPromptCategorySubcategories(newPromptCategory).map(subcat => (
+                        <option key={subcat} value={subcat}>{subcat}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
                 <div>
@@ -1838,6 +1990,8 @@ export default function App() {
                       setNewPromptDescription('');
                       setNewPromptContent('');
                       setNewPromptImage('');
+                      setNewPromptCategory(PROMPT_ROOT_CATEGORY);
+                      setNewPromptSubcategory(DEFAULT_PROMPT_SUBCATEGORIES[0]);
                       setNewPromptModels('ChatGPT, Claude');
                       setEditingPromptId(null);
                     }}
@@ -1855,58 +2009,137 @@ export default function App() {
               </div>
             ) : (
               <div className="space-y-4">
-                <div>
-                  <label className="block text-sm text-gray-400 mb-1.5">Nome da Categoria</label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="Ex: Produtividade"
-                      value={newCategoryName}
-                      onChange={(e) => setNewCategoryName(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          handleAddCategory();
-                        }
-                      }}
-                      className="flex-1 bg-[#0f1420] border border-gray-800/50 rounded-lg px-4 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-blue-600 transition-colors"
-                    />
-                    <button
-                      onClick={handleAddCategory}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                    >
-                      Adicionar
-                    </button>
-                  </div>
+                <div className="flex gap-4 mb-4 border-b border-gray-800">
+                  <button
+                    onClick={() => setCategoryTab('categoria')}
+                    className={`px-4 py-2 ${categoryTab === 'categoria' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-white'}`}
+                  >
+                    Categoria Principal
+                  </button>
+                  <button
+                    onClick={() => {
+                      setCategoryTab('subcategoria');
+                      setSelectedCategoryForSubcategory(newPromptCategory || PROMPT_ROOT_CATEGORY);
+                    }}
+                    className={`px-4 py-2 ${categoryTab === 'subcategoria' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-white'}`}
+                  >
+                    Subcategorias
+                  </button>
                 </div>
 
-                <div>
-                  <label className="block text-sm text-gray-400 mb-3">Categorias Existentes</label>
-                  <div className="space-y-2 max-h-64 overflow-y-auto">
-                    {(activeModal === 'ferramenta' ? toolCategories :
-                      activeModal === 'prompt' ? promptCategories : workflowCategories)
-                      .filter(cat => cat !== 'Todas' && cat !== 'Todos')
-                      .map(cat => (
-                        <div key={cat} className="flex items-center justify-between bg-[#0f1420] border border-gray-800/50 rounded-lg px-4 py-2.5">
-                          <span className="text-white">{cat}</span>
-                          <button
-                            onClick={() => handleDeleteCategory(
-                              activeModal === 'ferramenta' ? 'tool' :
-                                activeModal === 'prompt' ? 'prompt' : 'workflow',
-                              cat
-                            )}
-                            className="text-red-400 hover:text-red-300 transition-colors"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ))}
-                    {(activeModal === 'ferramenta' ? toolCategories :
-                      activeModal === 'prompt' ? promptCategories : workflowCategories)
-                      .filter(cat => cat !== 'Todas' && cat !== 'Todos').length === 0 && (
-                        <p className="text-sm text-gray-500 text-center py-4">Nenhuma categoria adicionada</p>
-                      )}
-                  </div>
-                </div>
+                {categoryTab === 'categoria' ? (
+                  <>
+                    <div>
+                      <label className="block text-sm text-gray-400 mb-1.5">Nome da Categoria</label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          placeholder="Ex: Produtividade"
+                          value={newCategoryName}
+                          onChange={(e) => setNewCategoryName(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              handleAddCategory();
+                            }
+                          }}
+                          className="flex-1 bg-[#0f1420] border border-gray-800/50 rounded-lg px-4 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-blue-600 transition-colors"
+                        />
+                        <button
+                          onClick={handleAddCategory}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                        >
+                          Adicionar
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm text-gray-400 mb-3">Categorias Existentes</label>
+                      <div className="space-y-2 max-h-64 overflow-y-auto">
+                        {promptMainCategories
+                          .filter(cat => cat !== 'Todas' && cat !== 'Todos')
+                          .map(cat => (
+                            <div key={cat} className="flex items-center justify-between bg-[#0f1420] border border-gray-800/50 rounded-lg px-4 py-2.5">
+                              <span className="text-white">{cat}</span>
+                              <button
+                                onClick={() => handleDeleteCategory(
+                                  activeModal === 'ferramenta' ? 'tool' :
+                                    activeModal === 'prompt' ? 'prompt' : 'workflow',
+                                  cat
+                                )}
+                                className="text-red-400 hover:text-red-300 transition-colors"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ))}
+                        {promptMainCategories
+                          .filter(cat => cat !== 'Todas' && cat !== 'Todos').length === 0 && (
+                            <p className="text-sm text-gray-500 text-center py-4">Nenhuma categoria adicionada</p>
+                          )}
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div>
+                      <label className="block text-sm text-gray-400 mb-1.5">Categoria Principal</label>
+                      <select
+                        value={selectedCategoryForSubcategory}
+                        onChange={(e) => setSelectedCategoryForSubcategory(e.target.value)}
+                        className="w-full bg-[#0f1420] border border-gray-800/50 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-600 transition-colors mb-4"
+                      >
+                        {promptMainCategories.map(cat => (
+                          <option key={cat} value={cat}>{cat}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm text-gray-400 mb-1.5">Nome da Subcategoria</label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          placeholder="Ex: Prompts para video"
+                          value={newSubcategoryName}
+                          onChange={(e) => setNewSubcategoryName(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              handleAddSubcategory();
+                            }
+                          }}
+                          className="flex-1 bg-[#0f1420] border border-gray-800/50 rounded-lg px-4 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-blue-600 transition-colors"
+                        />
+                        <button
+                          onClick={handleAddSubcategory}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                        >
+                          Adicionar
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm text-gray-400 mb-3">Subcategorias de {selectedCategoryForSubcategory}</label>
+                      <div className="space-y-2 max-h-64 overflow-y-auto">
+                        {getPromptCategorySubcategories(selectedCategoryForSubcategory).map(subcat => (
+                          <div key={subcat} className="flex items-center justify-between bg-[#0f1420] border border-gray-800/50 rounded-lg px-4 py-2.5">
+                            <span className="text-white">{subcat}</span>
+                            <button
+                              onClick={() => handleDeleteSubcategory(selectedCategoryForSubcategory, subcat)}
+                              className="text-red-400 hover:text-red-300 transition-colors"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))}
+                        {getPromptCategorySubcategories(selectedCategoryForSubcategory).length === 0 && (
+                          <p className="text-sm text-gray-500 text-center py-4">Nenhuma subcategoria adicionada</p>
+                        )}
+                      </div>
+                    </div>
+                  </>
+                )}
 
                 <div className="flex gap-3 pt-3">
                   <button
@@ -2271,7 +2504,7 @@ export default function App() {
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-3">
                     <span className="px-2.5 py-1 bg-blue-600/20 text-blue-400 text-xs rounded uppercase font-medium">
-                      {selectedPrompt.category}
+                      {getPromptSubcategory(selectedPrompt) || getPromptCategory(selectedPrompt)}
                     </span>
                     <div className="flex gap-2">
                       {selectedPrompt.models.map((model, idx) => (

@@ -1,6 +1,10 @@
 import React, { memo } from 'react';
 import { X } from 'lucide-react';
 import { Prompt } from '../App';
+import {
+  DEFAULT_PROMPT_SUBCATEGORIES,
+  PROMPT_ROOT_CATEGORY
+} from '../../data/categories';
 
 interface PromptEditModalProps {
   prompt: Prompt | null;
@@ -16,12 +20,28 @@ export const PromptEditModal = memo((props: PromptEditModalProps) => {
       id: Date.now().toString(),
       title: '',
       description: '',
-      category: 'Aspect Ratio & Frame',
+      category: PROMPT_ROOT_CATEGORY,
+      subcategory: DEFAULT_PROMPT_SUBCATEGORIES[0],
       models: [],
       content: '',
       favorite: false
     }
   );
+
+  React.useEffect(() => {
+    setFormData(
+      props.prompt || {
+        id: Date.now().toString(),
+        title: '',
+        description: '',
+        category: PROMPT_ROOT_CATEGORY,
+        subcategory: DEFAULT_PROMPT_SUBCATEGORIES[0],
+        models: [],
+        content: '',
+        favorite: false
+      }
+    );
+  }, [props.prompt]);
 
   if (!props.isOpen) return null;
 
@@ -67,21 +87,30 @@ export const PromptEditModal = memo((props: PromptEditModalProps) => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Categoria</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Categoria Principal</label>
             <select
               value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              onChange={(e) => setFormData({
+                ...formData,
+                category: e.target.value,
+                subcategory: DEFAULT_PROMPT_SUBCATEGORIES[0]
+              })}
               className="w-full bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-600"
             >
-              <option>Aspect Ratio & Frame</option>
-              <option>Backgrounds & Surfaces</option>
-              <option>Camera Profiles</option>
-              <option>Lighting Setups</option>
-              <option>UGC Poses & Scenes</option>
-              <option>Hands & Models</option>
-              <option>Atmospheric Effects</option>
-              <option>Director Signatures</option>
-              <option>Motion & Camera Verbs</option>
+              <option value={PROMPT_ROOT_CATEGORY}>{PROMPT_ROOT_CATEGORY}</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Subcategoria</label>
+            <select
+              value={formData.subcategory || DEFAULT_PROMPT_SUBCATEGORIES[0]}
+              onChange={(e) => setFormData({ ...formData, subcategory: e.target.value })}
+              className="w-full bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-600"
+            >
+              {DEFAULT_PROMPT_SUBCATEGORIES.map(subcategory => (
+                <option key={subcategory} value={subcategory}>{subcategory}</option>
+              ))}
             </select>
           </div>
         </div>
