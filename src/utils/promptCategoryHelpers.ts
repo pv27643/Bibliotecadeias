@@ -46,9 +46,16 @@ export const getPromptCategory = (prompt: PromptCategoryItem) => (
 export const getPromptMainCategories = (
   promptCategories: string[],
   promptRootSubcategories: string[]
-) => Array.from(new Set([
-  PROMPT_ROOT_CATEGORY,
-  ...promptCategories.filter(category =>
-    category !== 'Todos' && !promptRootSubcategories.includes(category)
-  )
-]));
+) => {
+  const storedCategories = promptCategories.filter(category => category !== 'Todos');
+  const needsLegacyRoot = storedCategories.some(category =>
+    category === PROMPT_ROOT_CATEGORY || promptRootSubcategories.includes(category)
+  );
+
+  return Array.from(new Set([
+    ...(needsLegacyRoot ? [PROMPT_ROOT_CATEGORY] : []),
+    ...storedCategories.filter(category =>
+      category !== PROMPT_ROOT_CATEGORY && !promptRootSubcategories.includes(category)
+    )
+  ]));
+};

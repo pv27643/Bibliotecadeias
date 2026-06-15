@@ -38,3 +38,4 @@ logs/
 *.tmp
 *.bak
 supabase/.temp/
+.npm-cache/

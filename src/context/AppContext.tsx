@@ -80,7 +80,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
           if (data.toolCategories?.length > 0) setToolCategories(data.toolCategories);
           if (data.promptCategories?.length > 0) setPromptCategories(data.promptCategories);
           if (data.workflowCategories?.length > 0) setWorkflowCategories(data.workflowCategories);
-          if (data.subcategories) setSubcategoriesMap(data.subcategories);
+          if (data.subcategories && Object.keys(data.subcategories).length > 0) {
+            setSubcategoriesMap(data.subcategories);
+          }
         }
       } catch (error) {
         console.warn('Erro ao carregar dados:', error);

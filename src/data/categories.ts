@@ -17,7 +17,7 @@ export const DEFAULT_PROMPT_SUBCATEGORIES = [
 ];
 
 export const PROTECTED_TOOL_CATEGORIES = ['Todas'];
-export const PROTECTED_PROMPT_CATEGORIES = ['Todos', PROMPT_ROOT_CATEGORY];
+export const PROTECTED_PROMPT_CATEGORIES = ['Todos'];
 export const PROTECTED_WORKFLOW_CATEGORIES = ['Todos'];
 
 // Categorias de ferramentas
@@ -37,7 +37,14 @@ export const DEFAULT_TOOL_CATEGORIES = [
 // Categorias de prompts
 export const DEFAULT_PROMPT_CATEGORIES = [
   'Todos',
-  PROMPT_ROOT_CATEGORY
+  'UX design',
+  'Visual design',
+  'Branding',
+  'Product',
+  'Research',
+  'AI',
+  'Content',
+  'Career'
 ];
 
 // Categorias de workflows

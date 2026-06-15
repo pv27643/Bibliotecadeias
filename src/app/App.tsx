@@ -9,6 +9,7 @@ import BrandPostGenerator from './components/BrandPostGenerator';
 import WorkflowExecutor from './components/WorkflowExecutor';
 import N8nConfigModal from './components/N8nConfigModal';
 import {
+  DEFAULT_PROMPT_CATEGORIES,
   DEFAULT_PROMPT_SUBCATEGORIES,
   PROMPT_ROOT_CATEGORY,
   PROTECTED_PROMPT_CATEGORIES,
@@ -44,6 +45,7 @@ import {
 
 type View = 'biblioteca' | 'prompts' | 'workflows';
 type Modal = 'categoria' | 'ferramenta' | 'prompt' | 'workflow' | null;
+const DEFAULT_PROMPT_CATEGORY = DEFAULT_PROMPT_CATEGORIES[1] || PROMPT_ROOT_CATEGORY;
 
 export interface Tool {
   id: string;
@@ -126,8 +128,8 @@ export default function App() {
   const [newPromptDescription, setNewPromptDescription] = useState('');
   const [newPromptContent, setNewPromptContent] = useState('');
   const [newPromptImage, setNewPromptImage] = useState('');
-  const [newPromptCategory, setNewPromptCategory] = useState(PROMPT_ROOT_CATEGORY);
-  const [newPromptSubcategory, setNewPromptSubcategory] = useState<string | undefined>(DEFAULT_PROMPT_SUBCATEGORIES[0]);
+  const [newPromptCategory, setNewPromptCategory] = useState(DEFAULT_PROMPT_CATEGORY);
+  const [newPromptSubcategory, setNewPromptSubcategory] = useState<string | undefined>('');
   const [newPromptModels, setNewPromptModels] = useState('ChatGPT');
 
   const [editingWorkflowId, setEditingWorkflowId] = useState<string | null>(null);
@@ -370,7 +372,7 @@ export default function App() {
         setNewPromptContent(prompt.content);
         setNewPromptImage(prompt.image || '');
         setNewPromptCategory(getPromptCategory(prompt));
-        setNewPromptSubcategory(getPromptSubcategory(prompt) || subcategoriesMap[getPromptCategory(prompt)]?.[0] || '');
+        setNewPromptSubcategory(getPromptSubcategory(prompt) || getPromptCategorySubcategories(getPromptCategory(prompt))[0] || '');
         setNewPromptModels(prompt.models.join(', '));
         setActiveModal('prompt');
         setActiveTab('item');
@@ -616,7 +618,7 @@ export default function App() {
             title: newPromptTitle,
             description: newPromptDescription,
             category: newPromptCategory,
-            subcategory: newPromptSubcategory,
+            subcategory: newPromptSubcategory || undefined,
             models: modelsArray,
             content: newPromptContent,
             image: imageUrl || undefined
@@ -630,7 +632,7 @@ export default function App() {
         title: newPromptTitle,
         description: newPromptDescription,
         category: newPromptCategory,
-        subcategory: newPromptSubcategory,
+        subcategory: newPromptSubcategory || undefined,
         models: modelsArray,
         content: newPromptContent,
         image: imageUrl || undefined,
@@ -647,8 +649,8 @@ export default function App() {
     setNewPromptDescription('');
     setNewPromptContent('');
     setNewPromptImage('');
-    setNewPromptCategory(PROMPT_ROOT_CATEGORY);
-    setNewPromptSubcategory(DEFAULT_PROMPT_SUBCATEGORIES[0]);
+    setNewPromptCategory(DEFAULT_PROMPT_CATEGORY);
+    setNewPromptSubcategory('');
     setNewPromptModels('ChatGPT, Claude');
     setEditingPromptId(null);
     setActiveModal(null);
@@ -1115,7 +1117,7 @@ export default function App() {
                       Favoritos ({getFavoritesCount('prompt')})
                     </button>
                   )}
-                  {(selectedPromptSubcategory || selectedPromptCategory === 'Favoritos') && (
+                  {(selectedPromptSubcategory || selectedPromptCategory === 'Favoritos' || (selectedPromptCategory && getPromptCategorySubcategories(selectedPromptCategory).length === 0)) && (
                     <div className="relative flex-1 max-w-md">
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                       <input
@@ -1133,8 +1135,8 @@ export default function App() {
                     setActiveModal('prompt');
                     setActiveTab('item');
                     setEditingPromptId(null);
-                    setNewPromptCategory(PROMPT_ROOT_CATEGORY);
-                    setNewPromptSubcategory(getPromptCategorySubcategories(PROMPT_ROOT_CATEGORY)[0] || DEFAULT_PROMPT_SUBCATEGORIES[0]);
+                    setNewPromptCategory(DEFAULT_PROMPT_CATEGORY);
+                    setNewPromptSubcategory(getPromptCategorySubcategories(DEFAULT_PROMPT_CATEGORY)[0] || '');
                   }}
                   className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap ml-4"
                 >
@@ -1166,7 +1168,7 @@ export default function App() {
                     </div>
                   ))}
                 </div>
-              ) : selectedPromptCategory && !selectedPromptSubcategory && selectedPromptCategory !== 'Favoritos' ? (
+              ) : selectedPromptCategory && !selectedPromptSubcategory && selectedPromptCategory !== 'Favoritos' && getPromptCategorySubcategories(selectedPromptCategory).length > 0 ? (
                 <div className="grid grid-cols-4 gap-4">
                   {getPromptCategorySubcategories(selectedPromptCategory).map(subcategory => (
                     <div
@@ -1866,8 +1868,8 @@ export default function App() {
                 setNewPromptDescription('');
                 setNewPromptContent('');
                 setNewPromptImage('');
-                setNewPromptCategory(PROMPT_ROOT_CATEGORY);
-                setNewPromptSubcategory(DEFAULT_PROMPT_SUBCATEGORIES[0]);
+                setNewPromptCategory(DEFAULT_PROMPT_CATEGORY);
+                setNewPromptSubcategory('');
                 setNewPromptModels('ChatGPT, Claude');
                 setEditingPromptId(null);
               }} className="text-gray-400 hover:text-gray-300">
@@ -1990,8 +1992,8 @@ export default function App() {
                       setNewPromptDescription('');
                       setNewPromptContent('');
                       setNewPromptImage('');
-                      setNewPromptCategory(PROMPT_ROOT_CATEGORY);
-                      setNewPromptSubcategory(DEFAULT_PROMPT_SUBCATEGORIES[0]);
+                      setNewPromptCategory(DEFAULT_PROMPT_CATEGORY);
+                      setNewPromptSubcategory('');
                       setNewPromptModels('ChatGPT, Claude');
                       setEditingPromptId(null);
                     }}
