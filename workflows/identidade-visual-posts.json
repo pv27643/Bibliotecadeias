@@ -1,0 +1,353 @@
+{
+  "name": "My workflow 3",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "identidadevisual18",
+        "responseMode": "lastNode",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "id": "1cfb0083-2d5f-40b7-bda8-d298149c8a41",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        336,
+        1328
+      ],
+      "webhookId": "5b8b3440-bec1-43ae-958b-f491dadfe934"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first();\n\nconst debugInfo = {\n  jsonKeys: Object.keys(item.json || {}),\n  binaryKeys: Object.keys(item.binary || {}),\n  bodyKeys: Object.keys(item.json?.body || {}),\n  filesKeys: Object.keys(item.json?.files || {}),\n};\n\nconst body = item.json.body || item.json || {};\nconst files = item.json.files || {};\n\nconst uploadedFile =\n  item.binary?.file ||\n  item.binary?.data ||\n  item.binary?.image ||\n  files.file?.[0] ||\n  files.data?.[0] ||\n  files.image?.[0];\n\nif (!uploadedFile) {\n  throw new Error('File not found. Debug: ' + JSON.stringify(debugInfo));\n}\n\nreturn [{\n  json: {\n    postType: body.postType || body.post_type || 'quote post',\n    topic: body.topic || '',\n    mainMessage: body.mainMessage || body.main_message || body.message || '',\n    format: body.format || '1:1',\n    headline: body.headline || body.mainMessage || body.message || '',\n    secondaryText: body.secondaryText || body.secondary_text || ''\n  },\n  binary: {\n    data: uploadedFile\n  }\n}];"
+      },
+      "id": "557c4927-af10-4f68-8c90-20bf95580adb",
+      "name": "Extract Form Data1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        560,
+        1328
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list"
+        },
+        "text": "Your job is to describe the brand's visual DNA with enough precision that another AI image model can generate new posts that feel consistent with this brand.\n\nAnalyze only what is visible in the reference. If something is uncertain, mark it as inferred.\n\nExtract the following:\n\nBrand feeling\n\nDescribe the brand's emotional tone in 3 to 6 precise words.\n\nVisual category\n\nIdentify the visual world this brand belongs to: luxury, playful, editorial, tech, wellness, streetwear, educational, creator-led, minimal, chaotic, cinematic, corporate, handcrafted, futuristic, etc.\n\nColor system\n\nExtract the main palette with approximate HEX colors:\n\nPrimary color\n\nSecondary color\n\nAccent color\n\nBackground color\n\nText color\n\nHighlight color\n\nAlso describe saturation, contrast, warmth, and whether the palette feels soft, bold, muted, glossy, earthy, neon, pastel, monochrome, or high contrast.\n\nTypography and text style\n\nDescribe the visible typography:\n\nFont category\n\nWeight\n\nLetter spacing\n\nCase style\n\nHierarchy\n\nText placement\n\nText-to-image ratio\n\nHow headlines are treated\n\nHow secondary text is treated\n\nLayout system\n\nDescribe the composition rules:\n\nGrid style\n\nAlignment\n\nMargins\n\nNegative space\n\nImage placement\n\nText placement\n\nUse of frames, borders, cards, overlays, stickers, labels, or badges\n\nHow crowded or spacious the design feels\n\nImage style\n\nDescribe the imagery:\n\nPhotography, illustration, 3D, collage, flat graphics, mixed media, UI screenshot, editorial, UGC, cinematic, product-focused, character-focused, abstract\n\nSubject framing\n\nCamera angle\n\nDepth of field\n\nCropping style\n\nTexture and sharpness\n\nLighting and surface treatment\n\nDescribe:\n\nLighting direction\n\nLighting quality\n\nShadow softness\n\nHighlight style\n\nGloss, grain, blur, noise, gradients, glass, paper, metal, fabric, or other visible materials\n\nGraphic elements\n\nList recurring visual motifs:\n\nShapes\n\nIcons\n\nLines\n\nArrows\n\nPatterns\n\nGradients\n\nTexture overlays\n\nDecorative marks\n\nMotion cues\n\nUI elements\n\nSocial media adaptation rules\n\nExplain how to create new posts in this identity:\n\nHow a quote post should look\n\nHow an announcement post should look\n\nHow a carousel cover should look\n\nHow a product or feature post should look\n\nHow a story or vertical post should look\n\nAnti-drift rules\n\nList the visual choices that must stay consistent so future generations do not drift away from the brand.\n\nOutput the final result as:\n\nA. Short Brand DNA Summary\n\nB. Detailed Visual Identity Notes\n\nC. Reusable Brand Identity Block in JSON:\n\n{\n\n  \"brand_style\": {\n\n    \"name\": \"\",\n\n    \"mood\": [],\n\n    \"color_palette\": {\n\n      \"primary\": \"\",\n\n      \"secondary\": \"\",\n\n      \"accent\": \"\",\n\n      \"background\": \"\",\n\n      \"text\": \"\",\n\n      \"highlight\": \"\"\n\n    },\n\n    \"typography\": {\n\n      \"font_category\": \"\",\n\n      \"weight\": \"\",\n\n      \"case_style\": \"\",\n\n      \"hierarchy\": \"\",\n\n      \"text_placement\": \"\"\n\n    },\n\n    \"layout\": {\n\n      \"composition\": \"\",\n\n      \"alignment\": \"\",\n\n      \"spacing\": \"\",\n\n      \"graphic_system\": \"\"\n\n    },\n\n    \"imagery\": {\n\n      \"style\": \"\",\n\n      \"cameraorrendering\": \"\",\n\n      \"subject_framing\": \"\",\n\n      \"texture\": \"\"\n\n    },\n\n    \"lighting\": {\n\n      \"direction\": \"\",\n\n      \"quality\": \"\",\n\n      \"shadow_style\": \"\",\n\n      \"highlight_style\": \"\"\n\n    },\n\n    \"social_rules\": {\n\n      \"quote_post\": \"\",\n\n      \"announcement_post\": \"\",\n\n      \"carousel_cover\": \"\",\n\n      \"feature_post\": \"\",\n\n      \"story_post\": \"\"\n\n    },\n\n    \"antidriftrules\": []\n\n  }\n\n}\n\nD. One reusable generation prompt template that uses this identity block.",
+        "inputType": "base64",
+        "options": {}
+      },
+      "id": "414db7e8-7de8-4753-bc2c-ec9b09b0ba2e",
+      "name": "Analyze Product Image",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        784,
+        1328
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "55MhlttgGrCNE3gx",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a prompt-writer for an AI image generation model.\n\nYou will receive a brand visual identity analysis (derived ONLY from the reference image) and some post inputs (post type, topic, headline, format).\n\nTask: write ONE final image-generation prompt for the model to create a new social media post image that fits the same feed/brand identity.\n\nRules:\n- Preserve the brand's visual identity exactly (colors, typography feel, layout logic, imagery treatment, graphic motifs).\n- If something in the identity is uncertain, keep it conservative and do not invent specifics.\n- Make text readable with strong hierarchy and brand-consistent spacing.\n- Output ONLY the final prompt text (no markdown, no JSON).",
+              "role": "system"
+            },
+            {
+              "content": "=Using the brand identity block below, create a new social media post image for:\n\nPost type: {{ $(\"Extract Form Data1\").item.json.postType }}\nTopic: {{ $(\"Extract Form Data1\").item.json.topic }}\nMain message: {{ $(\"Extract Form Data1\").item.json.mainMessage }}\nFormat: {{ $(\"Extract Form Data1\").item.json.format }}\n\nPreserve the brand's visual identity exactly:\n\n{{ $(\"Analyze Product Image\").item.json.content || $(\"Analyze Product Image\").item.json.message?.content || \"\" }}\n\nGenerate a new design that follows the same color system, typography style, layout logic, image treatment, lighting, textures, and graphic motifs. Make it feel like part of the same social feed, while creating a fresh composition for this specific post.\n\nUse the main message as the headline:\n\"{{ $(\"Extract Form Data1\").item.json.headline }}\"\n\nIf secondary text is needed, use:\n\"{{ $(\"Extract Form Data1\").item.json.secondaryText }}\""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9a20744f-e512-4e56-b187-8ac21356b835",
+      "name": "Create Image Prompt",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        1008,
+        1328
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "55MhlttgGrCNE3gx",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/images/generations",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ model: \"gpt-image-2\", prompt: $json.message.content, n: 1, size: (() => { const f = $(\"Extract Form Data1\").item.json.format || \"1:1\"; if (f === \"9:16\") return \"1024x1792\"; if (f === \"16:9\") return \"1792x1024\"; if (f === \"4:5\") return \"1024x1280\"; return \"1024x1024\"; })() }) }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "6d2d3d1e-fab2-49f7-9f82-29400b1728ed",
+      "name": "GPT Image API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1360,
+        1328
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "55MhlttgGrCNE3gx",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "data[0].b64_json",
+        "options": {}
+      },
+      "id": "0e981003-0466-4f1a-98d0-02fceea933a5",
+      "name": "Convert To Binary",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1584,
+        1328
+      ]
+    },
+    {
+      "parameters": {
+        "name": "createdImage",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1rrdo_-_j_2FsGBEkUcTuTQRHfG0-AXHF",
+          "mode": "list",
+          "cachedResultName": "Imagens n8n",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1rrdo_-_j_2FsGBEkUcTuTQRHfG0-AXHF"
+        },
+        "options": {}
+      },
+      "id": "6eb379ba-2f33-4329-8855-b6ca006e0467",
+      "name": "Upload Image",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1808,
+        1328
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "success",
+              "value": "=true",
+              "type": "boolean",
+              "id": "a1"
+            },
+            {
+              "name": "fileId",
+              "value": "={{ $json.id }}",
+              "type": "string",
+              "id": "a2"
+            },
+            {
+              "name": "fileName",
+              "value": "={{ $json.name }}",
+              "type": "string",
+              "id": "a3"
+            },
+            {
+              "name": "viewLink",
+              "value": "={{ $json.webViewLink }}",
+              "type": "string",
+              "id": "a4"
+            },
+            {
+              "name": "downloadLink",
+              "value": "={{ $json.webContentLink }}",
+              "type": "string",
+              "id": "a5"
+            },
+            {
+              "name": "thumbnailLink",
+              "value": "={{ $json.thumbnailLink }}",
+              "type": "string",
+              "id": "a6"
+            },
+            {
+              "name": "createdAt",
+              "value": "={{ $json.createdTime }}",
+              "type": "string",
+              "id": "a7"
+            },
+            {
+              "name": "imagePrompt",
+              "value": "={{ $('Create Image Prompt').item.json.message.content }}",
+              "type": "string",
+              "id": "a8"
+            },
+            {
+              "name": "brandIdentityAnalysis",
+              "value": "={{ $('Analyze Product Image').item.json.content || $('Analyze Product Image').item.json.message?.content || '' }}",
+              "type": "string",
+              "id": "a9"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c8f1e96a-4ee7-4f33-a5dc-889df5a8456c",
+      "name": "Format Response",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2032,
+        1328
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# 📸 WORKFLOW: Gerador de Posts com Identidade Visual\n\n## 🔄 FLUXO:\n1. Webhook recebe multipart/form-data\n2. Extract extrai campos + binary do ficheiro\n3. Analyze analisa identidade visual da imagem\n4. Create gera prompt para nova imagem\n5. GPT Image API cria a imagem\n6. Convert converte para binary\n7. Upload para Google Drive\n8. Retorna links e metadados",
+        "height": 800,
+        "width": 2368,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        48,
+        688
+      ],
+      "typeVersion": 1,
+      "id": "46e0812a-6aaf-45fc-a32b-940e31c9b4c6",
+      "name": "Sticky Note"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract Form Data1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Form Data1": {
+      "main": [
+        [
+          {
+            "node": "Analyze Product Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Product Image": {
+      "main": [
+        [
+          {
+            "node": "Create Image Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Image Prompt": {
+      "main": [
+        [
+          {
+            "node": "GPT Image API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT Image API": {
+      "main": [
+        [
+          {
+            "node": "Convert To Binary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert To Binary": {
+      "main": [
+        [
+          {
+            "node": "Upload Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Image": {
+      "main": [
+        [
+          {
+            "node": "Format Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "triggerCount": 0,
+  "meta": null
+}

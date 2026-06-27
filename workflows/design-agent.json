@@ -1,0 +1,243 @@
+{
+  "name": "design-agent",
+  "nodes": [
+    {
+      "id": "da-webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        240,
+        400
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "design-agent",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "webhookId": "da-design-agent-001"
+    },
+    {
+      "id": "da-build",
+      "name": "Build Context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        400
+      ],
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body || $input.first().json;\nconst message = body.message || '';\nconst brandId = body.brand_id || '';\nconst history = (body.history || []).slice(-8);\n\nconst TOOLS = [\n  { type: 'function', function: { name: 'generate_post', description: 'Gera um post completo com legenda, hashtags e CTA. Usa quando o utilizador pede um post, publicacao ou caption para redes sociais.', parameters: { type: 'object', properties: { theme: { type: 'string', description: 'Tema do post' }, platform: { type: 'string', enum: ['Instagram', 'LinkedIn', 'Facebook', 'TikTok', 'Twitter/X'] }, goal: { type: 'string', enum: ['Engagement', 'Awareness', 'Conversao', 'Educacao', 'Entretenimento'] }, format: { type: 'string', enum: ['Post simples', 'Carrossel', 'Story', 'Reel', 'Artigo'] }, extra_context: { type: 'string' } }, required: ['theme', 'platform', 'goal', 'format'] } } },\n  { type: 'function', function: { name: 'generate_visual', description: 'Gera uma imagem com IA para a marca. Usa quando o utilizador pede uma imagem, visual, arte ou ilustracao.', parameters: { type: 'object', properties: { concept: { type: 'string', description: 'Descricao detalhada do visual a criar' }, aspect_ratio: { type: 'string', enum: ['1:1 (Feed)', '9:16 (Story/Reel)', '16:9 (Landscape)', '4:5 (Feed vertical)'] }, text_overlay: { type: 'string' } }, required: ['concept', 'aspect_ratio'] } } },\n  { type: 'function', function: { name: 'generate_carousel', description: 'Cria slides de carrossel. Usa quando o utilizador pede um carrossel ou slides.', parameters: { type: 'object', properties: { topic: { type: 'string' }, num_slides: { type: 'string', enum: ['3', '5', '7', '10'] }, platform: { type: 'string', enum: ['Instagram', 'LinkedIn', 'Facebook'] } }, required: ['topic', 'num_slides', 'platform'] } } },\n  { type: 'function', function: { name: 'repurpose_content', description: 'Adapta conteudo existente para multiplas plataformas.', parameters: { type: 'object', properties: { source_url: { type: 'string' }, source_text: { type: 'string' }, platforms: { type: 'string', enum: ['Instagram + LinkedIn', 'Instagram + TikTok', 'LinkedIn + Twitter/X', 'Todas (Instagram, LinkedIn, TikTok, Twitter/X)'] }, num_posts: { type: 'string', enum: ['1', '2', '3'] } }, required: ['platforms', 'num_posts'] } } },\n  { type: 'function', function: { name: 'weekly_batch', description: 'Gera um calendario de conteudo para 7 dias. Usa quando o utilizador pede um plano semanal.', parameters: { type: 'object', properties: { themes: { type: 'string' }, platform: { type: 'string', enum: ['Instagram', 'LinkedIn', 'Facebook', 'TikTok'] }, post_frequency: { type: 'string', enum: ['1 post/dia (7 posts)', 'Dias uteis (5 posts)', '3 posts/semana'] } }, required: ['themes', 'platform', 'post_frequency'] } } },\n  { type: 'function', function: { name: 'generate_bio', description: 'Gera uma bio otimizada para redes sociais.', parameters: { type: 'object', properties: { platform: { type: 'string', enum: ['Instagram', 'LinkedIn', 'TikTok', 'Twitter/X', 'YouTube'] }, tone_extra: { type: 'string' } }, required: ['platform'] } } },\n];\n\nconst sysLines = [\n  'Es o Assistente de IA Design da Celeuma IA.',\n  'Ajudas a criar conteudo de marca coerente, estrategico e com impacto visual.',\n  'Respondes SEMPRE em portugues europeu.',\n  'Antes de usar uma ferramenta, dizes em 1-2 frases o que vais fazer.',\n  'Apos receber o resultado de uma ferramenta, apresentas-o de forma clara e concisa.',\n  'Faz perguntas de clarificacao APENAS quando falta informacao essencial.',\n  'Quando o utilizador pede conteudo sem especificar plataforma, escolhe a mais adequada e avanca.',\n];\nif (brandId) {\n  sysLines.push(`Marca ativa: brand_id=\"${brandId}\". O Brand Style Profile e carregado automaticamente pelos geradores.`);\n} else {\n  sysLines.push('Sem marca ativa. Podes criar conteudo generico. Se o utilizador pedir conteudo de marca, sugere selecionar uma na sidebar.');\n}\n\nconst messages = [\n  { role: 'system', content: sysLines.join(' ') },\n  ...history,\n  { role: 'user', content: message }\n];\n\nreturn [{ json: {\n  openai_body: { model: 'gpt-4o', messages, tools: TOOLS, tool_choice: 'auto', max_tokens: 900, temperature: 0.7 },\n  messages,\n  brand_id: brandId,\n} }];"
+      }
+    },
+    {
+      "id": "da-oai1",
+      "name": "OpenAI First",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        680,
+        400
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify($json.openai_body) }}",
+        "options": {}
+      },
+      "credentials": {
+        "openAiApi": {
+          "id": "55MhlttgGrCNE3gx",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "id": "da-handle",
+      "name": "Handle & Execute",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        900,
+        400
+      ],
+      "parameters": {
+        "jsCode": "const oai = $input.first().json;\nconst ctx = $('Build Context').first().json;\nconst choice = oai.choices?.[0];\nconst finishReason = choice?.finish_reason;\n\nif (finishReason === 'stop' || !choice?.message?.tool_calls?.length) {\n  return [{ json: { done: true, reply: choice?.message?.content || 'Pronto!', actions: [] } }];\n}\n\nconst toolCalls = choice.message.tool_calls;\nconst actions = [];\nconst toolResults = [];\n\nconst TOOL_PATHS = {\n  generate_post: 'generate-post',\n  generate_visual: 'generate-visual',\n  generate_carousel: 'generate-carousel',\n  repurpose_content: 'repurpose-content',\n  weekly_batch: 'weekly-batch',\n  generate_bio: 'generate-bio',\n  extract_brand_style: 'extract-brand-style',\n};\n\nfor (const tc of toolCalls) {\n  const fnName = tc.function.name;\n  let args;\n  try { args = JSON.parse(tc.function.arguments || '{}'); } catch { args = {}; }\n  const path = TOOL_PATHS[fnName];\n\n  if (!path) {\n    toolResults.push({ tool_call_id: tc.id, role: 'tool', content: 'Ferramenta desconhecida.' });\n    continue;\n  }\n\n  const payload = { ...args, brand_id: ctx.brand_id };\n\n  try {\n    const res = await fetch(`http://localhost:5678/webhook/${path}`, {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json' },\n      body: JSON.stringify(payload),\n      signal: AbortSignal.timeout(90000),\n    });\n    const output = await res.json();\n    actions.push({ workflowId: fnName.replace(/_/g, '-'), output });\n    toolResults.push({ tool_call_id: tc.id, role: 'tool', content: JSON.stringify(output).slice(0, 3000) });\n  } catch (e) {\n    const msg = `Erro ao executar ${fnName}: ${e.message}`;\n    actions.push({ workflowId: fnName.replace(/_/g, '-'), output: { message: msg } });\n    toolResults.push({ tool_call_id: tc.id, role: 'tool', content: msg });\n  }\n}\n\nconst secondMessages = [ ...ctx.messages, choice.message, ...toolResults ];\n\nreturn [{ json: {\n  done: false,\n  second_body: { model: 'gpt-4o', messages: secondMessages, max_tokens: 500, temperature: 0.7 },\n  actions,\n} }];"
+      }
+    },
+    {
+      "id": "da-if",
+      "name": "Done?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1120,
+        400
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-done",
+              "leftValue": "={{ $json.done }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "da-format-direct",
+      "name": "Format Direct",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1340,
+        280
+      ],
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nreturn [{ json: { reply: d.reply || '', actions: d.actions || [] } }];"
+      }
+    },
+    {
+      "id": "da-oai2",
+      "name": "OpenAI Second",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1340,
+        520
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify($json.second_body) }}",
+        "options": {}
+      },
+      "credentials": {
+        "openAiApi": {
+          "id": "55MhlttgGrCNE3gx",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "id": "da-extract",
+      "name": "Extract Final",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1560,
+        520
+      ],
+      "parameters": {
+        "jsCode": "const oai = $input.first().json;\nconst toolData = $('Handle & Execute').first().json;\nconst text = oai.choices?.[0]?.message?.content || 'Feito!';\nreturn [{ json: { reply: text, actions: toolData.actions || [] } }];"
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Build Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Context": {
+      "main": [
+        [
+          {
+            "node": "OpenAI First",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI First": {
+      "main": [
+        [
+          {
+            "node": "Handle & Execute",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle & Execute": {
+      "main": [
+        [
+          {
+            "node": "Done?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Done?": {
+      "main": [
+        [
+          {
+            "node": "Format Direct",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "OpenAI Second",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Second": {
+      "main": [
+        [
+          {
+            "node": "Extract Final",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "versionId": "1"
+}

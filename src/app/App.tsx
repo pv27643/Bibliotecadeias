@@ -1,13 +1,17 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Zap, Workflow, FileText, Library, Plus, X, Sparkles, Layout, Box, Smartphone, ClipboardList, Linkedin, Mail, BarChart3, Edit, Trash2, Star, ArrowLeft, Search, MoreVertical, Clock, ArrowRight, CheckCircle2, Check, Copy, MessageSquare, Circle, Video, Image, PenTool, Settings } from 'lucide-react';
+import { Zap, Workflow, FileText, Library, Plus, X, Sparkles, Layout, Box, Smartphone, ClipboardList, Linkedin, Mail, BarChart3, Edit, Trash2, Star, ArrowLeft, Search, MoreVertical, Clock, ArrowRight, CheckCircle2, Check, Copy, MessageSquare, Circle, Video, Image, PenTool, Settings, History, Play, RefreshCw } from 'lucide-react';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
 import { useApp } from '../hooks/useApp';
 import { getCategoryIcon, getWorkflowIcon, getToolIcon } from '../utils/iconHelpers';
 import { supabase } from '../utils/supabase/client';
 import ImageUpload from './components/ImageUpload';
-import BrandPostGenerator from './components/BrandPostGenerator';
-import WorkflowExecutor from './components/WorkflowExecutor';
-import N8nConfigModal from './components/N8nConfigModal';
+import WorkflowRunner from './components/WorkflowRunner';
+import BrandSelector from './components/BrandSelector';
+import HistoryList from './components/HistoryList';
+import DesignAgentChat from './components/DesignAgentChat';
+import { WORKFLOWS } from '../config/workflows.config';
+import type { WorkflowConfig } from '../config/workflows.config';
+import type { BrandStyleProfile } from '../types/brand';
 import {
   DEFAULT_PROMPT_CATEGORIES,
   DEFAULT_PROMPT_SUBCATEGORIES,
@@ -23,28 +27,9 @@ import {
   getPromptRootSubcategories,
   getPromptSubcategory
 } from '../utils/promptCategoryHelpers';
-import {
-  loadToolsFromSupabase,
-  loadPromptsFromSupabase,
-  loadWorkflowsFromSupabase,
-  loadFavoritesFromSupabase,
-  syncToolsToSupabase,
-  syncPromptsToSupabase,
-  syncWorkflowsToSupabase,
-  syncCategoriesToSupabase,
-  syncSubcategoriesToSupabase,
-  loadToolCategoriesWithDefaults,
-  loadPromptCategoriesWithDefaults,
-  loadWorkflowCategoriesWithDefaults,
-  loadSubcategoriesWithDefaults,
-  migrateLocalStorageToSupabase,
-  clearLocalStorageForSupabase,
-  addFavoriteToSupabase,
-  removeFavoriteFromSupabase,
-} from '../utils/supabase/sync';
 
 type View = 'biblioteca' | 'prompts' | 'workflows';
-type Modal = 'categoria' | 'ferramenta' | 'prompt' | 'workflow' | null;
+type Modal = 'categoria' | 'ferramenta' | 'prompt' | null;
 const DEFAULT_PROMPT_CATEGORY = DEFAULT_PROMPT_CATEGORIES[1] || PROMPT_ROOT_CATEGORY;
 
 export interface Tool {
@@ -85,6 +70,8 @@ export interface WorkflowType {
   category?: string;
   steps: WorkflowStep[];
   webhookUrl?: string;
+  webhookPath?: string;
+  isN8nWorkflow?: boolean;
   inputs?: any[];
   image?: string;
   favorite?: boolean;
@@ -95,12 +82,11 @@ export default function App() {
   const {
     tools, setTools,
     prompts, setPrompts,
-    workflows, setWorkflows,
     toolCategories, setToolCategories,
     promptCategories, setPromptCategories,
-    workflowCategories, setWorkflowCategories,
     subcategoriesMap, setSubcategoriesMap,
-    saveTools, savePrompts, saveWorkflows,
+    isLoading,
+    saveTools, savePrompts,
     saveCategories, saveSubcategories,
     toggleFavorite, getFavoritesCount
   } = useApp();
@@ -110,15 +96,15 @@ export default function App() {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [showIconPicker, setShowIconPicker] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState<{ type: 'tool' | 'prompt' | 'workflow'; id: string } | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<{ type: 'tool' | 'prompt'; id: string } | null>(null);
 
   // Editing / modal state
   const [editingToolId, setEditingToolId] = useState<string | null>(null);
   const [newToolName, setNewToolName] = useState('');
   const [newToolDescription, setNewToolDescription] = useState('');
   const [newToolLink, setNewToolLink] = useState('');
-  const [newToolCategory, setNewToolCategory] = useState('Texto');
-  const [newToolSubcategory, setNewToolSubcategory] = useState<string | undefined>('Copywriting');
+  const [newToolCategory, setNewToolCategory] = useState('General AI');
+  const [newToolSubcategory, setNewToolSubcategory] = useState<string | undefined>('');
   const [newToolIcon, setNewToolIcon] = useState('sparkles');
   const [newToolBadges, setNewToolBadges] = useState<string[]>(['Free']);
   const [newToolTags, setNewToolTags] = useState('');
@@ -126,19 +112,18 @@ export default function App() {
   const [editingPromptId, setEditingPromptId] = useState<string | null>(null);
   const [newPromptTitle, setNewPromptTitle] = useState('');
   const [newPromptDescription, setNewPromptDescription] = useState('');
-  const [newPromptContent, setNewPromptContent] = useState('');
+  const [newPromptWhenToUse, setNewPromptWhenToUse] = useState('');
+  const [newPromptHowToUse, setNewPromptHowToUse] = useState('');
+  const [newPromptInputs, setNewPromptInputs] = useState('');
+  const [newPromptText, setNewPromptText] = useState('');
+  const [newPromptRestrictions, setNewPromptRestrictions] = useState('');
+  const [newPromptExpectedOutput, setNewPromptExpectedOutput] = useState('');
+  const [newPromptVariations, setNewPromptVariations] = useState('');
   const [newPromptImage, setNewPromptImage] = useState('');
   const [newPromptCategory, setNewPromptCategory] = useState(DEFAULT_PROMPT_CATEGORY);
   const [newPromptSubcategory, setNewPromptSubcategory] = useState<string | undefined>('');
   const [newPromptModels, setNewPromptModels] = useState('ChatGPT');
 
-  const [editingWorkflowId, setEditingWorkflowId] = useState<string | null>(null);
-  const [newWorkflowTitle, setNewWorkflowTitle] = useState('');
-  const [newWorkflowDescription, setNewWorkflowDescription] = useState('');
-  const [newWorkflowImage, setNewWorkflowImage] = useState('');
-  const [newWorkflowCategory, setNewWorkflowCategory] = useState('Marketing');
-  const [newWorkflowWebhookUrl, setNewWorkflowWebhookUrl] = useState('');
-  const [newWorkflowInputs, setNewWorkflowInputs] = useState<any[]>([]);
 
   const [activeModal, setActiveModal] = useState<Modal>(null);
   const [activeTab, setActiveTab] = useState<'item' | 'categoria' | 'subcategoria'>('item');
@@ -153,16 +138,27 @@ export default function App() {
   const [selectedPromptSubcategory, setSelectedPromptSubcategory] = useState<string | null>(null);
   const [searchPromptTerm, setSearchPromptTerm] = useState('');
   const [selectedPrompt, setSelectedPrompt] = useState<Prompt | null>(null);
+  const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
 
-  const [selectedWorkflowCategory, setSelectedWorkflowCategory] = useState<string | null>(null);
-  const [searchWorkflowTerm, setSearchWorkflowTerm] = useState('');
-  const [showN8nConfig, setShowN8nConfig] = useState(false);
-  const [showBrandGenerator, setShowBrandGenerator] = useState(false);
-  const [executingWorkflow, setExecutingWorkflow] = useState<WorkflowType | null>(null);
+
+
+  // Brand & AI workflows state
+  const [activeBrand, setActiveBrand] = useState<BrandStyleProfile | null>(null);
+  const [activeWorkflowConfig, setActiveWorkflowConfig] = useState<WorkflowConfig | null>(null);
+  const [workflowsSubTab, setWorkflowsSubTab] = useState<'biblioteca' | 'assistente'>('biblioteca');
+  const [toolFormError, setToolFormError] = useState('');
+  const [promptFormError, setPromptFormError] = useState('');
+  const [globalSearch, setGlobalSearch] = useState('');
+  const [showPromptDetails, setShowPromptDetails] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newSubcategoryName, setNewSubcategoryName] = useState('');
   const [categoryTab, setCategoryTab] = useState<'categoria' | 'subcategoria'>('categoria');
   const [selectedCategoryForSubcategory, setSelectedCategoryForSubcategory] = useState<string>('');
+
+  useEffect(() => {
+    setFieldValues({});
+    setShowPromptDetails(false);
+  }, [selectedPrompt]);
 
   const promptRootSubcategories = useMemo(
     () => getPromptRootSubcategories(promptCategories, subcategoriesMap),
@@ -176,15 +172,55 @@ export default function App() {
     () => getPromptMainCategories(promptCategories, promptRootSubcategories),
     [promptCategories, promptRootSubcategories]
   );
-  const getProtectedCategories = (type: 'tool' | 'prompt' | 'workflow') => (
-    type === 'tool'
-      ? PROTECTED_TOOL_CATEGORIES
-      : type === 'prompt'
-        ? PROTECTED_PROMPT_CATEGORIES
-        : PROTECTED_WORKFLOW_CATEGORIES
+  const getProtectedCategories = (type: 'tool' | 'prompt') => (
+    type === 'tool' ? PROTECTED_TOOL_CATEGORIES : PROTECTED_PROMPT_CATEGORIES
   );
-  const isProtectedCategory = (type: 'tool' | 'prompt' | 'workflow', category: string) =>
+  const isProtectedCategory = (type: 'tool' | 'prompt', category: string) =>
     getProtectedCategories(type).includes(category);
+
+  const PROMPT_SECTIONS = ['Objetivo', 'Quando usar', 'Como usar', 'Inputs a preencher', 'Prompt', 'Restrições obrigatórias', 'Output esperado', 'Variações'] as const;
+
+  const parsePromptContent = (content: string): Record<string, string> => {
+    const sections: Record<string, string> = {};
+    let currentKey = '';
+    const currentLines: string[] = [];
+    for (const line of content.split('\n')) {
+      if ((PROMPT_SECTIONS as readonly string[]).includes(line.trim())) {
+        if (currentKey) sections[currentKey] = currentLines.join('\n').trim();
+        currentKey = line.trim();
+        currentLines.length = 0;
+      } else {
+        currentLines.push(line);
+      }
+    }
+    if (currentKey) sections[currentKey] = currentLines.join('\n').trim();
+    if (!currentKey && content.trim()) sections['Prompt'] = content.trim();
+    return sections;
+  };
+
+  const buildPromptContent = (s: Record<string, string>): string =>
+    (['Quando usar', 'Como usar', 'Inputs a preencher', 'Prompt', 'Restrições obrigatórias', 'Output esperado', 'Variações'] as const)
+      .filter(k => s[k]?.trim())
+      .map(k => `${k}\n${s[k]}`)
+      .join('\n\n');
+
+  const resetPromptForm = () => {
+    setNewPromptTitle('');
+    setNewPromptDescription('');
+    setNewPromptWhenToUse('');
+    setNewPromptHowToUse('');
+    setNewPromptInputs('');
+    setNewPromptText('');
+    setNewPromptRestrictions('');
+    setNewPromptExpectedOutput('');
+    setNewPromptVariations('');
+    setNewPromptImage('');
+    setNewPromptCategory(DEFAULT_PROMPT_CATEGORY);
+    setNewPromptSubcategory('');
+    setNewPromptModels('ChatGPT');
+    setEditingPromptId(null);
+    setPromptFormError('');
+  };
 
   useEffect(() => {
     if (!selectedCategoryForSubcategory) {
@@ -194,16 +230,12 @@ export default function App() {
     }
   }, [activeModal, promptMainCategories, toolCategories, selectedCategoryForSubcategory]);
 
-  // Guardar tools, prompts e workflows no localStorage sempre que mudarem
-  // Removida persistência local de tools/prompts/workflows. Supabase agora é a fonte de verdade para esses dados.
 
-  const getCategoryCount = (category: string, type: 'tool' | 'prompt' | 'workflow') => {
+  const getCategoryCount = (category: string, type: 'tool' | 'prompt') => {
     if (type === 'tool') {
       return tools.filter(tool => tool.category === category).length;
-    } else if (type === 'prompt') {
-      return prompts.filter(prompt => getPromptCategory(prompt) === category).length;
     } else {
-      return workflows.filter(workflow => workflow.category === category).length;
+      return prompts.filter(prompt => getPromptCategory(prompt) === category).length;
     }
   };
 
@@ -219,97 +251,46 @@ export default function App() {
 
   
 
-  const executeWorkflow = (workflow: WorkflowType) => {
-    const normalizedWorkflow = normalizeWorkflowWebhook(workflow);
+  const copyPromptToClipboard = async (content: string) => {
+    const filteredContent = content
+      .split('\n')
+      .filter(line => !line.trim().startsWith('Model:') && !line.trim().startsWith('Casos de Uso:'))
+      .join('\n')
+      .trim();
 
-    // Workflow especial: Brand Post Generator — mantém modal dedicado
-    if (normalizedWorkflow.id === 'brand-post-generator') {
-      setShowBrandGenerator(true);
-      setExecutingWorkflow(normalizedWorkflow);
-      return;
-    }
-
-    // Workflow com formulário n8n externo (abre em nova aba)
-    if (normalizedWorkflow.id === '5') {
-      window.open('https://ivannnnnn.app.n8n.cloud/webhook/generate-product-photo', '_blank');
-      return;
-    }
-
-    // Para todos os outros: abre o WorkflowExecutor real
-    setExecutingWorkflow(normalizedWorkflow);
-  };
-
-  const copyPromptToClipboard = (content: string) => {
     try {
-      // Filtrar linhas: remover "Model:" e "Casos de Uso:"
-      const lines = content.split('\n');
-      const filteredLines = lines.filter(line => {
-        const trimmed = line.trim();
-        return !trimmed.startsWith('Model:') && !trimmed.startsWith('Casos de Uso:');
-      });
-      const filteredContent = filteredLines.join('\n').trim();
-
-      // Método alternativo que funciona mesmo quando a API está bloqueada
+      await navigator.clipboard.writeText(filteredContent);
+    } catch {
       const textarea = document.createElement('textarea');
       textarea.value = filteredContent;
-      textarea.style.position = 'fixed';
-      textarea.style.opacity = '0';
+      textarea.style.cssText = 'position:fixed;opacity:0';
       document.body.appendChild(textarea);
       textarea.select();
       document.execCommand('copy');
       document.body.removeChild(textarea);
-
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error('Erro ao copiar:', err);
     }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   // Upload de imagem para Supabase Storage
   const uploadImageToSupabase = async (base64Image: string): Promise<string | null> => {
     try {
-      console.log('📤 Iniciando upload para Supabase...');
-
-      // Converter base64 para Blob
       const base64Data = base64Image.split(',')[1];
       const mimeType = base64Image.split(',')[0].split(':')[1].split(';')[0];
-      const byteCharacters = atob(base64Data);
-      const byteNumbers = new Array(byteCharacters.length);
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
-      }
-      const byteArray = new Uint8Array(byteNumbers);
+      const byteArray = new Uint8Array(atob(base64Data).split('').map(c => c.charCodeAt(0)));
       const blob = new Blob([byteArray], { type: mimeType });
-
-      // Gerar nome único para o ficheiro
       const fileName = `prompt-${Date.now()}-${Math.random().toString(36).substring(7)}.${mimeType.split('/')[1]}`;
 
-      console.log('📦 Tamanho do ficheiro:', (blob.size / 1024 / 1024).toFixed(2), 'MB');
-
-      // Fazer upload para Supabase Storage
-      const { data, error } = await supabase.storage
+      const { error } = await supabase.storage
         .from('prompt-images')
-        .upload(fileName, blob, {
-          contentType: mimeType,
-          cacheControl: '3600',
-          upsert: false
-        });
+        .upload(fileName, blob, { contentType: mimeType, cacheControl: '3600', upsert: false });
 
-      if (error) {
-        console.error('❌ Erro ao fazer upload:', error);
-        return null;
-      }
+      if (error) return null;
 
-      // Obter URL pública da imagem
-      const { data: publicUrlData } = supabase.storage
-        .from('prompt-images')
-        .getPublicUrl(fileName);
-
-      console.log('✅ Imagem guardada:', publicUrlData.publicUrl);
+      const { data: publicUrlData } = supabase.storage.from('prompt-images').getPublicUrl(fileName);
       return publicUrlData.publicUrl;
-    } catch (error) {
-      console.error('❌ Erro ao processar imagem:', error);
+    } catch {
       return null;
     }
   };
@@ -327,7 +308,7 @@ export default function App() {
     }
   };
 
-  const handleDelete = (type: 'tool' | 'prompt' | 'workflow', id: string) => {
+  const handleDelete = (type: 'tool' | 'prompt', id: string) => {
     setShowDeleteConfirm({ type, id });
     setOpenMenuId(null);
   };
@@ -338,56 +319,36 @@ export default function App() {
     const { type, id } = showDeleteConfirm;
 
     if (type === 'tool') {
-      const updatedTools = tools.filter(t => t.id !== id);
-      setTools(updatedTools);
-      await saveTools(updatedTools);
-      // Limpar localStorage para evitar que reapareza após npm run dev
-      localStorage.setItem('tools', JSON.stringify(updatedTools));
+      await saveTools(tools.filter(t => t.id !== id));
     } else if (type === 'prompt') {
-      const updatedPrompts = prompts.filter(p => p.id !== id);
-      setPrompts(updatedPrompts);
-      await savePrompts(updatedPrompts);
-      // Limpar localStorage para evitar que reapareza após npm run dev
-      localStorage.setItem('prompts', JSON.stringify(updatedPrompts));
-    } else if (type === 'workflow') {
-      const updatedWorkflows = workflows.filter(w => w.id !== id);
-      setWorkflows(updatedWorkflows);
-      await saveWorkflows(updatedWorkflows);
-      // Limpar localStorage para evitar que reapareza após npm run dev
-      localStorage.setItem('workflows', JSON.stringify(updatedWorkflows));
+      await savePrompts(prompts.filter(p => p.id !== id));
     }
 
     setShowDeleteConfirm(null);
   };
 
-  const handleEdit = (type: 'tool' | 'prompt' | 'workflow', id: string) => {
+  const handleEdit = (type: 'tool' | 'prompt', id: string) => {
     setOpenMenuId(null);
 
     if (type === 'prompt') {
       const prompt = prompts.find(p => p.id === id);
       if (prompt) {
+        const sections = parsePromptContent(prompt.content);
         setEditingPromptId(id);
         setNewPromptTitle(prompt.title);
-        setNewPromptDescription(prompt.description);
-        setNewPromptContent(prompt.content);
+        setNewPromptDescription(prompt.description || sections['Objetivo'] || '');
+        setNewPromptWhenToUse(sections['Quando usar'] || '');
+        setNewPromptHowToUse(sections['Como usar'] || '');
+        setNewPromptInputs(sections['Inputs a preencher'] || '');
+        setNewPromptText(sections['Prompt'] || '');
+        setNewPromptRestrictions(sections['Restrições obrigatórias'] || '');
+        setNewPromptExpectedOutput(sections['Output esperado'] || '');
+        setNewPromptVariations(sections['Variações'] || '');
         setNewPromptImage(prompt.image || '');
         setNewPromptCategory(getPromptCategory(prompt));
         setNewPromptSubcategory(getPromptSubcategory(prompt) || getPromptCategorySubcategories(getPromptCategory(prompt))[0] || '');
         setNewPromptModels(prompt.models.join(', '));
         setActiveModal('prompt');
-        setActiveTab('item');
-      }
-    } else if (type === 'workflow') {
-      const workflow = workflows.find(w => w.id === id);
-      if (workflow) {
-        setEditingWorkflowId(id);
-        setNewWorkflowTitle(workflow.title);
-        setNewWorkflowDescription(workflow.description);
-        setNewWorkflowImage(workflow.image || '');
-        setNewWorkflowCategory(workflow.category);
-        setNewWorkflowWebhookUrl(workflow.webhookUrl || '');
-        setNewWorkflowInputs(workflow.inputs || []);
-        setActiveModal('workflow');
         setActiveTab('item');
       }
     } else if (type === 'tool') {
@@ -442,18 +403,12 @@ export default function App() {
           await saveSubcategories(updatedSubcategories);
         }
       }
-    } else if (activeModal === 'workflow') {
-      if (!workflowCategories.includes(categoryName)) {
-        const updated = [...workflowCategories, categoryName];
-        setWorkflowCategories(updated);
-        await saveCategories('workflow', updated);
-      }
     }
 
     setNewCategoryName('');
   };
 
-  const handleDeleteCategory = async (type: 'tool' | 'prompt' | 'workflow', categoryName: string) => {
+  const handleDeleteCategory = async (type: 'tool' | 'prompt', categoryName: string) => {
     if (isProtectedCategory(type, categoryName)) return;
 
     if (type === 'tool') {
@@ -479,13 +434,6 @@ export default function App() {
       if (selectedPromptCategory === categoryName) {
         setSelectedPromptCategory(null);
         setSelectedPromptSubcategory(null);
-      }
-    } else if (type === 'workflow') {
-      const updated = workflowCategories.filter(cat => cat !== categoryName);
-      setWorkflowCategories(updated);
-      await saveCategories('workflow', updated);
-      if (selectedWorkflowCategory === categoryName) {
-        setSelectedWorkflowCategory(null);
       }
     }
   };
@@ -535,8 +483,9 @@ export default function App() {
   };
 
   const handleAddTool = async () => {
+    setToolFormError('');
     if (!newToolName.trim() || !newToolDescription.trim()) {
-      alert('Por favor, preencha o nome e a descrição');
+      setToolFormError('Preenche o nome e a descrição.');
       return;
     }
 
@@ -569,158 +518,67 @@ export default function App() {
     setNewToolName('');
     setNewToolDescription('');
     setNewToolLink('');
-    setNewToolCategory('Texto');
-    setNewToolSubcategory('Copywriting');
+    setNewToolCategory('General AI');
+    setNewToolSubcategory('');
     setNewToolIcon('sparkles');
     setNewToolBadges(['Free']);
     setNewToolTags('');
+    setToolFormError('');
     setShowIconPicker(false);
     setEditingToolId(null);
     setActiveModal(null);
   };
 
   const handleAddPrompt = async () => {
-    if (!newPromptTitle.trim() || !newPromptDescription.trim() || !newPromptContent.trim()) {
-      alert('Por favor, preencha o título, descrição e conteúdo');
+    setPromptFormError('');
+    if (!newPromptTitle.trim() || !newPromptDescription.trim() || !newPromptText.trim()) {
+      setPromptFormError('Preenche o título, objetivo e o prompt.');
       return;
     }
-
     if (!newPromptModels.trim()) {
-      alert('Por favor, indique pelo menos uma IA/modelo');
+      setPromptFormError('Indica pelo menos uma IA/modelo.');
       return;
     }
 
     const modelsArray = newPromptModels.split(',').map(m => m.trim()).filter(m => m.length > 0);
+    const builtContent = buildPromptContent({
+      'Quando usar': newPromptWhenToUse,
+      'Como usar': newPromptHowToUse,
+      'Inputs a preencher': newPromptInputs,
+      'Prompt': newPromptText,
+      'Restrições obrigatórias': newPromptRestrictions,
+      'Output esperado': newPromptExpectedOutput,
+      'Variações': newPromptVariations,
+    });
 
-    // Upload de imagem para Supabase se existir e for base64
     let imageUrl = newPromptImage;
     if (newPromptImage && newPromptImage.startsWith('data:')) {
-      console.log('📸 Imagem detectada, enviando para Supabase Storage...');
       const uploadedUrl = await uploadImageToSupabase(newPromptImage);
       if (uploadedUrl) {
         imageUrl = uploadedUrl;
-        console.log('✅ URL da imagem:', uploadedUrl);
       } else {
-        console.warn('⚠️ Falha no upload. A imagem não será guardada.');
-        alert('Erro ao fazer upload da imagem para o Supabase. Verifica se o bucket "prompt-images" foi criado e é público.');
-        imageUrl = ''; // Limpar imagem se falhar
-      }
-    }
-
-    let updatedPrompts;
-
-    if (editingPromptId) {
-      // Modo edição: atualizar prompt existente
-      updatedPrompts = prompts.map(p =>
-        p.id === editingPromptId
-          ? {
-            ...p,
-            title: newPromptTitle,
-            description: newPromptDescription,
-            category: newPromptCategory,
-            subcategory: newPromptSubcategory || undefined,
-            models: modelsArray,
-            content: newPromptContent,
-            image: imageUrl || undefined
-          }
-          : p
-      );
-    } else {
-      // Modo criação: adicionar novo prompt
-      const newPrompt: Prompt = {
-        id: Date.now().toString(),
-        title: newPromptTitle,
-        description: newPromptDescription,
-        category: newPromptCategory,
-        subcategory: newPromptSubcategory || undefined,
-        models: modelsArray,
-        content: newPromptContent,
-        image: imageUrl || undefined,
-        favorite: false
-      };
-      updatedPrompts = [...prompts, newPrompt];
-    }
-
-    setPrompts(updatedPrompts);
-    await savePrompts(updatedPrompts);
-
-    // Limpar form
-    setNewPromptTitle('');
-    setNewPromptDescription('');
-    setNewPromptContent('');
-    setNewPromptImage('');
-    setNewPromptCategory(DEFAULT_PROMPT_CATEGORY);
-    setNewPromptSubcategory('');
-    setNewPromptModels('ChatGPT, Claude');
-    setEditingPromptId(null);
-    setActiveModal(null);
-  };
-
-  const handleAddWorkflow = async () => {
-    if (!newWorkflowTitle.trim() || !newWorkflowDescription.trim()) {
-      alert('Por favor, preencha o título e a descrição');
-      return;
-    }
-
-    // Upload de imagem para Supabase se existir e for base64
-    let imageUrl = newWorkflowImage;
-    if (newWorkflowImage && newWorkflowImage.startsWith('data:')) {
-      console.log('📸 Imagem detectada, enviando para Supabase Storage...');
-      const uploadedUrl = await uploadImageToSupabase(newWorkflowImage);
-      if (uploadedUrl) {
-        imageUrl = uploadedUrl;
-        console.log('✅ URL da imagem:', uploadedUrl);
-      } else {
-        console.warn('⚠️ Falha no upload. A imagem não será guardada.');
-        alert('Erro ao fazer upload da imagem para o Supabase. Verifica se o bucket "prompt-images" foi criado e é público.');
+        setPromptFormError('Erro ao fazer upload da imagem. Verifica se o bucket "prompt-images" está criado e é público.');
         imageUrl = '';
       }
     }
 
-    let updatedWorkflows;
+    const promptData = {
+      title: newPromptTitle,
+      description: newPromptDescription,
+      category: newPromptCategory,
+      subcategory: newPromptSubcategory || undefined,
+      models: modelsArray,
+      content: builtContent,
+      image: imageUrl || undefined,
+    };
 
-    if (editingWorkflowId) {
-      // Modo edição: atualizar workflow existente
-      updatedWorkflows = workflows.map(w =>
-        w.id === editingWorkflowId
-          ? {
-            ...w,
-            title: newWorkflowTitle,
-            description: newWorkflowDescription,
-            category: newWorkflowCategory,
-            webhookUrl: newWorkflowWebhookUrl.trim() || undefined,
-            image: imageUrl || undefined,
-            inputs: newWorkflowInputs.length > 0 ? newWorkflowInputs : undefined,
-          }
-          : w
-      );
-    } else {
-      // Modo criação: adicionar novo workflow
-      const newWorkflow: WorkflowType = {
-        id: Date.now().toString(),
-        title: newWorkflowTitle,
-        description: newWorkflowDescription,
-        category: newWorkflowCategory,
-        steps: [],
-        image: imageUrl || undefined,
-        webhookUrl: newWorkflowWebhookUrl.trim() || undefined,
-        inputs: newWorkflowInputs.length > 0 ? newWorkflowInputs : undefined,
-        favorite: false
-      };
-      updatedWorkflows = [...workflows, newWorkflow];
-    }
+    const updatedPrompts = editingPromptId
+      ? prompts.map(p => p.id === editingPromptId ? { ...p, ...promptData } : p)
+      : [...prompts, { id: Date.now().toString(), favorite: false, ...promptData }];
 
-    setWorkflows(updatedWorkflows);
-    await saveWorkflows(updatedWorkflows);
-
-    // Limpar form
-    setNewWorkflowTitle('');
-    setNewWorkflowDescription('');
-    setNewWorkflowImage('');
-    setNewWorkflowCategory('Marketing');
-    setNewWorkflowWebhookUrl('');
-    setNewWorkflowInputs([]);
-    setEditingWorkflowId(null);
+    setPrompts(updatedPrompts);
+    await savePrompts(updatedPrompts);
+    resetPromptForm();
     setActiveModal(null);
   };
 
@@ -784,8 +642,28 @@ export default function App() {
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
         <div className="max-w-7xl mx-auto p-8">
+
+          {/* Loading skeleton */}
+          {isLoading && (
+            <div className="animate-pulse">
+              <div className="h-8 bg-gray-800/60 rounded-lg w-48 mb-3" />
+              <div className="h-4 bg-gray-800/40 rounded w-80 mb-10" />
+              <div className="grid grid-cols-4 gap-4">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <div key={i} className="bg-[#151921] border border-gray-800/50 rounded-lg p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-12 h-12 bg-gray-800/60 rounded-lg" />
+                      <div className="w-8 h-6 bg-gray-800/60 rounded" />
+                    </div>
+                    <div className="h-4 bg-gray-800/60 rounded w-3/4" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Biblioteca de IAs */}
-          {currentView === 'biblioteca' && (
+          {!isLoading && currentView === 'biblioteca' && (
             <>
               <div className="mb-8">
                 <h1 className="text-3xl font-semibold mb-2">
@@ -843,12 +721,12 @@ export default function App() {
                       Favoritos ({getFavoritesCount('tool')})
                     </button>
                   )}
-                  {selectedSubcategory && (
+                  {(selectedSubcategory || (!selectedCategory && !selectedSubcategory)) && (
                     <div className="relative flex-1 max-w-md">
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                       <input
                         type="text"
-                        placeholder="Pesquisar ferramentas..."
+                        placeholder={selectedSubcategory ? 'Pesquisar ferramentas...' : 'Pesquisa global em todas as ferramentas...'}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="w-full bg-gray-800/50 border border-gray-800 rounded-lg pl-10 pr-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-blue-600 transition-colors"
@@ -862,8 +740,8 @@ export default function App() {
                     setNewToolName('');
                     setNewToolDescription('');
                     setNewToolLink('');
-                    setNewToolCategory('Texto');
-                    setNewToolSubcategory('Copywriting');
+                    setNewToolCategory('General AI');
+                    setNewToolSubcategory('');
                     setNewToolIcon('sparkles');
                     setNewToolBadges(['Free']);
                     setNewToolTags('');
@@ -878,7 +756,49 @@ export default function App() {
                 </button>
               </div>
 
-              {!selectedCategory && !searchTerm ? (
+              {!selectedCategory && searchTerm ? (
+                <div className="grid grid-cols-3 gap-4">
+                  {(() => {
+                    const results = tools.filter(t =>
+                      t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                      t.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                      t.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+                    );
+                    if (results.length === 0) return (
+                      <div className="col-span-3 py-16 text-center">
+                        <Search className="w-10 h-10 text-gray-700 mx-auto mb-3" />
+                        <p className="text-gray-400 font-medium">Nenhuma ferramenta encontrada para "{searchTerm}"</p>
+                        <p className="text-sm text-gray-600 mt-1">Tenta outras palavras-chave</p>
+                      </div>
+                    );
+                    return results.map(tool => (
+                      <div key={tool.id} className="bg-[#151921] border border-gray-800/50 rounded-lg p-5 hover:border-gray-700 transition-colors relative">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="w-12 h-12 bg-gray-800/50 rounded-lg flex items-center justify-center text-gray-300">
+                            {getToolIcon(tool.icon)}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button onClick={e => { e.stopPropagation(); toggleFavorite('tool', tool.id); }} className="text-gray-500 hover:text-yellow-400 transition-colors">
+                              <Star className={`w-5 h-5 ${tool.favorite ? 'fill-yellow-400 text-yellow-400' : ''}`} />
+                            </button>
+                            {tool.badges.map((badge, idx) => (
+                              <span key={idx} className={`px-2.5 py-1 text-xs rounded font-medium ${getBadgeColor(badge)}`}>{badge}</span>
+                            ))}
+                          </div>
+                        </div>
+                        <h3 className="text-white font-semibold mb-1 text-base">{tool.name}</h3>
+                        <p className="text-xs text-gray-600 mb-2">{tool.category} › {tool.subcategory}</p>
+                        <p className="text-sm text-gray-400 leading-relaxed mb-4">{tool.description}</p>
+                        {tool.link && (
+                          <a href={tool.link} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 transition-colors text-sm flex items-center gap-1" onClick={e => e.stopPropagation()}>
+                            Visitar <ArrowRight className="w-3.5 h-3.5" />
+                          </a>
+                        )}
+                      </div>
+                    ));
+                  })()}
+                </div>
+              ) : !selectedCategory && !searchTerm ? (
                 <div className="grid grid-cols-4 gap-4">
                   {toolCategories.filter(cat => cat !== 'Todas').map(category => (
                     <div
@@ -984,10 +904,13 @@ export default function App() {
                         return categoryMatch && badgeMatch && searchMatch;
                       });
 
-                      if (selectedCategory === 'Favoritos') {
-                        // Removed debug logs for cleaner output
-                      }
-
+                      if (filtered.length === 0) return (
+                        <div className="col-span-3 py-16 text-center">
+                          <Search className="w-10 h-10 text-gray-700 mx-auto mb-3" />
+                          <p className="text-gray-400 font-medium">Nenhuma ferramenta encontrada</p>
+                          <p className="text-sm text-gray-600 mt-1">{searchTerm ? `Sem resultados para "${searchTerm}"` : 'Não há ferramentas nesta subcategoria ainda'}</p>
+                        </div>
+                      );
                       return filtered;
                     })().map(tool => (
                       <div key={tool.id} className="bg-[#151921] border border-gray-800/50 rounded-lg p-5 hover:border-gray-700 transition-colors relative">
@@ -1078,7 +1001,7 @@ export default function App() {
           )}
 
           {/* Meus Prompts */}
-          {currentView === 'prompts' && (
+          {!isLoading && currentView === 'prompts' && (
             <>
               <div className="mb-8">
                 <h1 className="text-3xl font-semibold mb-2">Meus Prompts</h1>
@@ -1117,12 +1040,12 @@ export default function App() {
                       Favoritos ({getFavoritesCount('prompt')})
                     </button>
                   )}
-                  {(selectedPromptSubcategory || selectedPromptCategory === 'Favoritos' || (selectedPromptCategory && getPromptCategorySubcategories(selectedPromptCategory).length === 0)) && (
+                  {(selectedPromptSubcategory || selectedPromptCategory === 'Favoritos' || !selectedPromptCategory || (selectedPromptCategory && getPromptCategorySubcategories(selectedPromptCategory).length === 0)) && (
                     <div className="relative flex-1 max-w-md">
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                       <input
                         type="text"
-                        placeholder="Pesquisar prompts..."
+                        placeholder={!selectedPromptCategory ? 'Pesquisa global em todos os prompts...' : 'Pesquisar prompts...'}
                         value={searchPromptTerm}
                         onChange={(e) => setSearchPromptTerm(e.target.value)}
                         className="w-full bg-gray-800/50 border border-gray-800 rounded-lg pl-10 pr-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-blue-600 transition-colors"
@@ -1145,7 +1068,34 @@ export default function App() {
                 </button>
               </div>
 
-              {!selectedPromptCategory && !searchPromptTerm ? (
+              {!selectedPromptCategory && searchPromptTerm ? (
+                <div className="grid grid-cols-3 gap-4">
+                  {(() => {
+                    const results = prompts.filter(p =>
+                      p.title.toLowerCase().includes(searchPromptTerm.toLowerCase()) ||
+                      p.description.toLowerCase().includes(searchPromptTerm.toLowerCase()) ||
+                      p.content.toLowerCase().includes(searchPromptTerm.toLowerCase())
+                    );
+                    if (results.length === 0) return (
+                      <div className="col-span-3 py-16 text-center">
+                        <Search className="w-10 h-10 text-gray-700 mx-auto mb-3" />
+                        <p className="text-gray-400 font-medium">Nenhum prompt encontrado para "{searchPromptTerm}"</p>
+                        <p className="text-sm text-gray-600 mt-1">Tenta outras palavras-chave</p>
+                      </div>
+                    );
+                    return results.map(prompt => (
+                      <div key={prompt.id} onClick={() => setSelectedPrompt(prompt)}
+                        className="bg-[#151921] border border-gray-800/50 rounded-lg p-5 hover:border-gray-700 transition-colors cursor-pointer">
+                        <span className="px-2.5 py-1 bg-blue-600/20 text-blue-400 text-xs rounded uppercase font-medium">
+                          {getPromptSubcategory(prompt) || getPromptCategory(prompt)}
+                        </span>
+                        <h3 className="text-white font-semibold mt-3 mb-2 text-base">{prompt.title}</h3>
+                        <p className="text-sm text-gray-400 leading-relaxed">{prompt.description}</p>
+                      </div>
+                    ));
+                  })()}
+                </div>
+              ) : !selectedPromptCategory && !searchPromptTerm ? (
                 <div className="grid grid-cols-4 gap-4">
                   {promptMainCategories.map(category => (
                     <div
@@ -1296,195 +1246,114 @@ export default function App() {
           )}
 
           {/* Workflows */}
-          {currentView === 'workflows' && (
+          {!isLoading && currentView === 'workflows' && (
             <>
-              <div className="mb-8">
-                <h1 className="text-3xl font-semibold mb-2">Workflows</h1>
-                <p className="text-gray-400">Automatize tarefas combinando múltiplas ferramentas de IA em cadeia.</p>
+              <div className="mb-6">
+                <h1 className="text-3xl font-semibold mb-1">Workflows</h1>
+                <p className="text-gray-400">Geradores de conteúdo com IA e ferramentas de marca.</p>
               </div>
 
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex gap-2 items-center flex-1">
-                  {selectedWorkflowCategory ? (
-                    <button
-                      onClick={() => {
-                        setSelectedWorkflowCategory(null);
-                        setSearchWorkflowTerm('');
+              {/* Sub-nav — 2 tabs */}
+              <div className="flex gap-1 mb-6 bg-[#0f1420] rounded-lg p-1 w-fit">
+                {([
+                  { key: 'biblioteca', label: 'Biblioteca', icon: <Sparkles className="w-3.5 h-3.5" /> },
+                  { key: 'assistente', label: 'Assistente de IA Design', icon: <MessageSquare className="w-3.5 h-3.5" /> },
+                ] as { key: typeof workflowsSubTab; label: string; icon: React.ReactNode }[]).map(tab => (
+                  <button
+                    key={tab.key}
+                    onClick={() => { setWorkflowsSubTab(tab.key); setActiveWorkflowConfig(null); }}
+                    className={`flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-medium transition-colors ${workflowsSubTab === tab.key ? 'bg-[#1a1f2e] text-white shadow' : 'text-gray-500 hover:text-gray-300'}`}
+                  >
+                    {tab.icon}{tab.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* ── Biblioteca ── */}
+              {workflowsSubTab === 'biblioteca' && (
+                <div className="flex gap-6">
+
+                  {/* Main column */}
+                  <div className="flex-1 min-w-0 space-y-8">
+
+                    {/* Brand selector */}
+                    <BrandSelector
+                      value={activeBrand}
+                      onChange={setActiveBrand}
+                      onCreateNew={() => {
+                        setActiveWorkflowConfig(WORKFLOWS.find(w => w.id === 'extract-brand-style') ?? null);
                       }}
-                      className="px-4 py-2 rounded-lg transition-colors bg-gray-800/50 text-gray-400 hover:bg-gray-800 flex items-center gap-2"
-                    >
-                      <ArrowLeft className="w-4 h-4" />
-                      Voltar
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => setSelectedWorkflowCategory('Favoritos')}
-                      className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${selectedWorkflowCategory === 'Favoritos'
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-800/50 text-gray-400 hover:bg-gray-800'
-                        }`}
-                    >
-                      <Star className="w-4 h-4" />
-                      Favoritos ({getFavoritesCount('workflow')})
-                    </button>
-                  )}
-                  {selectedWorkflowCategory && (
-                    <div className="relative flex-1 max-w-md">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                      <input
-                        type="text"
-                        placeholder="Pesquisar workflows..."
-                        value={searchWorkflowTerm}
-                        onChange={(e) => setSearchWorkflowTerm(e.target.value)}
-                        className="w-full bg-gray-800/50 border border-gray-800 rounded-lg pl-10 pr-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-blue-600 transition-colors"
+                    />
+
+                    {/* AI Generators — same card style as Biblioteca de IAs */}
+                    <div className="grid grid-cols-3 gap-4">
+                      {WORKFLOWS.map(wf => (
+                        <div
+                          key={wf.id}
+                          onClick={() => setActiveWorkflowConfig(wf)}
+                          className="bg-[#151921] border border-gray-800/50 rounded-lg p-5 hover:border-gray-700 transition-colors cursor-pointer"
+                        >
+                          <div className="flex items-start justify-between mb-4">
+                            <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${wf.color} flex items-center justify-center flex-shrink-0`}>
+                              <Play className="w-5 h-5 text-white" />
+                            </div>
+                          </div>
+                          <h3 className="text-white font-semibold mb-1 text-base">{wf.name}</h3>
+                          <p className="text-sm text-gray-400 leading-relaxed">{wf.description}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* History sidebar */}
+                  <div className="w-72 flex-shrink-0">
+                    <div className="sticky top-6 bg-[#151921] border border-gray-800/50 rounded-xl overflow-hidden">
+                      <div className="px-4 py-3.5 border-b border-gray-800/50 flex items-center gap-2">
+                        <History className="w-4 h-4 text-gray-500" />
+                        <span className="text-sm font-medium text-gray-300">Histórico</span>
+                        {activeBrand && (
+                          <span className="text-xs text-gray-500 truncate ml-auto">{activeBrand.brand_name}</span>
+                        )}
+                      </div>
+                      <div className="p-3">
+                        {activeBrand ? (
+                          <HistoryList brandId={activeBrand.id} />
+                        ) : (
+                          <div className="py-8 text-center">
+                            <History className="w-8 h-8 text-gray-700 mx-auto mb-2" />
+                            <p className="text-xs text-gray-600 leading-relaxed">Seleciona uma marca para ver o histórico de gerações.</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              )}
+
+              {/* ── Assistente de IA Design ── */}
+              {workflowsSubTab === 'assistente' && (
+                <div className="bg-[#151921] border border-gray-800/50 rounded-xl">
+                  <DesignAgentChat activeBrand={activeBrand} />
+                </div>
+              )}
+
+              {/* Modal: WorkflowRunner */}
+              {activeWorkflowConfig && (
+                <div
+                  className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+                  onClick={e => { if (e.target === e.currentTarget) setActiveWorkflowConfig(null); }}
+                >
+                  <div className="bg-[#1a1f2e] border border-gray-800/50 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+                    <div className="p-6">
+                      <WorkflowRunner
+                        key={activeWorkflowConfig.id}
+                        workflow={activeWorkflowConfig}
+                        activeBrand={activeBrand}
+                        onBack={() => setActiveWorkflowConfig(null)}
                       />
                     </div>
-                  )}
-                </div>
-                <button
-                  onClick={() => {
-                    setActiveModal('workflow');
-                    setActiveTab('item');
-                    setEditingWorkflowId(null);
-                    setNewWorkflowTitle('');
-                    setNewWorkflowDescription('');
-                    setNewWorkflowImage('');
-                    setNewWorkflowCategory('Marketing');
-                    setNewWorkflowWebhookUrl('');
-                    setNewWorkflowInputs([]);
-                  }}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap ml-4"
-                >
-                  <Plus className="w-4 h-4" />
-                  Novo Workflow
-                </button>
-                <button
-                  onClick={() => setShowN8nConfig(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors whitespace-nowrap"
-                  title="Configurar URL base do N8N para os 3 workflows"
-                >
-                  <Settings className="w-4 h-4" />
-                  Configurar N8N
-                </button>
-              </div>
-
-              {!selectedWorkflowCategory && !searchWorkflowTerm ? (
-                <div className="grid grid-cols-4 gap-4">
-                  {workflowCategories.filter(cat => cat !== 'Todos').map(category => (
-                    <div
-                      key={category}
-                      onClick={() => setSelectedWorkflowCategory(category)}
-                      className="bg-[#151921] border border-gray-800/50 rounded-lg p-6 hover:border-blue-600 transition-colors cursor-pointer"
-                    >
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="w-12 h-12 bg-gray-800/50 rounded-lg flex items-center justify-center text-gray-300">
-                          <Workflow className="w-6 h-6" />
-                        </div>
-                        <span className="text-2xl font-semibold text-gray-500">
-                          {getCategoryCount(category, 'workflow')}
-                        </span>
-                      </div>
-                      <h3 className="text-white font-semibold text-lg">{category}</h3>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="grid grid-cols-3 gap-4">
-                  {workflows.filter(workflow => {
-                    const categoryMatch = selectedWorkflowCategory === 'Favoritos' ? workflow.favorite === true : workflow.category === selectedWorkflowCategory;
-                    const searchMatch = !searchWorkflowTerm ||
-                      workflow.title.toLowerCase().includes(searchWorkflowTerm.toLowerCase()) ||
-                      workflow.description.toLowerCase().includes(searchWorkflowTerm.toLowerCase());
-                    return categoryMatch && searchMatch;
-                  }).map(workflow => (
-                    <div key={workflow.id} className="bg-[#151921] border border-gray-800/50 rounded-lg overflow-hidden hover:border-gray-700 transition-colors relative">
-                      {workflow.image && (
-                        <div className="w-full h-48 overflow-hidden bg-gray-800">
-                          <img src={workflow.image} alt={workflow.title} className="w-full h-full object-cover" />
-                        </div>
-                      )}
-                      <div className="p-5">
-                        <div className="mb-4 flex items-start justify-between">
-                          <span className="px-2.5 py-1 bg-blue-600/20 text-blue-400 text-xs rounded uppercase font-medium">
-                            {workflow.category}
-                          </span>
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleFavorite('workflow', workflow.id);
-                              }}
-                              className="text-gray-500 hover:text-yellow-400 transition-colors"
-                            >
-                              <Star className={`w-5 h-5 ${workflow.favorite === true ? 'fill-yellow-400 text-yellow-400' : ''}`} />
-                            </button>
-                            <div className="relative">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setOpenMenuId(openMenuId === `workflow-${workflow.id}` ? null : `workflow-${workflow.id}`);
-                                }}
-                                className="text-gray-500 hover:text-gray-300 transition-colors p-1"
-                              >
-                                <MoreVertical className="w-4 h-4" />
-                              </button>
-                              {openMenuId === `workflow-${workflow.id}` && (
-                                <div className="absolute right-0 top-8 bg-[#1a1f2e] border border-gray-800 rounded-lg shadow-xl z-10 py-1 min-w-[140px]">
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleEdit('workflow', workflow.id);
-                                    }}
-                                    className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-gray-800 flex items-center gap-2"
-                                  >
-                                    <Edit className="w-4 h-4" />
-                                    Editar
-                                  </button>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleDelete('workflow', workflow.id);
-                                    }}
-                                    className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-gray-800 flex items-center gap-2"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                    Eliminar
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                        <h3 className="text-white font-semibold mb-2 text-base">{workflow.title}</h3>
-                        <p className="text-sm text-gray-400 leading-relaxed mb-6">{workflow.description}</p>
-                        <div className="flex items-center gap-3 mb-6">
-                          {workflow.steps.map((step, idx) => (
-                            <div key={idx} className="flex items-center gap-2">
-                              <div className="w-8 h-8 bg-gray-800/50 rounded-lg flex items-center justify-center text-gray-400">
-                                {getWorkflowIcon(step.icon, 'sm')}
-                              </div>
-                              {idx < workflow.steps.length - 1 && (
-                                <ArrowRight className="w-3 h-3 text-gray-600" />
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Clock className="w-4 h-4 text-gray-500" />
-                            <span className="text-xs text-gray-500">Ativo</span>
-                          </div>
-                          <button
-                            onClick={() => executeWorkflow(workflow)}
-                            className="text-blue-400 hover:text-blue-300 transition-colors text-sm flex items-center gap-1"
-                          >
-                            Executar
-                            <ArrowRight className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                  </div>
                 </div>
               )}
             </>
@@ -1702,6 +1571,9 @@ export default function App() {
                     {editingToolId ? 'Salvar Alterações' : 'Adicionar Ferramenta'}
                   </button>
                 </div>
+                {toolFormError && (
+                  <p className="text-sm text-red-400 text-center -mt-2">{toolFormError}</p>
+                )}
               </div>
             ) : (
               <div className="space-y-4">
@@ -1749,17 +1621,22 @@ export default function App() {
                     <div>
                       <label className="block text-sm text-gray-400 mb-3">Categorias Existentes</label>
                       <div className="space-y-2 max-h-64 overflow-y-auto">
-                        {(activeModal === 'ferramenta' ? toolCategories :
-                          activeModal === 'prompt' ? promptCategories : workflowCategories)
+                        {(activeModal === 'ferramenta' ? toolCategories : promptCategories)
                           .filter(cat => cat !== 'Todas' && cat !== 'Todos')
                           .map(cat => (
                             <div key={cat} className="flex items-center justify-between bg-[#0f1420] border border-gray-800/50 rounded-lg px-4 py-2.5">
                               <span className="text-white">{cat}</span>
-                              {isProtectedCategory('prompt', cat) ? (
+                              {isProtectedCategory(
+                                activeModal === 'ferramenta' ? 'tool' : 'prompt',
+                                cat
+                              ) ? (
                                 <span className="text-xs text-gray-500">Base</span>
                               ) : (
                                 <button
-                                  onClick={() => handleDeleteCategory('prompt', cat)}
+                                  onClick={() => handleDeleteCategory(
+                                    activeModal === 'ferramenta' ? 'tool' : 'prompt',
+                                    cat
+                                  )}
                                   className="text-red-400 hover:text-red-300 transition-colors"
                                 >
                                   <Trash2 className="w-4 h-4" />
@@ -1767,8 +1644,7 @@ export default function App() {
                               )}
                             </div>
                           ))}
-                        {(activeModal === 'ferramenta' ? toolCategories :
-                          activeModal === 'prompt' ? promptCategories : workflowCategories)
+                        {(activeModal === 'ferramenta' ? toolCategories : promptCategories)
                           .filter(cat => cat !== 'Todas' && cat !== 'Todos').length === 0 && (
                             <p className="text-sm text-gray-500 text-center py-4">Nenhuma categoria adicionada</p>
                           )}
@@ -1862,17 +1738,7 @@ export default function App() {
           <div className="bg-[#1a1f2e] border border-gray-800/50 rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold">{editingPromptId ? 'Editar Prompt' : 'Adicionar Novo'}</h2>
-              <button onClick={() => {
-                setActiveModal(null);
-                setNewPromptTitle('');
-                setNewPromptDescription('');
-                setNewPromptContent('');
-                setNewPromptImage('');
-                setNewPromptCategory(DEFAULT_PROMPT_CATEGORY);
-                setNewPromptSubcategory('');
-                setNewPromptModels('ChatGPT, Claude');
-                setEditingPromptId(null);
-              }} className="text-gray-400 hover:text-gray-300">
+              <button onClick={() => { setActiveModal(null); resetPromptForm(); }} className="text-gray-400 hover:text-gray-300">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -1909,9 +1775,9 @@ export default function App() {
                 </div>
 
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1.5">Descrição</label>
+                  <label className="block text-sm text-gray-400 mb-1.5">Objetivo <span className="text-red-500">*</span></label>
                   <textarea
-                    placeholder="Breve descrição do que este prompt faz..."
+                    placeholder="Para que serve este prompt? Ex: Gerar uma imagem de hero shot profissional..."
                     rows={2}
                     value={newPromptDescription}
                     onChange={(e) => setNewPromptDescription(e.target.value)}
@@ -1973,30 +1839,86 @@ export default function App() {
                 </div>
 
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1.5">Conteúdo do Prompt</label>
-                  <div className="text-xs text-gray-500 mb-1">Use [VARIÁVEL] para criar campos dinâmicos</div>
+                  <label className="block text-sm text-gray-400 mb-1.5">Quando usar <span className="text-gray-600 font-normal">(opcional)</span></label>
                   <textarea
-                    placeholder="Atue como um programador sênior. Refatore a seguinte função em Python para melhorar a legibilidade e performance: [CÓDIGO]"
-                    rows={4}
-                    value={newPromptContent}
-                    onChange={(e) => setNewPromptContent(e.target.value)}
+                    placeholder="Ex: Usa quando precisares de gerar uma imagem profissional — produto, campanha, editorial..."
+                    rows={2}
+                    value={newPromptWhenToUse}
+                    onChange={(e) => setNewPromptWhenToUse(e.target.value)}
+                    className="w-full bg-[#0f1420] border border-gray-800/50 rounded-lg px-4 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-blue-600 resize-none text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1.5">Como usar <span className="text-gray-600 font-normal">(opcional)</span></label>
+                  <textarea
+                    placeholder="Ex: Cola o prompt numa ferramenta de geração de imagens. Substitui os campos entre [colchetes]..."
+                    rows={2}
+                    value={newPromptHowToUse}
+                    onChange={(e) => setNewPromptHowToUse(e.target.value)}
+                    className="w-full bg-[#0f1420] border border-gray-800/50 rounded-lg px-4 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-blue-600 resize-none text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1.5">Inputs a preencher <span className="text-gray-600 font-normal">(opcional)</span></label>
+                  <textarea
+                    placeholder="• Produto / sujeito: [product]&#10;• Formato: [1:1 / 4:5 / 9:16]&#10;• Estilo: [minimal / editorial]"
+                    rows={3}
+                    value={newPromptInputs}
+                    onChange={(e) => setNewPromptInputs(e.target.value)}
+                    className="w-full bg-[#0f1420] border border-gray-800/50 rounded-lg px-4 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-blue-600 resize-none text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1.5">Prompt <span className="text-red-500">*</span></label>
+                  <div className="text-xs text-gray-500 mb-1">O texto que vai ser copiado e colado na IA. Usa [VARIÁVEL] para campos dinâmicos.</div>
+                  <textarea
+                    placeholder="Act as a senior art director... [product], [style], [format]"
+                    rows={5}
+                    value={newPromptText}
+                    onChange={(e) => setNewPromptText(e.target.value)}
                     className="w-full bg-[#0f1420] border border-gray-800 rounded-lg px-4 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-blue-600 resize-none font-mono text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1.5">Restrições obrigatórias <span className="text-gray-600 font-normal">(opcional)</span></label>
+                  <textarea
+                    placeholder="• Sem mãos distorcidas, rostos desfigurados...&#10;• Mantém o sujeito principal longe das extremidades..."
+                    rows={3}
+                    value={newPromptRestrictions}
+                    onChange={(e) => setNewPromptRestrictions(e.target.value)}
+                    className="w-full bg-[#0f1420] border border-gray-800/50 rounded-lg px-4 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-blue-600 resize-none text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1.5">Output esperado <span className="text-gray-600 font-normal">(opcional)</span></label>
+                  <textarea
+                    placeholder="Ex: Devolve apenas o prompt final em inglês, pronto para colar diretamente na ferramenta."
+                    rows={2}
+                    value={newPromptExpectedOutput}
+                    onChange={(e) => setNewPromptExpectedOutput(e.target.value)}
+                    className="w-full bg-[#0f1420] border border-gray-800/50 rounded-lg px-4 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-blue-600 resize-none text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1.5">Variações <span className="text-gray-600 font-normal">(opcional)</span></label>
+                  <textarea
+                    placeholder='Ex: Pede 5 variações mudando só: (1) lighting, (2) background, (3) camera angle...'
+                    rows={2}
+                    value={newPromptVariations}
+                    onChange={(e) => setNewPromptVariations(e.target.value)}
+                    className="w-full bg-[#0f1420] border border-gray-800/50 rounded-lg px-4 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-blue-600 resize-none text-sm"
                   />
                 </div>
 
                 <div className="flex gap-3 pt-3">
                   <button
-                    onClick={() => {
-                      setActiveModal(null);
-                      setNewPromptTitle('');
-                      setNewPromptDescription('');
-                      setNewPromptContent('');
-                      setNewPromptImage('');
-                      setNewPromptCategory(DEFAULT_PROMPT_CATEGORY);
-                      setNewPromptSubcategory('');
-                      setNewPromptModels('ChatGPT, Claude');
-                      setEditingPromptId(null);
-                    }}
+                    onClick={() => { setActiveModal(null); resetPromptForm(); }}
                     className="px-4 py-2.5 bg-transparent text-gray-400 hover:text-white transition-colors"
                   >
                     Cancelar
@@ -2008,6 +1930,9 @@ export default function App() {
                     {editingPromptId ? 'Atualizar Prompt' : 'Guardar Prompt'}
                   </button>
                 </div>
+                {promptFormError && (
+                  <p className="text-sm text-red-400 text-center -mt-2">{promptFormError}</p>
+                )}
               </div>
             ) : (
               <div className="space-y-4">
@@ -2161,428 +2086,177 @@ export default function App() {
         </div>
       )}
 
-      {/* Modal: Adicionar Workflow */}
-      {activeModal === 'workflow' && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-[#1a1f2e] border border-gray-800/50 rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold">Adicionar Novo</h2>
-              <button
-                onClick={() => {
-                  setActiveModal(null);
-                  setNewWorkflowTitle('');
-                  setNewWorkflowDescription('');
-                  setNewWorkflowImage('');
-                  setNewWorkflowCategory('Marketing');
-                  setNewWorkflowWebhookUrl('');
-                  setNewWorkflowInputs([]);
-                  setEditingWorkflowId(null);
-                }}
-                className="text-gray-400 hover:text-gray-300"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
 
-            <div className="flex gap-4 mb-6 border-b border-gray-800">
-              <button
-                onClick={() => setActiveTab('item')}
-                className={`px-4 py-2 ${activeTab === 'item' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-white'}`}
-              >
-                Workflow
-              </button>
-              <button
-                onClick={() => setActiveTab('categoria')}
-                className={`px-4 py-2 ${activeTab === 'categoria' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-white'}`}
-              >
-                Categoria
-              </button>
-            </div>
+{/* Modal: Visualizar Prompt */}
+      {selectedPrompt && (() => {
+        const sections = parsePromptContent(selectedPrompt.content);
+        const promptText = sections['Prompt'] || selectedPrompt.content.trim();
 
-            {activeTab === 'item' ? (
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-sm text-gray-400 mb-1.5">Título</label>
-                  <input
-                    type="text"
-                    placeholder="Ex: Análise de Dados Automatizada"
-                    value={newWorkflowTitle}
-                    onChange={(e) => setNewWorkflowTitle(e.target.value)}
-                    className="w-full bg-[#0f1420] border border-gray-800/50 rounded-lg px-4 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-blue-600 transition-colors"
-                  />
-                </div>
+        // Source of truth: unique [campos] detected from the prompt text
+        const promptFields = [...new Set([...promptText.matchAll(/\[([^\]]+)\]/g)].map(m => m[1]))];
 
-                <div>
-                  <label className="block text-sm text-gray-400 mb-1.5">Descrição</label>
-                  <textarea
-                    placeholder="Descreva o que este workflow faz..."
-                    rows={2}
-                    value={newWorkflowDescription}
-                    onChange={(e) => setNewWorkflowDescription(e.target.value)}
-                    className="w-full bg-[#0f1420] border border-gray-800/50 rounded-lg px-4 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-blue-600 transition-colors resize-none"
-                  />
-                </div>
+        // Build the resolved prompt: replace [campo] with typed value or keep original
+        const resolvedPrompt = promptText.replace(/\[([^\]]+)\]/g, (_, field) =>
+          fieldValues[field] || `[${field}]`
+        );
 
-                <div>
-                  <label className="block text-sm text-gray-400 mb-1.5">Imagem (opcional)</label>
-                  <ImageUpload
-                    onImageUpload={setNewWorkflowImage}
-                    currentImage={newWorkflowImage}
-                    maxSizeMB={50}
-                  />
-                </div>
+        // Count unfilled fields
+        const unfilledCount = promptFields.filter(f => !fieldValues[f]?.trim()).length;
+        const allFilled = unfilledCount === 0;
 
-                <div>
-                  <label className="block text-sm text-gray-400 mb-1.5">Categoria</label>
-                  <select
-                    value={newWorkflowCategory}
-                    onChange={(e) => setNewWorkflowCategory(e.target.value)}
-                    className="w-full bg-[#0f1420] border border-gray-800/50 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-600 transition-colors">
-                    {workflowCategories.filter(cat => cat !== 'Todos').map(cat => (
-                      <option key={cat}>{cat}</option>
-                    ))}
-                  </select>
-                </div>
+        // Render the preview: filled fields = normal text, unfilled = amber highlight
+        const renderPreview = (text: string) =>
+          text.split(/(\[[^\]]+\])/).map((part, i) => {
+            const match = part.match(/^\[([^\]]+)\]$/);
+            if (!match) return <span key={i}>{part}</span>;
+            const fieldName = match[1];
+            const filled = fieldValues[fieldName]?.trim();
+            return filled
+              ? <span key={i} className="text-white">{filled}</span>
+              : <span key={i} className="text-amber-400 bg-amber-500/10 rounded px-0.5">{part}</span>;
+          });
 
-                <div>
-                  <label className="block text-sm text-gray-400 mb-1.5">Webhook URL n8n</label>
-                  <input
-                    type="url"
-                    placeholder="https://ivannnnnn.app.n8n.cloud/webhook/e5fdf70f-c650-4822-9095-e86e1e8f9746"
-                    value={newWorkflowWebhookUrl}
-                    onChange={(e) => setNewWorkflowWebhookUrl(e.target.value)}
-                    className="w-full bg-[#0f1420] border border-gray-800/50 rounded-lg px-4 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-blue-600 transition-colors font-mono text-sm"
-                  />
-                </div>
+        const detailSections = (['Inputs a preencher', 'Restrições obrigatórias', 'Output esperado', 'Variações'] as const)
+          .filter(k => sections[k]?.trim());
 
-                <div className="rounded-2xl border border-gray-800/60 bg-[#141a2c] p-4 space-y-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-sm text-white">Campos do formulário</p>
-                      <p className="text-xs text-gray-500">Defina os campos que o webhook vai receber no POST.</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setNewWorkflowInputs(prev => [...prev, { name: 'message', label: 'Mensagem', type: 'textarea', required: true }])}
-                      className="px-3 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700 transition-colors"
-                    >
-                      + Adicionar campo
-                    </button>
-                  </div>
+        const handleClose = () => { setSelectedPrompt(null); setCopied(false); };
 
-                  {newWorkflowInputs.length === 0 ? (
-                    <p className="text-sm text-gray-500">Se deixar vazio, o workflow usará o campo padrão <code className="bg-gray-800 px-1 py-0.5 rounded">message</code>.</p>
-                  ) : (
-                    <div className="space-y-4">
-                      {newWorkflowInputs.map((input, index) => (
-                        <div key={`${input.name}-${index}`} className="rounded-xl border border-gray-800/50 bg-[#0f1420] p-4 space-y-3">
-                          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-                            <div className="flex-1 space-y-3">
-                              <div>
-                                <label className="block text-xs text-gray-400 mb-1">Nome do campo</label>
-                                <input
-                                  type="text"
-                                  value={input.name}
-                                  onChange={(e) => {
-                                    const value = e.target.value.replace(/\s+/g, '_');
-                                    setNewWorkflowInputs(prev => prev.map((item, idx) => idx === index ? { ...item, name: value } : item));
-                                  }}
-                                  className="w-full bg-[#141a2c] border border-gray-800/60 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-600"
-                                  placeholder="message"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-xs text-gray-400 mb-1">Rótulo</label>
-                                <input
-                                  type="text"
-                                  value={input.label}
-                                  onChange={(e) => setNewWorkflowInputs(prev => prev.map((item, idx) => idx === index ? { ...item, label: e.target.value } : item))}
-                                  className="w-full bg-[#141a2c] border border-gray-800/60 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-600"
-                                  placeholder="Mensagem"
-                                />
-                              </div>
-                            </div>
+        return (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-[#1a1f2e] border border-gray-800/50 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl">
 
-                            <div className="grid grid-cols-1 gap-3 w-full max-w-xs">
-                              <div>
-                                <label className="block text-xs text-gray-400 mb-1">Tipo</label>
-                                <select
-                                  value={input.type}
-                                  onChange={(e) => setNewWorkflowInputs(prev => prev.map((item, idx) => idx === index ? { ...item, type: e.target.value as WorkflowInput['type'], options: e.target.value === 'select' ? item.options ?? [] : undefined, maxImages: e.target.value === 'image' ? item.maxImages ?? 1 : undefined } : item))}
-                                  className="w-full bg-[#141a2c] border border-gray-800/60 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-600"
-                                >
-                                  <option value="text">Texto</option>
-                                  <option value="textarea">Texto longo</option>
-                                  <option value="select">Seleção</option>
-                                  <option value="email">Email</option>
-                                  <option value="image">Imagem</option>
-                                </select>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <input
-                                  id={`required-${index}`}
-                                  type="checkbox"
-                                  checked={input.required || false}
-                                  onChange={(e) => setNewWorkflowInputs(prev => prev.map((item, idx) => idx === index ? { ...item, required: e.target.checked } : item))}
-                                  className="h-4 w-4 text-blue-600 rounded border-gray-600 bg-gray-900"
-                                />
-                                <label htmlFor={`required-${index}`} className="text-sm text-gray-300">Obrigatório</label>
-                              </div>
-                            </div>
-                          </div>
-
-                          {input.type === 'select' && (
-                            <div>
-                              <label className="block text-xs text-gray-400 mb-1">Opções (separadas por vírgula)</label>
-                              <input
-                                type="text"
-                                value={(input.options || []).join(', ')}
-                                onChange={(e) => setNewWorkflowInputs(prev => prev.map((item, idx) => idx === index ? { ...item, options: e.target.value.split(',').map(opt => opt.trim()).filter(Boolean) } : item))}
-                                className="w-full bg-[#141a2c] border border-gray-800/60 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-600"
-                                placeholder="opção 1, opção 2"
-                              />
-                            </div>
-                          )}
-
-                          {input.type === 'image' && (
-                            <div>
-                              <label className="block text-xs text-gray-400 mb-1">Máx. imagens</label>
-                              <input
-                                type="number"
-                                min={1}
-                                max={10}
-                                value={input.maxImages ?? 1}
-                                onChange={(e) => setNewWorkflowInputs(prev => prev.map((item, idx) => idx === index ? { ...item, maxImages: Number(e.target.value) || 1 } : item))}
-                                className="w-32 bg-[#141a2c] border border-gray-800/60 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-600"
-                              />
-                            </div>
-                          )}
-
-                          <div className="flex justify-end">
-                            <button
-                              type="button"
-                              onClick={() => setNewWorkflowInputs(prev => prev.filter((_, idx) => idx !== index))}
-                              className="px-3 py-2 rounded-lg bg-red-700 text-white text-sm hover:bg-red-600 transition-colors"
-                            >
-                              Remover campo
-                            </button>
-                          </div>
-                        </div>
+              {/* Header */}
+              <div className="px-6 pt-6 pb-5 border-b border-gray-800/60">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
+                      <span className="px-2 py-0.5 bg-blue-600/20 text-blue-400 text-[11px] rounded-md uppercase font-semibold tracking-wide">
+                        {getPromptSubcategory(selectedPrompt) || getPromptCategory(selectedPrompt)}
+                      </span>
+                      {selectedPrompt.models.filter(Boolean).map((model, idx) => (
+                        <span key={idx} className="text-[11px] text-gray-500 font-mono">{model}</span>
                       ))}
                     </div>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm text-gray-400 mb-1.5">Ferramentas</label>
-                  <div className="text-xs text-gray-500 mb-1">Selecione as ferramentas que compõem este workflow</div>
-                  <div className="flex gap-2">
-                    <span className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-full flex items-center gap-1">
-                      ChatGPT
-                      <X className="w-3 h-3 cursor-pointer hover:text-gray-300" />
-                    </span>
-                    <button className="px-3 py-1.5 bg-gray-800 text-gray-400 text-sm rounded-full hover:bg-gray-700">
-                      + Adicionar
-                    </button>
+                    <h2 className="text-lg font-semibold text-white leading-snug">{selectedPrompt.title}</h2>
+                    {selectedPrompt.description && (
+                      <p className="text-sm text-gray-400 mt-1 leading-relaxed">{selectedPrompt.description}</p>
+                    )}
                   </div>
-                </div>
-
-                <div className="flex gap-3 pt-3">
-                  <button
-                    onClick={() => {
-                      setActiveModal(null);
-                      setNewWorkflowTitle('');
-                      setNewWorkflowDescription('');
-                      setNewWorkflowImage('');
-                      setNewWorkflowCategory('Marketing');
-                      setNewWorkflowWebhookUrl('');
-                      setNewWorkflowInputs([]);
-                      setEditingWorkflowId(null);
-                    }}
-                    className="px-4 py-2.5 text-gray-400 hover:text-white transition-colors"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    onClick={handleAddWorkflow}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                  >
-                    {editingWorkflowId ? 'Guardar Alterações' : 'Criar Workflow'}
+                  <button onClick={handleClose} className="text-gray-500 hover:text-gray-300 transition-colors flex-shrink-0 mt-0.5">
+                    <X className="w-5 h-5" />
                   </button>
                 </div>
               </div>
-            ) : (
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm text-gray-400 mb-1.5">Nome da Categoria</label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="Ex: Produtividade"
-                      value={newCategoryName}
-                      onChange={(e) => setNewCategoryName(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          handleAddCategory();
-                        }
-                      }}
-                      className="flex-1 bg-[#0f1420] border border-gray-800/50 rounded-lg px-4 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-blue-600 transition-colors"
-                    />
-                    <button
-                      onClick={handleAddCategory}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                    >
-                      Adicionar
-                    </button>
-                  </div>
-                </div>
 
-                <div>
-                  <label className="block text-sm text-gray-400 mb-3">Categorias Existentes</label>
-                  <div className="space-y-2 max-h-64 overflow-y-auto">
-                    {(activeModal === 'ferramenta' ? toolCategories :
-                      activeModal === 'prompt' ? promptCategories : workflowCategories)
-                      .filter(cat => cat !== 'Todas' && cat !== 'Todos')
-                      .map(cat => (
-                        <div key={cat} className="flex items-center justify-between bg-[#0f1420] border border-gray-800/50 rounded-lg px-4 py-2.5">
-                          <span className="text-white">{cat}</span>
-                          <button
-                            onClick={() => handleDeleteCategory(
-                              activeModal === 'ferramenta' ? 'tool' :
-                                activeModal === 'prompt' ? 'prompt' : 'workflow',
-                              cat
-                            )}
-                            className="text-red-400 hover:text-red-300 transition-colors"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ))}
-                    {(activeModal === 'ferramenta' ? toolCategories :
-                      activeModal === 'prompt' ? promptCategories : workflowCategories)
-                      .filter(cat => cat !== 'Todas' && cat !== 'Todos').length === 0 && (
-                        <p className="text-sm text-gray-500 text-center py-4">Nenhuma categoria adicionada</p>
+              {/* Body */}
+              <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
+
+                {/* Quando usar */}
+                {sections['Quando usar'] && (
+                  <div>
+                    <p className="text-[11px] text-gray-500 uppercase tracking-widest font-semibold mb-1.5">Quando usar</p>
+                    <p className="text-sm text-gray-400 leading-relaxed">{sections['Quando usar']}</p>
+                  </div>
+                )}
+
+                {/* Campos a preencher — inputs editáveis */}
+                {promptFields.length > 0 && (
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-[11px] text-gray-500 uppercase tracking-widest font-semibold">Campos a preencher</p>
+                      {Object.values(fieldValues).some(v => v.trim()) && (
+                        <button
+                          onClick={() => setFieldValues({})}
+                          className="text-[11px] text-gray-500 hover:text-gray-300 transition-colors"
+                        >
+                          Limpar
+                        </button>
                       )}
-                  </div>
-                </div>
-
-                <div className="flex gap-3 pt-3">
-                  <button
-                    onClick={() => {
-                      setActiveModal(null);
-                      setNewCategoryName('');
-                      setActiveTab('item');
-                    }}
-                    className="flex-1 px-4 py-2 text-gray-400 hover:text-white transition-colors"
-                  >
-                    Fechar
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Modal: Workflow Executor (n8n real) */}
-      {executingWorkflow && !showBrandGenerator && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-[#1a1f2e] border border-gray-800/50 rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <WorkflowExecutor
-              workflow={executingWorkflow}
-              onClose={() => setExecutingWorkflow(null)}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Modal: Visualizar Prompt */}
-      {selectedPrompt && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-[#1a1f2e] border border-gray-800/50 rounded-xl w-full max-w-3xl max-h-[90vh] flex flex-col">
-            {/* Header */}
-            <div className="p-6 border-b border-gray-800">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className="px-2.5 py-1 bg-blue-600/20 text-blue-400 text-xs rounded uppercase font-medium">
-                      {getPromptSubcategory(selectedPrompt) || getPromptCategory(selectedPrompt)}
-                    </span>
-                    <div className="flex gap-2">
-                      {selectedPrompt.models.map((model, idx) => (
-                        <span key={idx} className="text-xs text-gray-500">{model}</span>
+                    </div>
+                    <div className="grid grid-cols-1 gap-2.5">
+                      {promptFields.map(field => (
+                        <div key={field} className="flex items-center gap-3">
+                          <label className="text-xs text-amber-400 font-mono w-36 flex-shrink-0 truncate" title={field}>
+                            [{field}]
+                          </label>
+                          <input
+                            type="text"
+                            value={fieldValues[field] ?? ''}
+                            onChange={e => setFieldValues(prev => ({ ...prev, [field]: e.target.value }))}
+                            placeholder={`Preenche ${field}…`}
+                            className="flex-1 bg-[#0c1018] border border-gray-700/60 rounded-lg px-3 py-1.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-amber-500/60 transition-colors"
+                          />
+                        </div>
                       ))}
                     </div>
                   </div>
-                  <h2 className="text-2xl font-semibold text-white">{selectedPrompt.title}</h2>
+                )}
+
+                {/* Prompt preview */}
+                <div className="bg-[#0c1018] border border-gray-700/60 rounded-xl overflow-hidden">
+                  <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-700/40">
+                    <span className="text-[11px] text-gray-500 uppercase tracking-widest font-semibold">
+                      {promptFields.length > 0 ? 'Preview' : 'Prompt'}
+                    </span>
+                    <span className="text-[11px] text-gray-600">{resolvedPrompt.length} chars</span>
+                  </div>
+                  <pre className="text-sm text-gray-200 whitespace-pre-wrap font-mono leading-relaxed p-5">
+                    {renderPreview(resolvedPrompt)}
+                  </pre>
                 </div>
+
+                {/* Collapsible details */}
+                {detailSections.length > 0 && (
+                  <div className="border border-gray-800 rounded-xl overflow-hidden">
+                    <button
+                      onClick={() => setShowPromptDetails(v => !v)}
+                      className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-gray-800/30 transition-colors"
+                    >
+                      <span className="text-sm text-gray-400 font-medium">
+                        {showPromptDetails ? 'Ocultar detalhes' : 'Ver mais detalhes'}
+                      </span>
+                      <span className={`text-gray-500 transition-transform duration-200 ${showPromptDetails ? 'rotate-180' : ''}`}>
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                      </span>
+                    </button>
+                    {showPromptDetails && (
+                      <div className="divide-y divide-gray-800/60 border-t border-gray-800">
+                        {detailSections.map(k => (
+                          <div key={k} className="px-5 py-4">
+                            <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-widest mb-1.5">{k}</p>
+                            <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">{sections[k]}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+              </div>
+
+              {/* Footer */}
+              <div className="px-6 py-4 border-t border-gray-800/60 flex items-center justify-between gap-4">
+                {!allFilled && promptFields.length > 0 ? (
+                  <span className="text-[11px] text-gray-500">
+                    {unfilledCount} {unfilledCount === 1 ? 'campo por preencher' : 'campos por preencher'}
+                  </span>
+                ) : (
+                  <span />
+                )}
                 <button
-                  onClick={() => {
-                    setSelectedPrompt(null);
-                    setCopied(false);
-                  }}
-                  className="text-gray-400 hover:text-gray-300 transition-colors"
+                  onClick={() => copyPromptToClipboard(resolvedPrompt)}
+                  className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-500 transition-colors text-sm font-semibold shadow-lg shadow-blue-600/20"
                 >
-                  <X className="w-5 h-5" />
+                  {copied
+                    ? <><Check className="w-4 h-4" />Copiado!</>
+                    : <><Copy className="w-4 h-4" />Copiar Prompt</>}
                 </button>
               </div>
-            </div>
 
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto p-6">
-              <div className="mb-3 text-xs text-gray-500 flex items-center gap-2">
-                <span className="opacity-40 italic">Linhas a cinzento</span>
-                <span>não são copiadas (apenas para referência)</span>
-              </div>
-              <div className="bg-[#0f1420] border border-gray-800 rounded-lg p-4">
-                <pre className="text-sm text-gray-300 whitespace-pre-wrap font-mono leading-relaxed">
-                  {selectedPrompt.content.split('\n').map((line, index) => {
-                    const isMetadata = line.trim().startsWith('Model:') || line.trim().startsWith('Casos de Uso:');
-                    return (
-                      <span key={index} className={isMetadata ? 'opacity-40 italic' : ''}>
-                        {line}{index < selectedPrompt.content.split('\n').length - 1 ? '\n' : ''}
-                      </span>
-                    );
-                  })}
-                </pre>
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="p-6 border-t border-gray-800">
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-400">
-                  {selectedPrompt.content.length} caracteres
-                </div>
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => setSelectedPrompt(null)}
-                    className="px-4 py-2.5 bg-transparent text-gray-400 hover:text-white transition-colors"
-                  >
-                    Fechar
-                  </button>
-                  <button
-                    onClick={() => copyPromptToClipboard(selectedPrompt.content)}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    {copied ? (
-                      <>
-                        <Check className="w-4 h-4" />
-                        Copiado!
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-4 h-4" />
-                        Copiar Prompt
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Modal: Confirmar Exclusão */}
       {showDeleteConfirm && (
@@ -2608,25 +2282,6 @@ export default function App() {
           </div>
         </div>
       )}
-      {/* Modal: Brand Post Generator */}
-      {showBrandGenerator && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-[#1a1f2e] border border-gray-800/50 rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-semibold text-white">🎨 Brand Post Generator</h2>
-              <button
-                onClick={() => setShowBrandGenerator(false)}
-                className="text-gray-400 hover:text-gray-300 transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <BrandPostGenerator webhookUrl="https://ivannnnnn.app.n8n.cloud/webhook/brand-post-generator" />
-          </div>
-        </div>
-      )}
-      {/* Modal: N8N Configuration */}
-      <N8nConfigModal isOpen={showN8nConfig} onClose={() => setShowN8nConfig(false)} />
     </div>
   );
 }

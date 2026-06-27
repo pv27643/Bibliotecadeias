@@ -1,0 +1,384 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "identidadevisual18",
+        "responseMode": "lastNode",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "id": "a04d63ae-2d5c-4101-8cdf-589a10932425",
+      "name": "Webhook6",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -2864,
+        5840
+      ],
+      "webhookId": "generate-product-photo"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "brandReferenceImageUrl",
+              "value": "={{ ($binary?.data ? 'data:' + $binary.data.mimeType + ';base64,' + $binary.data.data : null) || ($binary?.file ? 'data:' + $binary.file.mimeType + ';base64,' + $binary.file.data : null) || '' }}",
+              "type": "string"
+            },
+            {
+              "name": "postType",              "value": "={{ $json.body?.postType || $json.body?.post_type || $json.postType || 'quote post' }}",
+              "type": "string"
+            },
+            {
+              "name": "topic",
+              "value": "={{ $json.body?.topic || $json.topic || '' }}",
+              "type": "string"
+            },
+            {
+              "name": "mainMessage",
+              "value": "={{ $json.body?.mainMessage || $json.body?.main_message || $json.body?.message || $json.mainMessage || '' }}",
+              "type": "string"
+            },
+            {
+              "name": "format",
+              "value": "={{ $json.body?.format || $json.format || '1:1' }}",
+              "type": "string"
+            },
+            {
+              "name": "headline",
+              "value": "={{ $json.body?.headline || $json.headline || $json.body?.mainMessage || $json.body?.message || $json.mainMessage || '' }}",
+              "type": "string"
+            },
+            {
+              "name": "secondaryText",
+              "value": "={{ $json.body?.secondaryText || $json.body?.secondary_text || $json.secondaryText || '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "dadd0a14-8866-488b-8765-1a034e9b7e4c",
+      "name": "Set Image URL5",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2608,
+        5840
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list"
+        },
+        "text": "Your job is to describe the brand's visual DNA with enough precision that another AI image model can generate new posts that feel consistent with this brand.\n\nAnalyze only what is visible in the reference. If something is uncertain, mark it as inferred.\n\nExtract the following:\n\nBrand feeling\n\nDescribe the brand's emotional tone in 3 to 6 precise words.\n\nVisual category\n\nIdentify the visual world this brand belongs to: luxury, playful, editorial, tech, wellness, streetwear, educational, creator-led, minimal, chaotic, cinematic, corporate, handcrafted, futuristic, etc.\n\nColor system\n\nExtract the main palette with approximate HEX colors:\n\nPrimary color\n\nSecondary color\n\nAccent color\n\nBackground color\n\nText color\n\nHighlight color\n\nAlso describe saturation, contrast, warmth, and whether the palette feels soft, bold, muted, glossy, earthy, neon, pastel, monochrome, or high contrast.\n\nTypography and text style\n\nDescribe the visible typography:\n\nFont category\n\nWeight\n\nLetter spacing\n\nCase style\n\nHierarchy\n\nText placement\n\nText-to-image ratio\n\nHow headlines are treated\n\nHow secondary text is treated\n\nLayout system\n\nDescribe the composition rules:\n\nGrid style\n\nAlignment\n\nMargins\n\nNegative space\n\nImage placement\n\nText placement\n\nUse of frames, borders, cards, overlays, stickers, labels, or badges\n\nHow crowded or spacious the design feels\n\nImage style\n\nDescribe the imagery:\n\nPhotography, illustration, 3D, collage, flat graphics, mixed media, UI screenshot, editorial, UGC, cinematic, product-focused, character-focused, abstract\n\nSubject framing\n\nCamera angle\n\nDepth of field\n\nCropping style\n\nTexture and sharpness\n\nLighting and surface treatment\n\nDescribe:\n\nLighting direction\n\nLighting quality\n\nShadow softness\n\nHighlight style\n\nGloss, grain, blur, noise, gradients, glass, paper, metal, fabric, or other visible materials\n\nGraphic elements\n\nList recurring visual motifs:\n\nShapes\n\nIcons\n\nLines\n\nArrows\n\nPatterns\n\nGradients\n\nTexture overlays\n\nDecorative marks\n\nMotion cues\n\nUI elements\n\nSocial media adaptation rules\n\nExplain how to create new posts in this identity:\n\nHow a quote post should look\n\nHow an announcement post should look\n\nHow a carousel cover should look\n\nHow a product or feature post should look\n\nHow a story or vertical post should look\n\nAnti-drift rules\n\nList the visual choices that must stay consistent so future generations do not drift away from the brand.\n\nOutput the final result as:\n\nA. Short Brand DNA Summary\n\nB. Detailed Visual Identity Notes\n\nC. Reusable Brand Identity Block in JSON:\n\n{\n\n  \"brand_style\": {\n\n    \"name\": \"\",\n\n    \"mood\": [],\n\n    \"color_palette\": {\n\n      \"primary\": \"\",\n\n      \"secondary\": \"\",\n\n      \"accent\": \"\",\n\n      \"background\": \"\",\n\n      \"text\": \"\",\n\n      \"highlight\": \"\"\n\n    },\n\n    \"typography\": {\n\n      \"font_category\": \"\",\n\n      \"weight\": \"\",\n\n      \"case_style\": \"\",\n\n      \"hierarchy\": \"\",\n\n      \"text_placement\": \"\"\n\n    },\n\n    \"layout\": {\n\n      \"composition\": \"\",\n\n      \"alignment\": \"\",\n\n      \"spacing\": \"\",\n\n      \"graphic_system\": \"\"\n\n    },\n\n    \"imagery\": {\n\n      \"style\": \"\",\n\n      \"cameraorrendering\": \"\",\n\n      \"subject_framing\": \"\",\n\n      \"texture\": \"\"\n\n    },\n\n    \"lighting\": {\n\n      \"direction\": \"\",\n\n      \"quality\": \"\",\n\n      \"shadow_style\": \"\",\n\n      \"highlight_style\": \"\"\n\n    },\n\n    \"social_rules\": {\n\n      \"quote_post\": \"\",\n\n      \"announcement_post\": \"\",\n\n      \"carousel_cover\": \"\",\n\n      \"feature_post\": \"\",\n\n      \"story_post\": \"\"\n\n    },\n\n    \"antidriftrules\": []\n\n  }\n\n}\n\nD. One reusable generation prompt template that uses this identity block.",
+        "inputType": "url",
+        "url": "={{ $json.brandReferenceImageUrl }}",
+        "options": {}
+      },
+      "id": "1b348377-56da-4154-969a-a07f430b5ad6",
+      "name": "Analyze Product Image4",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -2352,
+        5840
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "OIjFOfOxsF0y07Uk",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a prompt-writer for an AI image generation model.\n\nYou will receive a brand visual identity analysis (derived ONLY from the reference image) and some post inputs (post type, topic, headline, format).\n\nTask: write ONE final image-generation prompt for the model to create a new social media post image that fits the same feed/brand identity.\n\nRules:\n- Preserve the brand's visual identity exactly (colors, typography feel, layout logic, imagery treatment, graphic motifs).\n- If something in the identity is uncertain, keep it conservative and do not invent specifics.\n- Make text readable with strong hierarchy and brand-consistent spacing.\n- Output ONLY the final prompt text (no markdown, no JSON).",
+              "role": "system"
+            },
+            {
+              "content": "=Using the brand identity block below, create a new social media post image for:\n\nPost type: {{ $('Set Image URL5').item.json.postType }}\nTopic: {{ $('Set Image URL5').item.json.topic }}\nMain message: {{ $('Set Image URL5').item.json.mainMessage }}\nFormat: {{ $('Set Image URL5').item.json.format }}\n\nPreserve the brand's visual identity exactly:\n\n{{ $('Analyze Product Image4').item.json.content || $('Analyze Product Image4').item.json.message?.content || '' }}\n\nGenerate a new design that follows the same color system, typography style, layout logic, image treatment, lighting, textures, and graphic motifs. Make it feel like part of the same social feed, while creating a fresh composition for this specific post.\n\nUse the main message as the headline:\n\"{{ $('Set Image URL5').item.json.headline }}\"\n\nIf secondary text is needed, use:\n\"{{ $('Set Image URL5').item.json.secondaryText }}\""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a907395f-eef4-4a9c-9b5d-4e6431f7758e",
+      "name": "Create Image Prompt4",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -2048,
+        5840
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "OIjFOfOxsF0y07Uk",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/images/generations",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ model: 'gpt-image-2', prompt: $json.message.content, n: 1, size: (() => { const f = $('Set Image URL5').item.json.format || '1:1'; if (f === '9:16') return '1024x1792'; if (f === '16:9') return '1792x1024'; if (f === '4:5') return '1024x1280'; return '1024x1024'; })() }) }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "02666561-da90-4e4b-99f3-2335c29b39b9",
+      "name": "GPT Image API5",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1584,
+        5840
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "OIjFOfOxsF0y07Uk",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "data[0].b64_json",
+        "options": {}
+      },
+      "id": "bcc9d6d1-5053-4031-8501-40207338dfde",
+      "name": "Convert To Binary5",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        -1328,
+        5840
+      ]
+    },
+    {
+      "parameters": {
+        "name": "createdImage",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1rrdo_-_j_2FsGBEkUcTuTQRHfG0-AXHF",
+          "mode": "list",
+          "cachedResultName": "Imagens n8n",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1rrdo_-_j_2FsGBEkUcTuTQRHfG0-AXHF"
+        },
+        "options": {}
+      },
+      "id": "8b86d0e6-bf6f-4c9f-83d5-7911e25aae83",
+      "name": "Upload Image5",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -1072,
+        5840
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Cg3ECPi3RaQMD99o",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "success",
+              "value": "=true",
+              "type": "boolean"
+            },
+            {
+              "name": "fileId",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "name": "fileName",
+              "value": "={{ $json.name }}",
+              "type": "string"
+            },
+            {
+              "name": "viewLink",
+              "value": "={{ $json.webViewLink }}",
+              "type": "string"
+            },
+            {
+              "name": "downloadLink",
+              "value": "={{ $json.webContentLink }}",
+              "type": "string"
+            },
+            {
+              "name": "thumbnailLink",
+              "value": "={{ $json.thumbnailLink }}",
+              "type": "string"
+            },
+            {
+              "name": "createdAt",
+              "value": "={{ $json.createdTime }}",
+              "type": "string"
+            },
+            {
+              "name": "imagePrompt",
+              "value": "={{ $('Create Image Prompt4').item.json.message.content }}",
+              "type": "string"
+            },
+            {
+              "name": "brandIdentityAnalysis",
+              "value": "={{ $('Analyze Product Image4').item.json.content || $('Analyze Product Image4').item.json.message?.content || '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "91c4c062-4f8e-46e2-858f-8da7e11aae14",
+      "name": "Format Response6",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -816,
+        5840
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# 📸 WORKFLOW GERAL: Gerador de Posts com Identidade Visual (Clonagem de Estilo)\n\n⚠️ MODO: Upload de ficheiro via multipart/form-data (campo: 'file')\n",
+        "height": 320,
+        "width": 2368
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2928,
+        5712
+      ],
+      "typeVersion": 1,
+      "id": "52d68dca-e08b-44f3-894c-3ac23b414dc6",
+      "name": "Sticky Note4"
+    }
+  ],
+  "connections": {
+    "Webhook6": {
+      "main": [
+        [
+          {
+            "node": "Set Image URL5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Image URL5": {
+      "main": [
+        [
+          {
+            "node": "Analyze Product Image4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Product Image4": {
+      "main": [
+        [
+          {
+            "node": "Create Image Prompt4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Image Prompt4": {
+      "main": [
+        [
+          {
+            "node": "GPT Image API5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT Image API5": {
+      "main": [
+        [
+          {
+            "node": "Convert To Binary5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert To Binary5": {
+      "main": [
+        [
+          {
+            "node": "Upload Image5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Image5": {
+      "main": [
+        [
+          {
+            "node": "Format Response6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9ad7d933d1475da5d4ebd8ae3c94283f04cc5ca6dd718940d45ceb3055b163d8"
+  }
+}

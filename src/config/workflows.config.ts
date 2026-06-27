@@ -1,10 +1,6 @@
-/**
- * Configuração dos Workflows disponíveis
- * Inclui os workflows do N8N usados pela aplicação
- */
+const DEFAULT_N8N_BASE_URL = (import.meta as any).env?.VITE_N8N_WEBHOOK || 'http://localhost:5678/webhook';
 
-// URL base do N8N - pode ser configurada dinamicamente
-export let N8N_BASE_URL = localStorage.getItem('n8nBaseUrl') || 'https://ivannnnnn.app.n8n.cloud/webhook';
+export let N8N_BASE_URL = localStorage.getItem('n8nBaseUrl') || DEFAULT_N8N_BASE_URL;
 
 export const setN8nBaseUrl = (url: string) => {
   N8N_BASE_URL = url;
@@ -15,12 +11,13 @@ export interface WorkflowConfig {
   id: string;
   name: string;
   description: string;
-  category: 'Marketing' | 'Operações' | 'Vendas' | 'Criativo' | 'N8N';
+  category: 'N8N';
   icon: string;
   color: string;
   inputs: WorkflowInput[];
-  webhookPath: string; // caminho do webhook sem a URL base
-  isN8nWorkflow?: boolean;
+  webhookPath: string;
+  isN8nWorkflow: true;
+  requiresBrand?: boolean;
 }
 
 export interface WorkflowInput {
@@ -35,294 +32,279 @@ export interface WorkflowInput {
 
 export interface ExecuteWorkflowPayload {
   workflowId: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
-/**
- * Workflows disponíveis
- * Inclui workflows placeholder + os 3 workflows do N8N
- */
 export const WORKFLOWS: WorkflowConfig[] = [
   {
-    id: 'brand-dna-extractor',
-    name: 'Extrair Brand DNA',
-    description: 'Analisa imagens de marca e extrai identidade visual completa',
-    category: 'Criativo',
-    icon: '🎨',
-    color: 'from-purple-500 to-pink-500',
-    webhookUrl: 'https://ivannnnnn.app.n8n.cloud/webhook/execute-workflow',
+    id: 'extract-brand-style',
+    name: 'Extrair Estilo de Marca',
+    description: 'Analisa um website ou imagens e extrai a identidade visual completa da marca (paleta, tipografia, tom de voz).',
+    category: 'N8N',
+    icon: 'palette',
+    color: 'from-violet-500 to-purple-600',
+    webhookPath: (import.meta as any).env?.VITE_N8N_PATH_EXTRACT_BRAND || 'extract-brand-style',
+    isN8nWorkflow: true,
+    requiresBrand: false,
     inputs: [
       {
-        name: 'images',
-        type: 'image',
-        label: 'Imagens de Referência',
+        name: 'source_type',
+        type: 'select',
+        label: 'Fonte',
         required: true,
-        placeholder: 'Carregar 3-5 imagens da marca'
+        options: ['url', 'images'],
+        placeholder: 'Escolhe a fonte'
       },
       {
-        name: 'brandName',
+        name: 'url',
+        type: 'text',
+        label: 'URL do Website',
+        required: false,
+        placeholder: 'https://exemplo.com'
+      },
+      {
+        name: 'brand_name',
         type: 'text',
         label: 'Nome da Marca',
         required: true,
-        placeholder: 'ex: TechBrand'
+        placeholder: 'ex: Nike, Minha Marca'
+      },
+      {
+        name: 'images',
+        type: 'image',
+        label: 'Imagens de Referência (se fonte = images)',
+        required: false,
+        maxImages: 6
       }
     ]
   },
   {
-    id: 'generate-social-posts',
-    name: 'Gerar Posts Sociais',
-    description: 'Cria posts de redes sociais personalizados (1:1, 9:16, 16:9)',
-    category: 'Marketing',
-    icon: '📱',
+    id: 'generate-post',
+    name: 'Gerar Post (Texto)',
+    description: 'Gera legenda, hashtags e CTA para um post nas redes sociais, respeitando o tom de voz da marca.',
+    category: 'N8N',
+    icon: 'message-square',
     color: 'from-blue-500 to-cyan-500',
-    webhookUrl: 'https://ivannnnnn.app.n8n.cloud/webhook/execute-workflow',
+    webhookPath: (import.meta as any).env?.VITE_N8N_PATH_GENERATE_POST || 'generate-post',
+    isN8nWorkflow: true,
+    requiresBrand: true,
     inputs: [
       {
-        name: 'topic',
+        name: 'theme',
         type: 'text',
-        label: 'Tópico/Tema',
+        label: 'Tema do Post',
         required: true,
-        placeholder: 'ex: Lançamento de novo produto'
+        placeholder: 'ex: Lançamento de produto, Promoção de verão'
       },
       {
-        name: 'headline',
-        type: 'text',
-        label: 'Headline Principal',
+        name: 'platform',
+        type: 'select',
+        label: 'Plataforma',
         required: true,
-        placeholder: 'Título do post'
+        options: ['Instagram', 'LinkedIn', 'Facebook', 'TikTok', 'Twitter/X']
+      },
+      {
+        name: 'goal',
+        type: 'select',
+        label: 'Objetivo',
+        required: true,
+        options: ['Engagement', 'Awareness', 'Conversão', 'Educação', 'Entretenimento']
       },
       {
         name: 'format',
         type: 'select',
         label: 'Formato',
         required: true,
-        options: ['1:1 (Square)', '9:16 (Story)', '16:9 (Landscape)']
+        options: ['Post simples', 'Carrossel', 'Story', 'Reel', 'Artigo']
       },
       {
-        name: 'prompt',
+        name: 'extra_context',
         type: 'textarea',
-        label: 'Instruções Adicionais',
+        label: 'Contexto adicional (opcional)',
         required: false,
-        placeholder: 'Detalha como queres que fique...'
+        placeholder: 'Detalhes extras, produto específico, CTA desejado...'
       }
     ]
   },
   {
-    id: 'ai-chat-agent',
-    name: 'Chat com IA',
-    description: 'Conversa interativa com agente IA inteligente',
-    category: 'Criativo',
-    icon: '🤖',
-    color: 'from-green-500 to-emerald-500',
-    webhookUrl: 'https://ivannnnnn.app.n8n.cloud/webhook/execute-workflow',
+    id: 'generate-visual',
+    name: 'Gerar Visual',
+    description: 'Cria uma imagem para post usando a identidade visual da marca via IA (gpt-image).',
+    category: 'N8N',
+    icon: 'image',
+    color: 'from-pink-500 to-rose-500',
+    webhookPath: (import.meta as any).env?.VITE_N8N_PATH_GENERATE_VISUAL || 'generate-visual',
+    isN8nWorkflow: true,
+    requiresBrand: true,
     inputs: [
       {
-        name: 'message',
+        name: 'concept',
         type: 'textarea',
-        label: 'Mensagem',
+        label: 'Conceito Visual',
         required: true,
-        placeholder: 'Fala com a IA...'
-      }
-    ]
-  },
-  {
-    id: 'scrape-ads-library',
-    name: 'Análise de Ads (Facebook)',
-    description: 'Scrape e análise de anúncios do Facebook por palavra-chave',
-    category: 'Marketing',
-    icon: '📊',
-    color: 'from-indigo-500 to-blue-500',
-    webhookUrl: 'https://ivannnnnn.app.n8n.cloud/webhook/execute-workflow',
-    inputs: [
-      {
-        name: 'keyword',
-        type: 'text',
-        label: 'Palavra-chave',
-        required: true,
-        placeholder: 'ex: AI tools, SaaS'
+        placeholder: 'Descreve o que deves ver na imagem...'
       },
       {
-        name: 'maxResults',
+        name: 'text_overlay',
         type: 'text',
-        label: 'Máximo de Resultados',
+        label: 'Texto na Imagem (opcional)',
         required: false,
-        placeholder: '10'
+        placeholder: 'ex: "50% OFF este fim de semana"'
+      },
+      {
+        name: 'aspect_ratio',
+        type: 'select',
+        label: 'Formato',
+        required: true,
+        options: ['1:1 (Feed)', '9:16 (Story/Reel)', '16:9 (Landscape)', '4:5 (Feed vertical)']
       }
     ]
   },
   {
-    id: 'generate-newsletter',
-    name: 'Gerar Newsletter',
-    description: 'Cria newsletter com notícias de IA e conteúdo curado',
-    category: 'Marketing',
-    icon: '📰',
-    color: 'from-orange-500 to-red-500',
-    webhookUrl: 'https://ivannnnnn.app.n8n.cloud/webhook/execute-workflow',
+    id: 'generate-carousel',
+    name: 'Gerar Carrossel',
+    description: 'Cria os slides de um carrossel com título, corpo e conceito visual para cada slide.',
+    category: 'N8N',
+    icon: 'layout',
+    color: 'from-amber-500 to-orange-500',
+    webhookPath: (import.meta as any).env?.VITE_N8N_PATH_GENERATE_CAROUSEL || 'generate-carousel',
+    isN8nWorkflow: true,
+    requiresBrand: true,
     inputs: [
       {
         name: 'topic',
         type: 'text',
-        label: 'Tópico Principal',
+        label: 'Tópico do Carrossel',
         required: true,
-        placeholder: 'ex: AI Trends, Web3'
+        placeholder: 'ex: 5 dicas para melhorar o teu branding'
       },
       {
-        name: 'recipients',
-        type: 'email',
-        label: 'Email (opcional)',
-        required: false,
-        placeholder: 'Para quem enviar'
-      }
-    ]
-  },
-  {
-    id: 'bulk-photo-generation',
-    name: 'Bulk Photo Generator',
-    description: 'Gera fotos de produtos em bulk a partir de imagens',
-    category: 'Operações',
-    icon: '📸',
-    color: 'from-rose-500 to-pink-500',
-    webhookUrl: 'https://ivannnnnn.app.n8n.cloud/webhook/execute-workflow',
-    inputs: [
-      {
-        name: 'images',
-        type: 'image',
-        label: 'Imagens dos Produtos',
-        required: true,
-        placeholder: 'Carregar fotos dos produtos'
-      },
-      {
-        name: 'style',
+        name: 'num_slides',
         type: 'select',
-        label: 'Estilo Fotográfico',
+        label: 'Número de Slides',
         required: true,
-        options: ['Professional', 'Lifestyle', 'Product', 'Minimalist']
+        options: ['3', '5', '7', '10']
+      },
+      {
+        name: 'platform',
+        type: 'select',
+        label: 'Plataforma',
+        required: true,
+        options: ['Instagram', 'LinkedIn', 'Facebook']
       }
     ]
   },
-  // ===== N8N WORKFLOWS =====
   {
-    id: 'n8n-brand-posts',
-    name: '🎨 Gerador de Posts com Identidade Visual',
-    description: 'Analisa imagem de marca e gera novos posts mantendo identidade visual',
+    id: 'repurpose-content',
+    name: 'Repurpose de Conteúdo',
+    description: 'Transforma conteúdo existente (URL ou texto) em posts adaptados para várias plataformas.',
     category: 'N8N',
-    icon: '🎨',
-    color: 'from-purple-500 to-pink-500',
-    webhookPath: 'identidadevisual18',
+    icon: 'refresh-cw',
+    color: 'from-teal-500 to-green-500',
+    webhookPath: (import.meta as any).env?.VITE_N8N_PATH_REPURPOSE || 'repurpose-content',
     isN8nWorkflow: true,
+    requiresBrand: true,
     inputs: [
       {
-        name: 'file',
-        type: 'image',
-        label: 'Imagem de Referência',
-        required: true,
-        placeholder: 'Carregar imagem com identidade visual'
-      },
-      {
-        name: 'post_type',
-        type: 'select',
-        label: 'Tipo de Post',
-        required: true,
-        options: ['quote post', 'story post', 'carousel post', 'reel cover'],
-        placeholder: 'Selecciona o tipo'
-      },
-      {
-        name: 'topic',
+        name: 'source_url',
         type: 'text',
-        label: 'Tema/Tópico',
-        required: true,
-        placeholder: 'ex: Lançamento de novo produto'
+        label: 'URL do Conteúdo (opcional)',
+        required: false,
+        placeholder: 'https://blog.exemplo.com/artigo'
       },
       {
-        name: 'main_message',
+        name: 'source_text',
         type: 'textarea',
-        label: 'Mensagem Principal',
-        required: true,
-        placeholder: 'Texto principal do post'
+        label: 'Texto de Origem (se não tiveres URL)',
+        required: false,
+        placeholder: 'Cola aqui o texto original...'
       },
       {
-        name: 'format',
+        name: 'platforms',
         type: 'select',
-        label: 'Formato da Imagem',
+        label: 'Plataformas Alvo',
         required: true,
-        options: ['1:1', '9:16', '16:9'],
-        placeholder: 'ex: 1:1'
+        options: ['Instagram + LinkedIn', 'Instagram + TikTok', 'LinkedIn + Twitter/X', 'Todas (Instagram, LinkedIn, TikTok, Twitter/X)']
       },
       {
-        name: 'headline',
-        type: 'text',
-        label: 'Headline',
-        required: false,
-        placeholder: 'Título em destaque'
-      },
-      {
-        name: 'secondary_text',
-        type: 'text',
-        label: 'Texto Secundário',
-        required: false,
-        placeholder: 'Texto de suporte'
+        name: 'num_posts',
+        type: 'select',
+        label: 'Posts por Plataforma',
+        required: true,
+        options: ['1', '2', '3']
       }
     ]
   },
   {
-    id: 'n8n-product-photo',
-    name: '📸 Fotografia de Produto',
-    description: 'Transforma foto do produto em fotografia profissional com modelo',
+    id: 'weekly-batch',
+    name: 'Batch Semanal',
+    description: 'Gera um calendário de conteúdo para 7 dias com legendas e conceitos visuais prontos a agendar.',
     category: 'N8N',
-    icon: '📸',
-    color: 'from-blue-500 to-cyan-500',
-    webhookPath: 'generate-product-photo1',
+    icon: 'calendar',
+    color: 'from-indigo-500 to-blue-600',
+    webhookPath: (import.meta as any).env?.VITE_N8N_PATH_WEEKLY_BATCH || 'weekly-batch',
     isN8nWorkflow: true,
+    requiresBrand: true,
     inputs: [
       {
-        name: 'file',
-        type: 'image',
-        label: 'Foto do Produto',
+        name: 'themes',
+        type: 'textarea',
+        label: 'Temas da Semana (um por linha)',
         required: true,
-        placeholder: 'Carregar foto do produto'
+        placeholder: 'Produto novo\nDica da semana\nTestemunho de cliente\n...'
+      },
+      {
+        name: 'platform',
+        type: 'select',
+        label: 'Plataforma Principal',
+        required: true,
+        options: ['Instagram', 'LinkedIn', 'Facebook', 'TikTok']
+      },
+      {
+        name: 'post_frequency',
+        type: 'select',
+        label: 'Frequência',
+        required: true,
+        options: ['1 post/dia (7 posts)', 'Dias úteis (5 posts)', '3 posts/semana']
       }
     ]
   },
   {
-    id: 'n8n-remove-background',
-    name: '✨ Remover Fundo',
-    description: 'Remove o fundo de uma imagem e retorna PNG com transparência',
+    id: 'generate-bio',
+    name: 'Gerar Bio',
+    description: 'Gera uma bio otimizada para redes sociais com base no perfil de marca e plataforma alvo.',
     category: 'N8N',
-    icon: '✨',
-    color: 'from-green-500 to-emerald-500',
-    webhookPath: 'removerfundo',
+    icon: 'pen-tool',
+    color: 'from-cyan-500 to-blue-500',
+    webhookPath: (import.meta as any).env?.VITE_N8N_PATH_GENERATE_BIO || 'generate-bio',
     isN8nWorkflow: true,
+    requiresBrand: true,
     inputs: [
       {
-        name: 'file',
-        type: 'image',
-        label: 'Imagem',
+        name: 'platform',
+        type: 'select',
+        label: 'Plataforma',
         required: true,
-        placeholder: 'Carregar imagem para remover fundo'
+        options: ['Instagram', 'LinkedIn', 'TikTok', 'Twitter/X', 'YouTube']
+      },
+      {
+        name: 'tone_extra',
+        type: 'text',
+        label: 'Tom adicional (opcional)',
+        required: false,
+        placeholder: 'ex: mais descontraído, foco em humor'
       }
     ]
   }
 ];
 
-export const getWorkflowById = (id: string): WorkflowConfig | undefined => {
-  return WORKFLOWS.find(w => w.id === id);
-};
+export const getWorkflowById = (id: string): WorkflowConfig | undefined =>
+  WORKFLOWS.find(w => w.id === id);
 
-export const getWorkflowsByCategory = (category: string): WorkflowConfig[] => {
-  return WORKFLOWS.filter(w => w.category === category);
-};
+export const getWorkflowsByCategory = (category: string): WorkflowConfig[] =>
+  WORKFLOWS.filter(w => w.category === category);
 
-export const getCategories = (): string[] => {
-  return ['Marketing', 'Operações', 'Vendas', 'Criativo', 'N8N'];
-};
+export const getCategories = (): string[] => ['N8N'];
 
-/**
- * Obter URL completa do webhook para um workflow
- */
-export const getWebhookUrl = (workflow: WorkflowConfig): string => {
-  if (workflow.isN8nWorkflow) {
-    return `${N8N_BASE_URL}/${workflow.webhookPath}`;
-  }
-  // Para workflows antigos que têm webhookUrl (backwards compatibility)
-  return (workflow as any).webhookUrl || N8N_BASE_URL;
-};
+export const getWebhookUrl = (workflow: Pick<WorkflowConfig, 'webhookPath'>): string =>
+  `${N8N_BASE_URL}/${workflow.webhookPath}`;

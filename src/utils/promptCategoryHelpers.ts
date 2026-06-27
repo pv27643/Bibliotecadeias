@@ -40,7 +40,9 @@ export const getPromptSubcategory = (prompt: PromptCategoryItem) => (
 );
 
 export const getPromptCategory = (prompt: PromptCategoryItem) => (
-  getPromptSubcategory(prompt) ? PROMPT_ROOT_CATEGORY : prompt.category
+  DEFAULT_PROMPT_SUBCATEGORIES.includes(prompt.category)
+    ? PROMPT_ROOT_CATEGORY
+    : prompt.category
 );
 
 export const getPromptMainCategories = (

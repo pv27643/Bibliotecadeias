@@ -1,5 +1,57 @@
-import { useState, useRef, DragEvent, ChangeEvent } from 'react';
+import { useState, useRef, useEffect, DragEvent, ChangeEvent } from 'react';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
+
+export function ImageUploadField({ label, required, maxImages = 6, files, onChange, disabled }: {
+  label: string; required?: boolean; maxImages?: number;
+  files: File[]; onChange: (f: File[]) => void; disabled?: boolean;
+}) {
+  const ref = useRef<HTMLInputElement>(null);
+  const objectUrls = useRef<string[]>([]);
+
+  useEffect(() => {
+    return () => { objectUrls.current.forEach(u => URL.revokeObjectURL(u)); };
+  }, []);
+
+  const makeUrl = (f: File) => {
+    const url = URL.createObjectURL(f);
+    objectUrls.current.push(url);
+    return url;
+  };
+
+  return (
+    <div>
+      <label className="block text-sm text-gray-400 mb-1.5">
+        {label}{required && <span className="text-red-500 ml-1">*</span>}
+      </label>
+      <div
+        onClick={() => !disabled && ref.current?.click()}
+        className={`border-2 border-dashed rounded-lg p-5 text-center transition-colors ${disabled ? 'opacity-50 cursor-not-allowed border-gray-700' : 'border-gray-700 hover:border-blue-600 cursor-pointer'}`}
+      >
+        <input ref={ref} type="file" multiple accept="image/*" className="hidden" disabled={disabled}
+          onChange={e => {
+            const inc = Array.from(e.target.files ?? []).filter(f => f.type.startsWith('image/'));
+            onChange([...files, ...inc].slice(0, maxImages));
+          }} />
+        <Upload className="w-5 h-5 mx-auto mb-1.5 text-gray-500" />
+        <p className="text-sm text-gray-500">Clica ou arrasta imagens</p>
+        <p className="text-xs text-gray-600 mt-0.5">PNG, JPG, WebP — máx. {maxImages}</p>
+      </div>
+      {files.length > 0 && (
+        <div className="grid grid-cols-3 gap-2 mt-2">
+          {files.map((f, i) => (
+            <div key={i} className="relative group rounded overflow-hidden border border-gray-800">
+              <img src={makeUrl(f)} className="w-full h-20 object-cover" alt="" />
+              <button type="button" onClick={() => onChange(files.filter((_, j) => j !== i))} disabled={disabled}
+                className="absolute top-1 right-1 bg-red-600 text-white p-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 interface ImageUploadProps {
   onImageUpload: (imageUrl: string) => void;
