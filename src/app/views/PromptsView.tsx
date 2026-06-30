@@ -214,7 +214,7 @@ export default function PromptsView() {
           })()}
         </div>
       ) : !selectedPromptCategory && !searchPromptTerm ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {promptMainCategories.map(category => (
             <div
               key={category}
@@ -222,37 +222,37 @@ export default function PromptsView() {
                 setSelectedPromptCategory(category);
                 setSelectedPromptSubcategory(null);
               }}
-              className="bg-[#151921] border border-gray-800/50 rounded-lg p-6 hover:border-blue-600 transition-colors cursor-pointer"
+              className="bg-[#151921] border border-gray-800/50 rounded-lg p-4 hover:border-blue-600 transition-colors cursor-pointer"
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 bg-gray-800/50 rounded-lg flex items-center justify-center text-gray-300">
                   <FileText className="w-6 h-6" />
                 </div>
-                <span className="text-2xl font-semibold text-gray-500">
+                <span className="text-lg font-semibold text-gray-500">
                   {getCategoryCount(category)}
                 </span>
               </div>
-              <h3 className="text-white font-semibold text-lg">{category}</h3>
+              <h3 className="text-white font-medium text-sm">{category}</h3>
             </div>
           ))}
         </div>
       ) : selectedPromptCategory && !selectedPromptSubcategory && selectedPromptCategory !== 'Favoritos' && getPromptCategorySubcategories(selectedPromptCategory).length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {getPromptCategorySubcategories(selectedPromptCategory).map(subcategory => (
             <div
               key={subcategory}
               onClick={() => setSelectedPromptSubcategory(subcategory)}
-              className="bg-[#151921] border border-gray-800/50 rounded-lg p-6 hover:border-blue-600 transition-colors cursor-pointer"
+              className="bg-[#151921] border border-gray-800/50 rounded-lg p-4 hover:border-blue-600 transition-colors cursor-pointer"
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 bg-gray-800/50 rounded-lg flex items-center justify-center text-gray-300">
                   <FileText className="w-6 h-6" />
                 </div>
-                <span className="text-2xl font-semibold text-gray-500">
+                <span className="text-lg font-semibold text-gray-500">
                   {getPromptSubcategoryCount(selectedPromptCategory, subcategory)}
                 </span>
               </div>
-              <h3 className="text-white font-semibold text-lg">{subcategory}</h3>
+              <h3 className="text-white font-medium text-sm">{subcategory}</h3>
             </div>
           ))}
           {getPromptCategorySubcategories(selectedPromptCategory).length === 0 && (
