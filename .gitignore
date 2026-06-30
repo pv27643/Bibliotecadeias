@@ -39,3 +39,9 @@ logs/
 *.bak
 supabase/.temp/
 .npm-cache/
+
+# n8n workflow exports (may contain credentials)
+workflows/
+*.json.export
+Brand DNA*.json
+*copy.json
