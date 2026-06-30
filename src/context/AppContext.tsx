@@ -8,10 +8,24 @@ import {
   DEFAULT_WORKFLOW_CATEGORIES,
   DEFAULT_SUBCATEGORIES_MAP
 } from '@/data/categories';
+import {
+  addFavoriteToSupabase,
+  removeFavoriteFromSupabase,
+  loadFavoritesFromSupabase,
+} from '../utils/supabase/sync';
 
 const API_BASE = projectId && projectId !== 'demo-project'
   ? `https://${projectId}.supabase.co/functions/v1/make-server-d8505aef`
   : null;
+
+const FAVS_KEY = 'bibliotecaias_favorites';
+const readLocalFavs = (): Set<string> => {
+  try { return new Set(JSON.parse(localStorage.getItem(FAVS_KEY) ?? '[]')); }
+  catch { return new Set(); }
+};
+const writeLocalFavs = (set: Set<string>) => {
+  try { localStorage.setItem(FAVS_KEY, JSON.stringify([...set])); } catch {}
+};
 const ACTIVE_WORKFLOW_PATHS = ['identidadevisual18', 'brand-post-generator', 'execute-workflow'];
 
 const ACTIVE_WORKFLOW_FALLBACKS: WorkflowType[] = [
@@ -144,13 +158,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (!API_BASE) { setIsLoading(false); return; }
       setIsLoading(true);
       try {
-        const response = await fetch(`${API_BASE}/data`, {
-          headers: { 'Authorization': `Bearer ${publicAnonKey}` }
-        });
+        const [response, supabaseFavs] = await Promise.all([
+          fetch(`${API_BASE}/data`, { headers: { 'Authorization': `Bearer ${publicAnonKey}` } }),
+          loadFavoritesFromSupabase(),
+        ]);
         if (response.ok) {
           const data = await response.json();
-          if (data.tools?.length > 0) setTools(data.tools);
-          if (data.prompts?.length > 0) setPrompts(data.prompts);
+          // Merge localStorage + Supabase so both sources are respected
+          const favSet = new Set([
+            ...readLocalFavs(),
+            ...(supabaseFavs ?? []).map((f: { type: string; id: string }) => `${f.type}:${f.id}`),
+          ]);
+          writeLocalFavs(favSet); // keep localStorage in sync
+          const applyFavs = <T extends { id: string; favorite?: boolean }>(items: T[], type: string) =>
+            items.map(item => ({ ...item, favorite: favSet.has(`${type}:${item.id}`) }));
+
+          if (data.tools?.length > 0) setTools(applyFavs(data.tools, 'tool'));
+          if (data.prompts?.length > 0) setPrompts(applyFavs(data.prompts, 'prompt'));
           setWorkflows(withWorkflowFallback(data.workflows?.length > 0 ? getActiveWorkflows(data.workflows) : []));
           if (data.toolCategories?.length > 0) setToolCategories(data.toolCategories);
           if (data.promptCategories?.length > 0) setPromptCategories(data.promptCategories);
@@ -240,9 +264,27 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const toggle = <T extends { id: string; favorite?: boolean }>(item: T) =>
       item.id === id ? { ...item, favorite: !item.favorite } : item;
 
-    if (type === 'tool') saveTools(tools.map(toggle));
-    else if (type === 'prompt') savePrompts(prompts.map(toggle));
-    else saveWorkflows(workflows.map(toggle));
+    const isFav =
+      type === 'tool' ? tools.find(t => t.id === id)?.favorite :
+      type === 'prompt' ? prompts.find(p => p.id === id)?.favorite :
+      workflows.find(w => w.id === id)?.favorite;
+
+    const itemName =
+      type === 'tool' ? (tools.find(t => t.id === id)?.name ?? '') :
+      type === 'prompt' ? (prompts.find(p => p.id === id)?.title ?? '') :
+      (workflows.find(w => w.id === id)?.name ?? '');
+
+    // Update local state immediately
+    if (type === 'tool') setTools(prev => prev.map(toggle));
+    else if (type === 'prompt') setPrompts(prev => prev.map(toggle));
+    else setWorkflows(prev => prev.map(toggle));
+
+    // Persist to localStorage (immediate) and Supabase favorites table
+    const localFavs = readLocalFavs();
+    const key = `${type}:${id}`;
+    if (isFav) { localFavs.delete(key); removeFavoriteFromSupabase(type, id); }
+    else { localFavs.add(key); addFavoriteToSupabase(type, id, itemName); }
+    writeLocalFavs(localFavs);
   };
 
   const getFavoritesCount = (type: 'tool' | 'prompt' | 'workflow'): number => {

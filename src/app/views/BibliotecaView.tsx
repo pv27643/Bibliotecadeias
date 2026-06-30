@@ -31,7 +31,7 @@ export default function BibliotecaView() {
   const [editingTool, setEditingTool] = useState<Tool | null>(null);
 
   useEffect(() => {
-    if (selectedCategory && !toolCategories.includes(selectedCategory)) {
+    if (selectedCategory && selectedCategory !== 'Favoritos' && !toolCategories.includes(selectedCategory)) {
       setSelectedCategory(null);
       setSelectedSubcategory(null);
     }
