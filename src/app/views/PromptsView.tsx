@@ -187,7 +187,7 @@ export default function PromptsView() {
       </div>
 
       {!selectedPromptCategory && searchPromptTerm ? (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {(() => {
             const results = prompts.filter(p =>
               p.title.toLowerCase().includes(searchPromptTerm.toLowerCase()) ||
@@ -214,7 +214,7 @@ export default function PromptsView() {
           })()}
         </div>
       ) : !selectedPromptCategory && !searchPromptTerm ? (
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {promptMainCategories.map(category => (
             <div
               key={category}
@@ -237,7 +237,7 @@ export default function PromptsView() {
           ))}
         </div>
       ) : selectedPromptCategory && !selectedPromptSubcategory && selectedPromptCategory !== 'Favoritos' && getPromptCategorySubcategories(selectedPromptCategory).length > 0 ? (
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {getPromptCategorySubcategories(selectedPromptCategory).map(subcategory => (
             <div
               key={subcategory}
@@ -262,7 +262,7 @@ export default function PromptsView() {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {prompts.filter(prompt => {
             let categoryMatch = true;
 

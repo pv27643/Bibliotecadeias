@@ -39,7 +39,7 @@ export default function WorkflowsView() {
 
       {/* ── Biblioteca ── */}
       {workflowsSubTab === 'biblioteca' && (
-        <div className="flex gap-6">
+        <div className="flex flex-col lg:flex-row gap-6">
 
           {/* Main column */}
           <div className="flex-1 min-w-0 space-y-8">
@@ -54,7 +54,7 @@ export default function WorkflowsView() {
             />
 
             {/* AI Generators */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {WORKFLOWS.map(wf => (
                 <div
                   key={wf.id}
@@ -74,7 +74,7 @@ export default function WorkflowsView() {
           </div>
 
           {/* History sidebar */}
-          <div className="w-72 flex-shrink-0">
+          <div className="w-full lg:w-72 lg:flex-shrink-0">
             <div className="sticky top-6 bg-[#151921] border border-gray-800/50 rounded-xl overflow-hidden">
               <div className="px-4 py-3.5 border-b border-gray-800/50 flex items-center gap-2">
                 <History className="w-4 h-4 text-gray-500" />

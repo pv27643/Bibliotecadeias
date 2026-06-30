@@ -147,7 +147,7 @@ export default function BibliotecaView() {
       </div>
 
       {!selectedCategory && searchTerm ? (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {(() => {
             const results = tools.filter(t =>
               t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -189,7 +189,7 @@ export default function BibliotecaView() {
           })()}
         </div>
       ) : !selectedCategory && !searchTerm ? (
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {toolCategories.filter(cat => cat !== 'Todas').map(category => (
             <div
               key={category}
@@ -212,7 +212,7 @@ export default function BibliotecaView() {
           ))}
         </div>
       ) : selectedCategory && !selectedSubcategory && selectedCategory !== 'Favoritos' ? (
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {(subcategoriesMap[selectedCategory] || []).map(subcategory => (
             <div
               key={subcategory}
@@ -233,7 +233,7 @@ export default function BibliotecaView() {
         </div>
       ) : (
         <>
-          <div className="flex gap-2 mb-6">
+          <div className="flex gap-2 mb-6 overflow-x-auto pb-1 scrollbar-none">
             <button
               onClick={() => setSelectedBadge(null)}
               className={`px-4 py-2 rounded-lg transition-colors ${!selectedBadge
@@ -272,7 +272,7 @@ export default function BibliotecaView() {
             </button>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {(() => {
               const filtered = tools.filter(tool => {
                 let categoryMatch = true;
