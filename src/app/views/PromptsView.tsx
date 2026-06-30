@@ -453,6 +453,14 @@ export default function PromptsView() {
                   </div>
                 )}
 
+                {/* Como usar */}
+                {sections['Como usar'] && (
+                  <div>
+                    <p className="text-[11px] text-gray-500 uppercase tracking-widest font-semibold mb-1.5">Como usar</p>
+                    <p className="text-sm text-gray-400 leading-relaxed whitespace-pre-wrap">{sections['Como usar']}</p>
+                  </div>
+                )}
+
                 {/* Campos a preencher */}
                 {promptFields.length > 0 && (
                   <div>

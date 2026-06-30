@@ -48,6 +48,7 @@ export const DEFAULT_SUBCATEGORIES_MAP: Record<string, string[]> = {
   'Code & Handoff': ['Code Generation', 'Frontend Builder'],
   'Automation & Productivity': ['Workflow Automation', 'Project Management', 'Knowledge Base'],
   'Design': [
+    'Assistente Design',
     'Identidade Visual & Branding',
     'Fotografia de Produto',
     'Publicidade & Anúncios',
