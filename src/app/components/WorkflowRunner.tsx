@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Send, Loader, AlertCircle, ArrowLeft } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Send, Loader, AlertCircle, ArrowLeft, Clock } from 'lucide-react';
 import { getWebhookUrl } from '@/config/workflows.config';
 import type { WorkflowConfig, WorkflowInput } from '@/config/workflows.config';
 import type { BrandStyleProfile } from '@/types/brand';
@@ -40,10 +40,16 @@ export default function WorkflowRunner({ workflow, activeBrand, onBack }: Workfl
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<WorkflowOutput | null>(null);
+  const [elapsed, setElapsed] = useState(0);
+  const [duration, setDuration] = useState<number | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const startRef = useRef<number>(0);
 
   const inputs: WorkflowInput[] = workflow.inputs ?? [
     { name: 'message', label: 'Mensagem', type: 'textarea', required: true },
   ];
+
+  useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
 
   const handleChange = (name: string, value: string) => {
     setError(null);
@@ -66,6 +72,10 @@ export default function WorkflowRunner({ workflow, activeBrand, onBack }: Workfl
       setError('Este workflow requer uma marca ativa. Seleciona ou cria uma marca primeiro.'); return;
     }
 
+    setElapsed(0);
+    setDuration(null);
+    startRef.current = Date.now();
+    timerRef.current = setInterval(() => setElapsed(Math.floor((Date.now() - startRef.current) / 1000)), 1000);
     setLoading(true);
     try {
       const webhookUrl = getWebhookUrl(workflow);
@@ -116,6 +126,8 @@ export default function WorkflowRunner({ workflow, activeBrand, onBack }: Workfl
         setError(err.message || 'Erro desconhecido');
       }
     } finally {
+      if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
+      setDuration(Math.floor((Date.now() - startRef.current) / 1000));
       setLoading(false);
     }
   };
@@ -154,7 +166,8 @@ export default function WorkflowRunner({ workflow, activeBrand, onBack }: Workfl
         <ResultPanel
           output={result}
           workflowId={workflow.id}
-          onRunAgain={() => { setResult(null); setFormData({}); setImageFiles({}); }}
+          duration={duration ?? undefined}
+          onRunAgain={() => { setResult(null); setFormData({}); setImageFiles({}); setDuration(null); }}
         />
       )}
 
@@ -212,7 +225,7 @@ export default function WorkflowRunner({ workflow, activeBrand, onBack }: Workfl
             className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-700 disabled:text-gray-400 transition-colors font-medium text-sm"
           >
             {loading
-              ? <><Loader className="w-4 h-4 animate-spin" />A executar...</>
+              ? <><Loader className="w-4 h-4 animate-spin" />A executar... <span className="text-gray-400 font-mono">{elapsed}s</span></>
               : <><Send className="w-4 h-4" />Executar Workflow</>}
           </button>
         </div>

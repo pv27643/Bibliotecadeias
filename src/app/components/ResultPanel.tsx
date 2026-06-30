@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Copy, Download, Check, ExternalLink, Image as ImageIcon, ChevronDown, ChevronUp } from 'lucide-react';
+import { Copy, Download, Check, ExternalLink, Image as ImageIcon, ChevronDown, ChevronUp, Clock } from 'lucide-react';
 
 export interface WorkflowOutput {
   // Text workflows (W2, W4, W5, W6)
@@ -26,6 +26,7 @@ export interface WorkflowOutput {
 interface ResultPanelProps {
   output: WorkflowOutput;
   workflowId: string;
+  duration?: number;
   onRunAgain: () => void;
 }
 
@@ -178,7 +179,10 @@ function SlideList({ slides }: { slides: NonNullable<WorkflowOutput['slides']> }
           </div>
           <p className="text-sm font-semibold text-white mb-1">{slide.title}</p>
           <p className="text-sm text-gray-300">{slide.body}</p>
-          {slide.visual_concept && (
+          {slide.image_url && (
+            <img src={slide.image_url} alt={slide.title} className="mt-2 w-full rounded-lg object-cover" />
+          )}
+          {!slide.image_url && slide.visual_concept && (
             <p className="text-xs text-gray-500 italic mt-1">Visual: {slide.visual_concept}</p>
           )}
         </div>
@@ -216,12 +220,25 @@ function BrandResult({ brand }: { brand: Record<string, any> }) {
   );
 }
 
-export default function ResultPanel({ output, workflowId, onRunAgain }: ResultPanelProps) {
+function formatDuration(s: number) {
+  if (s < 60) return `${s}s`;
+  return `${Math.floor(s / 60)}m ${s % 60}s`;
+}
+
+export default function ResultPanel({ output, workflowId, duration, onRunAgain }: ResultPanelProps) {
   const imageUrl = output.image_url || output.viewLink || output.thumbnailLink;
   const allText = [output.caption, output.hashtags?.join(' '), output.cta].filter(Boolean).join('\n\n');
 
   return (
     <div className="space-y-3">
+      {/* Duration badge */}
+      {duration !== undefined && (
+        <div className="flex items-center gap-1.5 text-[11px] text-green-400/80">
+          <Clock className="w-3 h-3" />
+          Concluído em {formatDuration(duration)}
+        </div>
+      )}
+
       {/* Image */}
       {imageUrl && (
         <ImageResult

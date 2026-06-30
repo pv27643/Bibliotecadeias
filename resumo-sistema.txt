@@ -1,0 +1,602 @@
+═══════════════════════════════════════════════════════════════════
+ CELEUMA IA — RESUMO COMPLETO DO SISTEMA
+ (Para partilhar com Claude em nova conversa)
+═══════════════════════════════════════════════════════════════════
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. STACK TECNOLÓGICO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Frontend : React 18 + TypeScript + Vite
+Estilos  : Tailwind CSS v4
+Ícones   : lucide-react
+Gestor   : pnpm (package.json com "type": "module")
+Runtime  : Node.js v24 (ESM nativo)
+
+Backend / persistência:
+  - Supabase (Postgres + Edge Functions + Storage)
+  - n8n (automações via webhooks)
+
+Projeto Supabase:
+  ID  : rgbszdjyubbxhzhspuqv
+  URL : https://rgbszdjyubbxhzhspuqv.supabase.co
+
+Chaves (em .env.local):
+  VITE_SUPABASE_PROJECT_ID     = rgbszdjyubbxhzhspuqv
+  VITE_SUPABASE_PUBLIC_ANON_KEY= eyJhbGci... (anon key JWT)
+  VITE_N8N_WEBHOOK             = http://localhost:5678/webhook
+  VITE_N8N_PATH_EXTRACT_BRAND  = extract-brand-style
+  VITE_N8N_PATH_GENERATE_POST  = generate-post
+  VITE_N8N_PATH_GENERATE_VISUAL= generate-visual
+  VITE_N8N_PATH_GENERATE_CAROUSEL = generate-carousel
+  VITE_N8N_PATH_REPURPOSE      = repurpose-content
+  VITE_N8N_PATH_WEEKLY_BATCH   = weekly-batch
+  VITE_N8N_PATH_GENERATE_BIO   = generate-bio
+  VITE_N8N_PATH_DESIGN_AGENT   = design-agent
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. ESTRUTURA DE FICHEIROS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+src/
+  main.tsx                      — entrypoint React, monta <App> dentro de <AppProvider>
+  app/
+    App.tsx                     — componente raiz; toda a UI e lógica de vistas
+    components/
+      BrandSelector.tsx         — dropdown para selecionar/criar/eliminar marcas
+      DesignAgentChat.tsx       — chat com o agente n8n (design-agent)
+      HistoryList.tsx           — lista de gerações anteriores de uma marca
+      ImageUpload.tsx           — campo de upload de imagem com preview
+      ResultPanel.tsx           — renderiza o output dos workflows (texto, imagem, slides, etc.)
+      WorkflowRunner.tsx        — formulário genérico + execução de qualquer WorkflowConfig
+  config/
+    workflows.config.ts         — array WORKFLOWS com todos os geradores n8n; getWebhookUrl()
+  context/
+    AppContext.tsx               — contexto global React; estado e funções de persistência
+  data/
+    categories.ts               — listas e mapa de categorias/subcategorias por defeito
+    cinematografiaPrompts.ts    — 29 prompts visuais cinematográficos (subcategoria Design)
+  hooks/
+    useApp.ts                   — hooks de acesso ao AppContext
+  types/
+    brand.ts                    — interfaces TypeScript: BrandStyleProfile, Generation
+  utils/
+    iconHelpers.tsx             — mapeamento nome → componente Lucide
+    promptCategoryHelpers.ts    — funções para resolver categorias de prompts
+    supabase/
+      client.ts                 — instância @supabase/supabase-js (anon)
+      info.ts                   — projectId, publicAnonKey, supabaseUrl
+      sync.ts                   — utilitários de sincronização (sync helpers)
+
+supabase/
+  functions/
+    make-server-d8505aef/
+      index.tsx                 — Edge Function principal (Hono + KV store)
+    server/
+      index.tsx                 — versão alternativa da Edge Function
+      kv_store.tsx              — abstração KV separada
+  migrations/
+    brand_profiles.sql          — DDL das tabelas brand_profiles e generations
+
+workflows/                      — ficheiros JSON importáveis no n8n
+  design-agent.json             — agente conversacional (tool-calling GPT-4o)
+  identidade-visual-posts.json  — gerador de posts com identidade visual
+
+n8n/                            — documentação markdown de cada webhook n8n
+  README.md
+  extract-brand-style.md
+  generate-post.md
+  generate-visual.md
+  generate-carousel.md
+  repurpose-content.md
+  weekly-batch.md
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. BASE DE DADOS — DUAS CAMADAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+── CAMADA 1: KV Store (Edge Function) ──────────────────────────
+Tabela Supabase: kv_store_d8505aef (key TEXT, value JSONB)
+
+Chaves armazenadas:
+  "tools"             → array Tool[]
+  "prompts"           → array Prompt[]
+  "workflows"         → array WorkflowType[] (cards da app)
+  "toolCategories"    → string[]
+  "promptCategories"  → string[]
+  "workflowCategories"→ string[]
+  "subcategories"     → Record<string, string[]>
+
+Operações: upsert por chave (SET), SELECT por chave (GET), DELETE.
+
+API HTTP (Edge Function make-server-d8505aef):
+  Base URL: https://rgbszdjyubbxhzhspuqv.supabase.co/functions/v1/make-server-d8505aef
+  Auth: Header "Authorization: Bearer <anon_key>"
+
+  GET  /data           → retorna todos os dados de uma vez
+  POST /tools          → body: Tool[]         → sobrescreve array completo
+  POST /prompts        → body: Prompt[]        → sobrescreve array completo
+  POST /workflows      → body: WorkflowType[]  → sobrescreve array completo
+  POST /categories     → body: {type, categories} → sobrescreve lista de categorias
+  POST /subcategories  → body: {subcategories} → sobrescreve mapa de subcategorias
+  GET  /health         → {"status":"ok"}
+
+── CAMADA 2: Supabase Postgres (tabelas relacionais) ────────────
+
+Tabela: brand_profiles
+  id            uuid PK (gen_random_uuid)
+  brand_name    text NOT NULL
+  source        jsonb  — {type: 'url'|'images'|'manual', ref?: string}
+  palette       jsonb  — {primary, secondary, accent, neutral, background, text, extra[]}
+  typography    jsonb  — {heading_font, body_font, weights[], scale}
+  logo          jsonb  — {url, variants[], clear_space}
+  tone_of_voice jsonb  — {adjectives[], do[], dont[], sample_phrases[]}
+  imagery_style jsonb  — {description, composition_rules[], filters}
+  layout_patterns jsonb — {grid, spacing, alignment, recurring_elements[]}
+  platforms     jsonb  — {instagram: {aspect_ratios[], post_types[]}, linkedin: ..., ...}
+  created_at    timestamptz default now()
+  updated_at    timestamptz (auto-atualizado por trigger)
+
+Tabela: generations (histórico de outputs por marca)
+  id            uuid PK
+  brand_id      uuid FK → brand_profiles.id ON DELETE CASCADE
+  workflow_id   text  — id do workflow executado (ex: "generate-post")
+  workflow_name text  — nome legível (ex: "Gerar Post (Texto)")
+  inputs        jsonb — campos do formulário submetidos
+  outputs       jsonb — resposta do n8n
+  created_at    timestamptz default now()
+
+Storage Supabase:
+  Bucket: "prompt-images" (público)
+  Uso: upload de imagens associadas a prompts
+  Método: supabase.storage.from('prompt-images').upload(fileName, blob)
+  URL pública: supabase.storage.from('prompt-images').getPublicUrl(fileName)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. CONTEXTO GLOBAL — AppContext (src/context/AppContext.tsx)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Estado gerido:
+  tools[]              — ferramentas de IA
+  prompts[]            — prompts
+  workflows[]          — cards de workflow
+  toolCategories[]     — categorias de ferramentas
+  promptCategories[]   — categorias de prompts
+  workflowCategories[] — categorias de workflows
+  subcategoriesMap     — Record<category, subcategory[]>
+  isLoading            — boolean (true durante carga inicial)
+
+Arranque (useEffect):
+  1. GET /data → carrega tudo do KV
+  2. Se data.workflows existe, filtra pelos caminhos webhook ativos
+     (ACTIVE_WORKFLOW_PATHS = ['identidadevisual18','brand-post-generator','execute-workflow'])
+  3. Adiciona workflows de fallback hardcoded (ACTIVE_WORKFLOW_FALLBACKS) se não existirem
+
+Funções expostas:
+  saveTools(tools[])       → setState + POST /tools
+  savePrompts(prompts[])   → setState + POST /prompts
+  saveWorkflows(wfs[])     → setState + POST /workflows
+  saveCategories(type, []) → POST /categories
+  saveSubcategories(map)   → POST /subcategories
+  toggleFavorite(type, id) → inverte favorite e chama o save correspondente
+  getFavoritesCount(type)  → conta itens com favorite===true
+
+Hook de acesso: useApp() (src/hooks/useApp.ts)
+Hooks especializados: useTools(), usePrompts(), useWorkflows(), useCategories()
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. VISTAS PRINCIPAIS (App.tsx — type View)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Sidebar fixa com 3 botões de navegação:
+  'biblioteca'  → Biblioteca de IAs
+  'prompts'     → Meus Prompts
+  'workflows'   → Workflows
+
+── Vista: Biblioteca de IAs ────────────────────────────────────
+Navegação por drilldown (3 níveis):
+  Nível 0 (raiz)     → grelha 4 colunas de categorias com contagem
+  Nível 1 (categoria)→ grelha 4 colunas de subcategorias com contagem
+  Nível 2 (subcat.)  → grelha 3 colunas de cards de ferramentas
+
+Filtros no nível 2:
+  - Badge: Todos / Free / Freemium / Pago
+  - Search: texto livre por nome, descrição, tags
+
+Funcionalidades por tool card:
+  - Botão estrela → toggleFavorite('tool', id)
+  - Menu "⋮" → Editar | Eliminar
+  - Link externo (se tool.link definido)
+
+Modo favoritos: botão no topo → filtra por tool.favorite===true
+Pesquisa global: barra de pesquisa sem categoria → busca em todas as ferramentas
+
+── Vista: Meus Prompts ─────────────────────────────────────────
+Mesma lógica de drilldown:
+  Nível 0  → grelha 4 colunas de categorias de prompts
+  Nível 1  → grelha 4 colunas de subcategorias
+  Nível 2  → grelha 3 colunas de cards de prompts
+
+Card de prompt inclui:
+  - Imagem de capa (se prompt.image existir) — altura 48 / object-cover
+  - Badge de subcategoria ou categoria
+  - Título + descrição
+  - Lista de modelos (prompt.models[])
+  - Botão estrela → toggleFavorite('prompt', id)
+  - Menu "⋮" → Editar | Eliminar
+
+Ao clicar num card → selectedPrompt → painel lateral com conteúdo completo
+O conteúdo é multi-secção separado por \n:
+  Seccções reconhecidas: "Quando usar", "Como usar", "Inputs a preencher",
+  "Prompt", "Restrições obrigatórias", "Output esperado", "Variações"
+Botão "Copiar" → clipboard sem as linhas Model: e Casos de Uso:
+
+── Vista: Workflows (2 sub-tabs) ───────────────────────────────
+
+Sub-tab "Biblioteca":
+  - BrandSelector no topo
+  - Grelha 3 colunas com os 7 WorkflowConfig (WORKFLOWS do config)
+  - Ao clicar abre modal com WorkflowRunner
+  - Sidebar direita: HistoryList (20 gerações da marca ativa)
+
+Sub-tab "Assistente de IA Design":
+  - DesignAgentChat — interface de chat
+  - Envia mensagem ao webhook n8n design-agent
+  - Suporta histórico de conversa (últimas 8 mensagens enviadas ao n8n)
+  - Resultados do agente renderizados inline via ResultPanel
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. MODAIS / FORMULÁRIOS (App.tsx — type Modal)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Modal 'ferramenta' — Adicionar/Editar Ferramenta:
+  Tabs: "Ferramenta" | "Categoria"
+  Tab Ferramenta:
+    - Nome (obrigatório)
+    - Descrição (obrigatório)
+    - Link (URL)
+    - Preço: toggle multi-select Free / Freemium / Pago
+    - Tags (separadas por vírgula; padrão = nome da categoria)
+    - Categoria Principal (select de toolCategories)
+    - Subcategoria (select de subcategoriesMap[categoria])
+    - Ícone (picker com 7 opções: sparkles, layout, image, pen-tool, video, box, message-square)
+  Tab Categoria:
+    - Sub-tabs: "Categoria" | "Subcategoria"
+    - Adicionar/eliminar categorias de ferramentas
+    - Adicionar/eliminar subcategorias por categoria
+    - Categorias protegidas: ['Todas'] — não podem ser eliminadas
+
+Modal 'prompt' — Adicionar/Editar Prompt:
+  Tabs: "Prompt" | "Categoria"
+  Tab Prompt:
+    - Título (obrigatório)
+    - Objetivo/Descrição (obrigatório)
+    - Quando usar
+    - Como usar
+    - Inputs a preencher
+    - Prompt (obrigatório — o texto do prompt em si)
+    - Restrições obrigatórias
+    - Output esperado
+    - Variações
+    - Imagem (upload para bucket Supabase "prompt-images")
+    - Categoria + Subcategoria
+    - Modelos (ex: "ChatGPT, Midjourney")
+  Tab Categoria: igual à de ferramentas mas para promptCategories
+
+Confirmação de eliminação: modal separado (showDeleteConfirm)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+7. TIPOS TYPESCRIPT PRINCIPAIS (src/app/App.tsx)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+interface Tool {
+  id: string
+  name: string
+  description: string
+  category: string
+  subcategory?: string
+  badges: string[]          // ['Free'], ['Freemium'], ['Pago']
+  tags: string[]
+  icon: string              // nome do ícone lucide
+  link?: string
+  favorite?: boolean
+}
+
+interface Prompt {
+  id: string
+  title: string
+  description: string
+  category: string
+  subcategory?: string
+  models: string[]          // ['ChatGPT', 'Midjourney', ...]
+  content: string           // texto multi-secção
+  image?: string            // URL pública Supabase Storage
+  favorite?: boolean
+}
+
+interface WorkflowType {    // cards guardados no KV
+  id: string
+  title: string
+  description?: string
+  category?: string
+  steps: WorkflowStep[]
+  webhookUrl?: string
+  webhookPath?: string
+  isN8nWorkflow?: boolean
+  inputs?: any[]
+  image?: string
+  favorite?: boolean
+}
+
+interface WorkflowStep {
+  tool: string
+  status?: 'pending' | 'completed' | 'failed' | string
+  icon?: string
+}
+
+interface BrandStyleProfile {   // tabela brand_profiles
+  id: string
+  brand_name: string
+  source: { type: 'url'|'images'|'manual'; ref?: string }
+  palette: { primary, secondary, accent, neutral, background, text, extra? }
+  typography: { heading_font, body_font, weights[], scale? }
+  logo: { url?, variants?, clear_space? }
+  tone_of_voice: { adjectives[], do[], dont[], sample_phrases[] }
+  imagery_style: { description, composition_rules[], filters? }
+  layout_patterns: { grid?, spacing?, alignment?, recurring_elements? }
+  platforms: { instagram?, linkedin?, [k]: any }
+  created_at: string
+  updated_at: string
+}
+
+interface Generation {          // tabela generations
+  id: string
+  brand_id: string
+  workflow_id: string
+  workflow_name: string
+  inputs: Record<string, any>
+  outputs: Record<string, any>
+  created_at: string
+}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+8. WORKFLOWS N8N — CONFIGURAÇÃO (src/config/workflows.config.ts)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+N8N_BASE_URL: lido de localStorage('n8nBaseUrl') || VITE_N8N_WEBHOOK
+              (padrão: http://localhost:5678/webhook)
+              pode ser alterado em runtime via setN8nBaseUrl(url)
+
+URL final de chamada: `${N8N_BASE_URL}/${workflow.webhookPath}`
+
+Array WORKFLOWS (7 geradores):
+
+1. extract-brand-style  (requiresBrand: false)
+   Inputs: source_type (url|images), url, brand_name, images (até 6)
+   Acção: analisa website/imagens e cria/actualiza brand_profile
+
+2. generate-post  (requiresBrand: true)
+   Inputs: theme, platform (IG/LK/FB/TK/X), goal, format, extra_context
+   Output esperado: {caption, hashtags[], cta, visual_concept}
+
+3. generate-visual  (requiresBrand: true)
+   Inputs: concept, text_overlay, aspect_ratio
+   Output esperado: {image_url, alt_text} ou {viewLink, downloadLink}
+
+4. generate-carousel  (requiresBrand: true)
+   Inputs: topic, num_slides (3/5/7/10), platform
+   Output esperado: {slides: [{title, body, visual_concept}]}
+
+5. repurpose-content  (requiresBrand: true)
+   Inputs: source_url, source_text, platforms, num_posts
+   Output esperado: {posts: [{platform, caption, hashtags[], visual_concept}]}
+             ou: {variations: {platform: {caption, hashtags[]}}}
+
+6. weekly-batch  (requiresBrand: true)
+   Inputs: themes (textarea, um por linha), platform, post_frequency
+   Output esperado: {calendar: [{day, theme, caption, visual_concept}]}
+
+7. generate-bio  (requiresBrand: true)
+   Inputs: platform (IG/LK/TK/X/YT), tone_extra
+   Output esperado: {caption} (a bio gerada)
+
+Funções auxiliares:
+  getWorkflowById(id)        → WorkflowConfig | undefined
+  getWorkflowsByCategory(cat)→ WorkflowConfig[]
+  getWebhookUrl(workflow)    → string (URL completa)
+  getCategories()            → ['N8N']
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+9. COMPONENTES DE SUPORTE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WorkflowRunner (componente modal):
+  - Recebe WorkflowConfig + BrandStyleProfile | null + onBack()
+  - Renderiza formulário dinâmico a partir de workflow.inputs[]
+  - Tipos de input suportados: text, textarea, select, image, email
+  - Se hasImages: envia FormData (multipart); senão: JSON
+  - Sempre inclui brand_id no payload se activeBrand existir
+  - Se imagens: converte para base64 e adiciona campo ${field}_base64
+  - Após sucesso: chama saveGeneration() → INSERT em generations
+  - Renderiza ResultPanel com o output recebido
+
+ResultPanel (componente de output):
+  Campos do output reconhecidos:
+    image_url / viewLink / thumbnailLink → ImageResult (com download e Drive)
+    brand                                → BrandResult (paleta + JSON expansível)
+    caption + hashtags[] + cta           → TextBlock por campo + "Copiar tudo"
+    visual_concept                        → TextBlock
+    variations: {plataforma: {caption, hashtags}} → PlatformVariations (tabs)
+    slides: [{title, body, visual_concept}]       → SlideList
+    posts: [{platform, caption, hashtags[]}]      → lista de posts por plataforma
+    calendar: [{day, theme, caption, visual_concept}] → CalendarView
+    message (fallback)                   → TextBlock genérico
+
+BrandSelector:
+  - Carrega brand_profiles via supabase.from('brand_profiles').select('*')
+  - Ordena por updated_at DESC
+  - Auto-seleciona a primeira marca ao carregar
+  - Botão "+" → abre WorkflowRunner com workflow 'extract-brand-style'
+  - Botão eliminar (hover) → supabase.from('brand_profiles').delete()
+
+HistoryList:
+  - Recebe brandId
+  - Carrega generations por brand_id (limite 20, ordem DESC por created_at)
+  - Lista colapsável: clique expande para ver inputs + output formatado
+  - Data formatada com toLocaleString('pt-PT')
+
+DesignAgentChat:
+  - Estado: messages[], input, loading, sessionId (UUID fixo por sessão)
+  - Envia para: ${N8N_BASE_URL}/design-agent
+  - Payload: {message, brand_id, session_id, history (últimas 8 msgs)}
+  - Timeout: 120 segundos (AbortSignal.timeout)
+  - Resposta: {reply: string, actions?: [{workflowId, output}]}
+  - Actions renderizadas inline como ResultPanel dentro da bolha do assistente
+  - Enter = enviar; Shift+Enter = nova linha
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+10. CATEGORIAS E SUBCATEGORIAS (src/data/categories.ts)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PROTECTED_TOOL_CATEGORIES     = ['Todas']
+PROTECTED_PROMPT_CATEGORIES   = ['Todos']
+PROTECTED_WORKFLOW_CATEGORIES = ['Todos']
+
+DEFAULT_TOOL_CATEGORIES = [
+  'Todas', 'General AI', 'UX & Product', 'Visual Design', 'Image Generation',
+  'Video & Motion', 'Audio & Voice', 'Branding & Content', 'Research & Insights',
+  '3D & Spatial', 'Code & Handoff', 'Automation & Productivity'
+]
+
+DEFAULT_PROMPT_CATEGORIES = ['Todos', 'Design']
+
+DEFAULT_SUBCATEGORIES_MAP (selecção):
+  'Image Generation' : ['Text-to-Image','Image Editing','Upscaling','Avatars & Characters','Product Photography']
+  'Video & Motion'   : ['Text-to-Video','Video Editing','Subtitles & Dubbing','Personalized Video']
+  'Design'           : ['Identidade Visual & Branding','Fotografia de Produto','Publicidade & Anúncios',
+                        'Poster & Design Editorial','Redes Sociais','UX & Web Design','Vídeo & Motion',
+                        'Direção Criativa','Revisão & Qualidade','Copy & Marketing','Cinematografia']
+  ... (+ todas as outras categorias de ferramentas)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+11. PROMPTS DE CINEMATOGRAFIA (src/data/cinematografiaPrompts.ts)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+29 prompts de geração de imagem para a subcategoria "Cinematografia" dentro de "Design".
+IDs: cinematografia-001 a cinematografia-029
+Modelos alvo: ["Nano Banana"] (Nano Banana Pro ou Nano Banana 2 dependendo do prompt)
+Estrutura do content:
+  Linha 1: "Camera: X · Lens: Y · Focal: Z · Aperture: A"
+  Linha 2: "Model: X · Aspect: W:H"
+  Linhas seguintes: brief detalhado em inglês
+
+Exemplos de briefs: Villeneuve Monolith, Deakins Single Practical,
+Park Chan-wook Handmaiden Frame, Lynch Red Room, Bong Joon-ho Vertical,
+Michael Mann Blue Hour, Anamorphic Action Wide, VHS Home Video, UGC Phone-Camera, etc.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+12. EDGE FUNCTION (supabase/functions/make-server-d8505aef/index.tsx)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Runtime: Deno (Supabase Edge Functions)
+Framework: Hono
+CORS: * (todos os origens, todos os métodos)
+
+KV layer interno:
+  Usa SUPABASE_SERVICE_ROLE_KEY (não a anon key) para aceder à tabela
+  kv_store_d8505aef com operações: upsert (SET), select (GET), delete (DEL)
+
+Rotas:
+  GET  /health         → {status:"ok"}
+  GET  /data           → Promise.all de 7 keys → objeto unificado
+  POST /tools          → kv.set("tools", body)
+  POST /prompts        → kv.set("prompts", body)
+  POST /workflows      → kv.set("workflows", body)
+  POST /categories     → kv.set(key_por_type, categories)
+  POST /subcategories  → kv.set("subcategories", subcategories)
+
+Nota: o array é sempre substituído por completo (não é patch/merge).
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+13. WORKFLOWS N8N — IMPLEMENTAÇÃO INTERNA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Ficheiro: workflows/design-agent.json
+  Webhook: POST /webhook/design-agent
+  Fluxo:
+    1. Build Context — monta mensagens + lista de TOOLS para GPT-4o
+       Tools disponíveis: generate_post, generate_visual, generate_carousel,
+                          repurpose_content, weekly_batch, generate_bio, extract_brand_style
+    2. OpenAI First — chamada GPT-4o com tool_choice:"auto"
+    3. Handle & Execute — se tool_calls: chama cada sub-webhook em fetch()
+       (http://localhost:5678/webhook/<path>), agrega resultados
+    4. Done? (if) — se finish_reason=stop → Format Direct
+                    se tool_calls → OpenAI Second (follow-up com resultados)
+    5. Extract Final — extrai reply + actions
+  Resposta: {reply: string, actions: [{workflowId, output}]}
+
+Ficheiro: workflows/identidade-visual-posts.json
+  Webhook: POST /webhook/identidadevisual18
+  Fluxo:
+    1. Extract Form Data1 — extrai campos + binário da imagem
+    2. Analyze Product Image — GPT-4o Vision analisa identidade visual da imagem
+    3. Create Image Prompt — GPT-4o gera prompt de geração de imagem
+    4. GPT Image API — chama /v1/images/generations com gpt-image-2
+       Tamanhos: 1:1→1024x1024, 9:16→1024x1792, 16:9→1792x1024, 4:5→1024x1280
+    5. Convert To Binary — base64_json → binário
+    6. Upload Image — Google Drive (pasta "Imagens n8n" id: 1rrdo_-_j_2FsGBEkUcTuTQRHfG0-AXHF)
+    7. Format Response — {success, fileId, fileName, viewLink, downloadLink,
+                          thumbnailLink, createdAt, imagePrompt, brandIdentityAnalysis}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+14. FLUXO COMPLETO — DO CLIQUE AO RESULTADO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FERRAMENTA / PROMPT (CRUD):
+  Utilizador preenche formulário modal
+  → handleAddTool() / handleAddPrompt()
+  → saveTools() / savePrompts() no AppContext
+  → POST /tools ou /prompts na Edge Function
+  → kv.set() na tabela kv_store_d8505aef
+
+WORKFLOW (EXECUÇÃO):
+  Utilizador seleciona marca (BrandSelector → brand_profiles)
+  → clica num WorkflowConfig card
+  → WorkflowRunner renderiza formulário
+  → handleSubmit() monta payload (JSON ou FormData)
+  → fetch(N8N_BASE_URL + webhookPath)
+  → n8n processa e devolve JSON
+  → setResult(data) → ResultPanel renderiza output
+  → saveGeneration() → INSERT em generations
+
+DESIGN AGENT (CHAT):
+  Utilizador escreve mensagem
+  → DesignAgentChat.send()
+  → POST N8N_BASE_URL/design-agent com {message, brand_id, session_id, history}
+  → n8n decide ferramentas com GPT-4o tool-calling
+  → chama sub-webhooks internamente
+  → devolve {reply, actions[]}
+  → actions renderizados como ResultPanel inline
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+15. PONTOS IMPORTANTES / PARTICULARIDADES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+• O KV guarda arrays COMPLETOS — não há patch. Cada save substitui tudo.
+• O n8n URL padrão é localhost:5678 mas pode ser alterado via
+  localStorage('n8nBaseUrl') sem rebuild.
+• Workflows "ativos" na app (lista KV) são filtrados por ACTIVE_WORKFLOW_PATHS;
+  os outros são ignorados mesmo que estejam no KV.
+• brand_profiles e generations usam o cliente Supabase (anon key) directamente
+  — não passam pela Edge Function.
+• Upload de imagens de prompts: bucket "prompt-images" (deve ser público).
+• Cópia de prompt para clipboard: remove linhas que começam com "Model:" e
+  "Casos de Uso:" antes de copiar.
+• Categorias protegidas ('Todas', 'Todos') não podem ser eliminadas pelo utilizador.
+• A subcategoria "Cinematografia" foi adicionada manualmente ao mapa de Design.
+• Script de seed: seed-cinematografia.ts (executar com npx tsx seed-cinematografia.ts)
+  — lê .env.local, faz merge idempotente por id, escreve em /prompts.
+
+═══════════════════════════════════════════════════════════════════
+ FIM DO RESUMO
+═══════════════════════════════════════════════════════════════════

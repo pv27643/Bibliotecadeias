@@ -1,12 +1,10 @@
 {
   "_info": {
-    "exportedAt": "2026-06-27",
-    "sources": {
-      "app_workflows": "KV Supabase — cards visíveis na app (7 entradas)",
-      "n8n_workflows": "Ficheiros locais em /workflows/ — importar directamente no n8n (2 ficheiros)"
-    }
+    "exportedAt": "2026-06-28",
+    "description": "Export completo dos workflows ativos do n8n — gerado automaticamente",
+    "n8n_instance": "http://localhost:5678",
+    "workflows_count": 8
   },
-
   "app_workflows": [
     {
       "id": "1",
@@ -15,9 +13,21 @@
       "category": "Marketing",
       "favorite": false,
       "steps": [
-        { "icon": "message-square", "tool": "ChatGPT",    "status": "pending" },
-        { "icon": "image",          "tool": "Midjourney", "status": "pending" },
-        { "icon": "smartphone",     "tool": "Buffer",     "status": "pending" }
+        {
+          "icon": "message-square",
+          "tool": "ChatGPT",
+          "status": "pending"
+        },
+        {
+          "icon": "image",
+          "tool": "Midjourney",
+          "status": "pending"
+        },
+        {
+          "icon": "smartphone",
+          "tool": "Buffer",
+          "status": "pending"
+        }
       ]
     },
     {
@@ -27,9 +37,21 @@
       "category": "Operações",
       "favorite": false,
       "steps": [
-        { "icon": "clipboard-list", "tool": "Typeform",    "status": "pending" },
-        { "icon": "message-square", "tool": "ChatGPT",     "status": "pending" },
-        { "icon": "message-square", "tool": "Slack",       "status": "pending" }
+        {
+          "icon": "clipboard-list",
+          "tool": "Typeform",
+          "status": "pending"
+        },
+        {
+          "icon": "message-square",
+          "tool": "ChatGPT",
+          "status": "pending"
+        },
+        {
+          "icon": "message-square",
+          "tool": "Slack",
+          "status": "pending"
+        }
       ]
     },
     {
@@ -39,9 +61,21 @@
       "category": "Vendas",
       "favorite": false,
       "steps": [
-        { "icon": "linkedin",       "tool": "LinkedIn",   "status": "pending" },
-        { "icon": "message-square", "tool": "ChatGPT",    "status": "pending" },
-        { "icon": "mail",           "tool": "Gmail",      "status": "pending" }
+        {
+          "icon": "linkedin",
+          "tool": "LinkedIn",
+          "status": "pending"
+        },
+        {
+          "icon": "message-square",
+          "tool": "ChatGPT",
+          "status": "pending"
+        },
+        {
+          "icon": "mail",
+          "tool": "Gmail",
+          "status": "pending"
+        }
       ]
     },
     {
@@ -51,19 +85,86 @@
       "category": "Marketing",
       "favorite": false,
       "steps": [
-        { "icon": "image",     "tool": "Análise Visual", "status": "pending" },
-        { "icon": "sparkles",  "tool": "GPT-4o Vision",  "status": "pending" },
-        { "icon": "image",     "tool": "DALL-E 3",        "status": "pending" }
+        {
+          "icon": "image",
+          "tool": "Análise Visual",
+          "status": "pending"
+        },
+        {
+          "icon": "sparkles",
+          "tool": "GPT-4o Vision",
+          "status": "pending"
+        },
+        {
+          "icon": "image",
+          "tool": "DALL-E 3",
+          "status": "pending"
+        }
       ],
       "inputs": [
-        { "name": "brandName",      "type": "text",     "label": "Nome da Marca",          "required": true,  "placeholder": "Ex: TechBrand" },
-        { "name": "postType",       "type": "select",   "label": "Tipo de Post",            "required": true,  "options": ["Quote Post","Announcement","Carousel Cover","Feature Post","Story Post"] },
-        { "name": "topic",          "type": "text",     "label": "Tópico",                  "required": true,  "placeholder": "Ex: New Product Launch" },
-        { "name": "mainMessage",    "type": "textarea", "label": "Mensagem Principal",      "required": true,  "placeholder": "Descreve a mensagem principal..." },
-        { "name": "headline",       "type": "text",     "label": "Headline",                "required": true,  "placeholder": "Ex: Revolucionando a indústria" },
-        { "name": "secondaryText",  "type": "textarea", "label": "Texto Secundário (opcional)", "placeholder": "Texto complementar..." },
-        { "name": "format",         "type": "select",   "label": "Formato",                 "options": ["1:1","9:16","16:9"] },
-        { "name": "images",         "type": "image",    "label": "Imagens de Referência",   "maxImages": 6 }
+        {
+          "name": "brandName",
+          "type": "text",
+          "label": "Nome da Marca",
+          "required": true,
+          "placeholder": "Ex: TechBrand"
+        },
+        {
+          "name": "postType",
+          "type": "select",
+          "label": "Tipo de Post",
+          "required": true,
+          "options": [
+            "Quote Post",
+            "Announcement",
+            "Carousel Cover",
+            "Feature Post",
+            "Story Post"
+          ]
+        },
+        {
+          "name": "topic",
+          "type": "text",
+          "label": "Tópico",
+          "required": true,
+          "placeholder": "Ex: New Product Launch"
+        },
+        {
+          "name": "mainMessage",
+          "type": "textarea",
+          "label": "Mensagem Principal",
+          "required": true,
+          "placeholder": "Descreve a mensagem principal..."
+        },
+        {
+          "name": "headline",
+          "type": "text",
+          "label": "Headline",
+          "required": true,
+          "placeholder": "Ex: Revolucionando a indústria"
+        },
+        {
+          "name": "secondaryText",
+          "type": "textarea",
+          "label": "Texto Secundário (opcional)",
+          "placeholder": "Texto complementar..."
+        },
+        {
+          "name": "format",
+          "type": "select",
+          "label": "Formato",
+          "options": [
+            "1:1",
+            "9:16",
+            "16:9"
+          ]
+        },
+        {
+          "name": "images",
+          "type": "image",
+          "label": "Imagens de Referência",
+          "maxImages": 6
+        }
       ]
     },
     {
@@ -74,18 +175,83 @@
       "favorite": false,
       "webhookUrl": "https://ivannnnnn.app.n8n.cloud/webhook/identidadevisual00",
       "steps": [
-        { "icon": "layout",   "tool": "N8N Webhook",   "status": "pending" },
-        { "icon": "sparkles", "tool": "GPT-4o Vision", "status": "pending" },
-        { "icon": "image",    "tool": "DALL-E 3",       "status": "pending" }
+        {
+          "icon": "layout",
+          "tool": "N8N Webhook",
+          "status": "pending"
+        },
+        {
+          "icon": "sparkles",
+          "tool": "GPT-4o Vision",
+          "status": "pending"
+        },
+        {
+          "icon": "image",
+          "tool": "DALL-E 3",
+          "status": "pending"
+        }
       ],
       "inputs": [
-        { "name": "file",           "type": "image",    "label": "Imagem de Referência",    "required": true,  "placeholder": "Carregar imagem com identidade visual" },
-        { "name": "post_type",      "type": "select",   "label": "Tipo de Post",             "required": true,  "placeholder": "Selecciona o tipo", "options": ["quote post","story post","carousel post","reel cover"] },
-        { "name": "topic",          "type": "text",     "label": "Tema/Tópico",              "required": true,  "placeholder": "ex: Lançamento de novo produto" },
-        { "name": "main_message",   "type": "textarea", "label": "Mensagem Principal",       "required": true,  "placeholder": "Texto principal do post" },
-        { "name": "format",         "type": "select",   "label": "Formato da Imagem",        "required": true,  "placeholder": "ex: 1:1", "options": ["1:1","9:16","16:9"] },
-        { "name": "headline",       "type": "text",     "label": "Headline",                 "required": false, "placeholder": "Título em destaque" },
-        { "name": "secondary_text", "type": "text",     "label": "Texto Secundário",         "required": false, "placeholder": "Texto de suporte" }
+        {
+          "name": "file",
+          "type": "image",
+          "label": "Imagem de Referência",
+          "required": true,
+          "placeholder": "Carregar imagem com identidade visual"
+        },
+        {
+          "name": "post_type",
+          "type": "select",
+          "label": "Tipo de Post",
+          "required": true,
+          "placeholder": "Selecciona o tipo",
+          "options": [
+            "quote post",
+            "story post",
+            "carousel post",
+            "reel cover"
+          ]
+        },
+        {
+          "name": "topic",
+          "type": "text",
+          "label": "Tema/Tópico",
+          "required": true,
+          "placeholder": "ex: Lançamento de novo produto"
+        },
+        {
+          "name": "main_message",
+          "type": "textarea",
+          "label": "Mensagem Principal",
+          "required": true,
+          "placeholder": "Texto principal do post"
+        },
+        {
+          "name": "format",
+          "type": "select",
+          "label": "Formato da Imagem",
+          "required": true,
+          "placeholder": "ex: 1:1",
+          "options": [
+            "1:1",
+            "9:16",
+            "16:9"
+          ]
+        },
+        {
+          "name": "headline",
+          "type": "text",
+          "label": "Headline",
+          "required": false,
+          "placeholder": "Título em destaque"
+        },
+        {
+          "name": "secondary_text",
+          "type": "text",
+          "label": "Texto Secundário",
+          "required": false,
+          "placeholder": "Texto de suporte"
+        }
       ]
     },
     {
@@ -96,12 +262,30 @@
       "favorite": false,
       "webhookUrl": "https://ivannnnnn.app.n8n.cloud/webhook/generate-product-photo00",
       "steps": [
-        { "icon": "layout",   "tool": "N8N Webhook",   "status": "pending" },
-        { "icon": "sparkles", "tool": "GPT-4o Vision", "status": "pending" },
-        { "icon": "image",    "tool": "DALL-E 3",       "status": "pending" }
+        {
+          "icon": "layout",
+          "tool": "N8N Webhook",
+          "status": "pending"
+        },
+        {
+          "icon": "sparkles",
+          "tool": "GPT-4o Vision",
+          "status": "pending"
+        },
+        {
+          "icon": "image",
+          "tool": "DALL-E 3",
+          "status": "pending"
+        }
       ],
       "inputs": [
-        { "name": "file", "type": "image", "label": "Foto do Produto", "required": true, "placeholder": "Carregar foto do produto" }
+        {
+          "name": "file",
+          "type": "image",
+          "label": "Foto do Produto",
+          "required": true,
+          "placeholder": "Carregar foto do produto"
+        }
       ]
     },
     {
@@ -112,19 +296,1804 @@
       "favorite": false,
       "webhookUrl": "https://ivannnnnn.app.n8n.cloud/webhook/removerfundo00",
       "steps": [
-        { "icon": "layout",   "tool": "N8N Webhook",  "status": "pending" },
-        { "icon": "sparkles", "tool": "GPT Image API","status": "pending" }
+        {
+          "icon": "layout",
+          "tool": "N8N Webhook",
+          "status": "pending"
+        },
+        {
+          "icon": "sparkles",
+          "tool": "GPT Image API",
+          "status": "pending"
+        }
       ],
       "inputs": [
-        { "name": "file", "type": "image", "label": "Imagem", "required": true, "placeholder": "Carregar imagem para remover fundo" }
+        {
+          "name": "file",
+          "type": "image",
+          "label": "Imagem",
+          "required": true,
+          "placeholder": "Carregar imagem para remover fundo"
+        }
       ]
     }
   ],
-
   "n8n_workflows": {
+    "w1-extract-brand-style": {
+      "_n8n_id": "OGnbQfBFJerqUQZr",
+      "_description": "W1 — Extract Brand Style",
+      "_updatedAt": "2026-06-28T22:08:53.212Z",
+      "name": "W1 — Extract Brand Style",
+      "nodes": [
+        {
+          "id": "node-webhook",
+          "name": "Webhook",
+          "type": "n8n-nodes-base.webhook",
+          "typeVersion": 2.1,
+          "position": [
+            240,
+            300
+          ],
+          "webhookId": "extract-brand-style-wh",
+          "parameters": {
+            "httpMethod": "POST",
+            "path": "extract-brand-style",
+            "responseMode": "lastNode",
+            "options": {}
+          }
+        },
+        {
+          "id": "node-prepare",
+          "name": "Extrair Input",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            460,
+            300
+          ],
+          "parameters": {
+            "jsCode": "const body = $input.first().json.body || $input.first().json;\nconst sourceType = body.source_type || 'url';\nconst url = body.url || '';\nconst brandName = body.brand_name || 'Unknown Brand';\nreturn [{ json: { sourceType, url, brandName } }];"
+          }
+        },
+        {
+          "id": "node-jina",
+          "name": "Jina Reader",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.2,
+          "position": [
+            680,
+            300
+          ],
+          "parameters": {
+            "method": "GET",
+            "url": "=https://r.jina.ai/{{ $json.url }}",
+            "options": {
+              "timeout": 30000
+            },
+            "sendHeaders": true,
+            "headerParameters": {
+              "parameters": [
+                {
+                  "name": "Accept",
+                  "value": "text/plain"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "node-openai-payload",
+          "name": "Montar Payload OpenAI",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            1120,
+            300
+          ],
+          "parameters": {
+            "jsCode": "const { jinaText, screenshotB64, hasScreenshot } = $input.first().json;\nconst { brandName, url, sourceType } = $('Extrair Input').first().json;\n\nconst systemPrompt = `És um analista sénior de identidade de marca e especialista em design systems. A tua missão é extrair um Brand Style Profile (BSP) completo e rigoroso.\n\nREGRAS DE EXTRAÇÃO:\n1. CORES: Extrai hex codes REAIS do CSS, estilos inline ou elementos visuais visíveis. Nunca uses #000000/#ffffff como placeholder — se a marca usar preto/branco puro, indica-o explicitamente. Fornece mínimo 6 cores.\n2. TIPOGRAFIA: Identifica nomes reais de fontes (Google Fonts, Adobe Fonts, fontes do sistema). Procura declarações font-family, @import, ou referências Typekit.\n3. TOM DE VOZ: Extrai frases reais da página — headlines, CTAs, taglines, descrições de produto. Mínimo 5 sample_phrases reais, não inventadas.\n4. ESTILO VISUAL: Analisa a linguagem visual — editorial/lifestyle/produto/minimalista/bold? Que cores dominam as imagens? Qual é o estilo de composição?\n5. STYLE_ANCHOR_PROMPT: Gera um parágrafo de 200 palavras que descreve o estilo visual completo da marca de forma tão precisa que qualquer modelo de geração de imagem pode replicar esta identidade visual apenas com este parágrafo. Inclui: paleta com hex codes e papéis, estilo de iluminação e temperatura de cor, regras de composição, texturas e materiais, tratamento tipográfico, mood geral. Escreve como um brief de diretor de arte profissional.\n6. REFERENCE_IMAGES: Array com descrições textuais das imagens de referência que melhor representam o estilo visual da marca (extraídas do conteúdo analisado).\n\nOUTPUT: JSON válido apenas, sem markdown. Schema exato:\n{\n  \"brand_name\": \"string\",\n  \"source\": { \"type\": \"url\", \"ref\": \"string\" },\n  \"palette\": {\n    \"primary\": \"#hex\", \"secondary\": \"#hex\", \"accent\": \"#hex\",\n    \"neutral\": \"#hex\", \"background\": \"#hex\", \"text\": \"#hex\",\n    \"extra\": [\"#hex\"]\n  },\n  \"typography\": {\n    \"heading_font\": \"Nome da Fonte\", \"body_font\": \"Nome da Fonte\",\n    \"weights\": [\"400\",\"600\",\"700\"], \"scale\": \"1.25\"\n  },\n  \"logo\": { \"url\": null, \"variants\": [\"primary\",\"reversed\"], \"clear_space\": \"descrição\" },\n  \"tone_of_voice\": {\n    \"adjectives\": [\"palavra1\",\"palavra2\",\"palavra3\",\"palavra4\",\"palavra5\"],\n    \"do\": [\"regra1\",\"regra2\",\"regra3\",\"regra4\"],\n    \"dont\": [\"regra1\",\"regra2\",\"regra3\",\"regra4\"],\n    \"sample_phrases\": [\"Frase real da página 1\",\"Frase real da página 2\",\"Frase real da página 3\",\"Frase real da página 4\",\"Frase real da página 5\"]\n  },\n  \"imagery_style\": {\n    \"description\": \"Descrição de 2 frases do estilo fotográfico/visual da marca\",\n    \"composition_rules\": [\"regra1 (ex: sujeito centrado com 40% espaço negativo)\",\"regra2\",\"regra3\"],\n    \"filters\": \"descrição do color grading e tratamento (ex: tom quente desaturado estilo film, alto contraste frio, limpo e luminoso)\"\n  },\n  \"layout_patterns\": {\n    \"grid\": \"12-col / 6-col / fluid\",\n    \"spacing\": \"compact / comfortable / generous\",\n    \"alignment\": \"left / center / right\",\n    \"recurring_elements\": [\"hero banner\",\"grid de cartões\",\"imagem full-bleed\"]\n  },\n  \"platforms\": {\n    \"instagram\": { \"aspect_ratios\": [\"1:1\",\"9:16\"], \"post_types\": [\"produto\",\"lifestyle\",\"citação\"] },\n    \"linkedin\": { \"aspect_ratios\": [\"1.91:1\",\"1:1\"], \"post_types\": [\"artigo\",\"anúncio\"] }\n  },\n  \"style_anchor_prompt\": \"Parágrafo de 200 palavras para uso direto em prompts de imagem — descreve estilo fotográfico completo, paleta com hex e papéis, iluminação técnica, composição, texturas, mood\",\n  \"reference_images\": [\"Descrição imagem de referência 1\",\"Descrição imagem de referência 2\",\"Descrição imagem de referência 3\"]\n}`;\n\nconst userContent = [];\n\nif (hasScreenshot && screenshotB64) {\n  userContent.push({\n    type: 'image_url',\n    image_url: { url: `data:image/jpeg;base64,${screenshotB64}`, detail: 'high' }\n  });\n  userContent.push({\n    type: 'text',\n    text: `Marca: ${brandName}\\nURL: ${url}\\n\\nO screenshot acima mostra o website da marca. Analisa VISUALMENTE as cores reais, estilo fotográfico, composição, tipografia e identidade visual.\\n\\nConteúdo de texto extraído da página:\\n${jinaText.slice(0, 8000)}\\n\\nExtrai o BSP completo combinando a análise visual do screenshot COM o conteúdo de texto.`\n  });\n} else {\n  userContent.push({\n    type: 'text',\n    text: `Marca: ${brandName}\\nURL: ${url}\\n\\nConteúdo da página web:\\n${jinaText}\\n\\nExtrai o BSP completo. Faz inferências precisas e profissionais onde os dados não são explícitos.`\n  });\n}\n\nconst payload = {\n  model: 'gpt-4o',\n  max_tokens: 4096,\n  response_format: { type: 'json_object' },\n  messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userContent }]\n};\nreturn [{ json: { payload, brandName, url, sourceType } }];"
+          }
+        },
+        {
+          "id": "node-openai",
+          "name": "OpenAI GPT-4o",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.2,
+          "position": [
+            1340,
+            300
+          ],
+          "parameters": {
+            "method": "POST",
+            "url": "https://api.openai.com/v1/chat/completions",
+            "authentication": "predefinedCredentialType",
+            "nodeCredentialType": "openAiApi",
+            "sendBody": true,
+            "contentType": "raw",
+            "rawContentType": "application/json",
+            "body": "={{ JSON.stringify($json.payload) }}",
+            "options": {
+              "timeout": 90000
+            }
+          },
+          "credentials": {
+            "openAiApi": {
+              "id": "8QZH2HYI3IvfDZQo",
+              "name": "OpenAI account"
+            }
+          }
+        },
+        {
+          "id": "node-parse-bsp",
+          "name": "Parsear BSP",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            1560,
+            300
+          ],
+          "parameters": {
+            "jsCode": "const openAiResp = $input.first().json;\nconst meta = $('Montar Payload OpenAI').first().json;\nconst rawText = openAiResp.choices?.[0]?.message?.content || '';\nif (!rawText) throw new Error('OpenAI empty: ' + JSON.stringify(openAiResp).slice(0,200));\nlet bsp;\ntry { bsp = JSON.parse(rawText); } catch(e) { throw new Error('BSP parse failed: ' + rawText.slice(0,200)); }\nbsp.brand_name = bsp.brand_name || meta.brandName;\nbsp.source = bsp.source || { type: meta.sourceType, ref: meta.url };\nconst supabasePayload = { brand_name: bsp.brand_name, source: bsp.source || {}, palette: bsp.palette || {}, typography: bsp.typography || {}, logo: bsp.logo || {}, tone_of_voice: bsp.tone_of_voice || {}, imagery_style: bsp.imagery_style || {}, layout_patterns: bsp.layout_patterns || {}, platforms: bsp.platforms || {} };\nreturn [{ json: { bsp, supabasePayload } }];"
+          }
+        },
+        {
+          "id": "node-supabase",
+          "name": "Guardar Supabase",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.2,
+          "position": [
+            1780,
+            300
+          ],
+          "parameters": {
+            "method": "POST",
+            "url": "https://rgbszdjyubbxhzhspuqv.supabase.co/rest/v1/brand_profiles",
+            "sendBody": true,
+            "contentType": "raw",
+            "rawContentType": "application/json",
+            "body": "={{ JSON.stringify($json.supabasePayload) }}",
+            "sendHeaders": true,
+            "headerParameters": {
+              "parameters": [
+                {
+                  "name": "apikey",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJnYnN6ZGp5dWJieGh6aHNwdXF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3MDU4MzMsImV4cCI6MjA5MzI4MTgzM30.y-9yb6tKrjlCI43fIT_XtDnUEcqLuA_7hVlg5-wvE80"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJnYnN6ZGp5dWJieGh6aHNwdXF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3MDU4MzMsImV4cCI6MjA5MzI4MTgzM30.y-9yb6tKrjlCI43fIT_XtDnUEcqLuA_7hVlg5-wvE80"
+                },
+                {
+                  "name": "Prefer",
+                  "value": "return=representation"
+                }
+              ]
+            },
+            "options": {}
+          }
+        },
+        {
+          "id": "node-format",
+          "name": "Formatar Resposta",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            2000,
+            300
+          ],
+          "parameters": {
+            "jsCode": "const saved = $input.first().json;\nconst record = Array.isArray(saved) ? saved[0] : saved;\nconst bsp = $('Parsear BSP').first().json.bsp;\nreturn [{ json: { brand: { ...bsp, id: record.id, created_at: record.created_at, updated_at: record.updated_at } } }];"
+          }
+        },
+        {
+          "id": "n-screenshot",
+          "name": "Capturar Screenshot",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            900,
+            300
+          ],
+          "parameters": {
+            "jsCode": "const { url } = $('Extrair Input').first().json;\nconst jinaRaw = $input.first().json;\nconst jinaText = typeof jinaRaw.data === 'string' ? jinaRaw.data : JSON.stringify(jinaRaw);\n\n// Configura SCREENSHOTONE_KEY em n8n Settings → Environment Variables para ativar screenshots\n// Regista gratuitamente em screenshotone.com — free tier com 100 capturas/mês\nconst SCREENSHOT_KEY = process.env.SCREENSHOTONE_KEY || '';\nlet screenshotB64 = null;\n\nif (SCREENSHOT_KEY) {\n  try {\n    const sUrl = `https://api.screenshotone.com/take?access_key=${SCREENSHOT_KEY}&url=${encodeURIComponent(url)}&format=jpg&viewport_width=1440&viewport_height=900&block_ads=true&cache=true&delay=2&image_quality=80`;\n    const resp = await fetch(sUrl, { signal: AbortSignal.timeout(30000) });\n    if (resp.ok && (resp.headers.get('content-type') || '').startsWith('image/')) {\n      const buf = await resp.arrayBuffer();\n      screenshotB64 = Buffer.from(buf).toString('base64');\n    }\n  } catch (_) { /* screenshot opcional — falha silenciosa */ }\n}\n\nreturn [{ json: { jinaText: jinaText.slice(0, 14000), screenshotB64, hasScreenshot: !!screenshotB64 } }];"
+          }
+        }
+      ],
+      "connections": {
+        "Webhook": {
+          "main": [
+            [
+              {
+                "node": "Extrair Input",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Extrair Input": {
+          "main": [
+            [
+              {
+                "node": "Jina Reader",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Jina Reader": {
+          "main": [
+            [
+              {
+                "node": "Capturar Screenshot",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Montar Payload OpenAI": {
+          "main": [
+            [
+              {
+                "node": "OpenAI GPT-4o",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "OpenAI GPT-4o": {
+          "main": [
+            [
+              {
+                "node": "Parsear BSP",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Parsear BSP": {
+          "main": [
+            [
+              {
+                "node": "Guardar Supabase",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Guardar Supabase": {
+          "main": [
+            [
+              {
+                "node": "Formatar Resposta",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Capturar Screenshot": {
+          "main": [
+            [
+              {
+                "node": "Montar Payload OpenAI",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        }
+      },
+      "settings": {
+        "executionOrder": "v1"
+      },
+      "staticData": null,
+      "pinData": {},
+      "tags": []
+    },
+    "w2-generate-post": {
+      "_n8n_id": "SvzfEMFAIsbmQLLv",
+      "_description": "W2 — Generate Post",
+      "_updatedAt": "2026-06-28T22:08:53.290Z",
+      "name": "W2 — Generate Post",
+      "nodes": [
+        {
+          "id": "n-webhook",
+          "name": "Webhook",
+          "type": "n8n-nodes-base.webhook",
+          "typeVersion": 2.1,
+          "position": [
+            240,
+            300
+          ],
+          "webhookId": "generate-post-wh",
+          "parameters": {
+            "httpMethod": "POST",
+            "path": "generate-post",
+            "responseMode": "lastNode",
+            "options": {}
+          }
+        },
+        {
+          "id": "n-extract",
+          "name": "Extrair Input",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            460,
+            300
+          ],
+          "parameters": {
+            "jsCode": "const body = $input.first().json.body || $input.first().json;\nconst brandId = body.brand_id || '';\nconst theme = body.theme || '';\nconst platform = body.platform || 'Instagram';\nconst goal = body.goal || 'Engagement';\nconst extraContext = body.extra_context || '';\nif (!brandId) throw new Error('brand_id is required');\nreturn [{ json: { brandId, theme, platform, goal, extraContext } }];"
+          }
+        },
+        {
+          "id": "n-supabase-get",
+          "name": "Buscar BSP Supabase",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.2,
+          "position": [
+            680,
+            300
+          ],
+          "parameters": {
+            "method": "GET",
+            "url": "=https://rgbszdjyubbxhzhspuqv.supabase.co/rest/v1/brand_profiles?id=eq.{{ $json.brandId }}&select=*",
+            "sendHeaders": true,
+            "headerParameters": {
+              "parameters": [
+                {
+                  "name": "apikey",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJnYnN6ZGp5dWJieGh6aHNwdXF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3MDU4MzMsImV4cCI6MjA5MzI4MTgzM30.y-9yb6tKrjlCI43fIT_XtDnUEcqLuA_7hVlg5-wvE80"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJnYnN6ZGp5dWJieGh6aHNwdXF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3MDU4MzMsImV4cCI6MjA5MzI4MTgzM30.y-9yb6tKrjlCI43fIT_XtDnUEcqLuA_7hVlg5-wvE80"
+                },
+                {
+                  "name": "Accept",
+                  "value": "application/json"
+                }
+              ]
+            },
+            "options": {}
+          }
+        },
+        {
+          "id": "n-build-payload",
+          "name": "Montar Payload OpenAI",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            900,
+            300
+          ],
+          "parameters": {
+            "jsCode": "const inputs = $('Extrair Input').first().json;\nconst supaResp = $input.first().json;\nconst bsp = Array.isArray(supaResp) ? supaResp[0] : supaResp;\nif (!bsp || !bsp.brand_name) throw new Error('BSP não encontrado para id: ' + inputs.brandId);\n\nconst tov = bsp.tone_of_voice || {};\nconst img = bsp.imagery_style || {};\nconst p   = bsp.palette || {};\n\nconst styleAnchor = bsp.style_anchor_prompt ||\n  `Marca: ${bsp.brand_name}. Paleta: primária ${p.primary||'N/A'}, secundária ${p.secondary||'N/A'}, accent ${p.accent||'N/A'}, fundo ${p.background||'N/A'}. Imagem: ${img.description||'fotografia comercial profissional'}. Composição: ${(img.composition_rules||[]).join(', ')||'profissional'}. Tratamento: ${img.filters||'limpo, nítido, profissional'}.`;\n\nconst platformRules = {\n  Instagram: 'Máx 2200 caract. Hook na PRIMEIRA linha (sem emoji até linha 2). 3-5 hashtags agrupados no fim. Parágrafos curtos com espaço entre eles. Primeiros 125 caract. devem funcionar sozinhos como preview.',\n  LinkedIn:  'Profissional mas humano. Máx 1500 caract. Máx 3 hashtags. Abre com insight ou afirmação contraintuitiva. Sem clichés motivacionais.',\n  TikTok:    'Conversacional, soa a fala não a texto. Hook nas primeiras 3 palavras. Máx 300 caract. 1 hashtag no máximo.',\n  'Twitter/X': 'Máx 280 caract. Direto, provocador ou útil. 1 hashtag máximo ou nenhum.'\n};\nconst rule = platformRules[inputs.platform] || 'Adapta às normas da plataforma.';\n\nconst hashtagRules = `HASHTAGS — REGRAS OBRIGATÓRIAS:\n- NUNCA usar hashtags genéricas (#marketing #business #entrepreneur #success)\n- Usar apenas hashtags específicas ao nicho da marca: setor, produto, comunidade\n- Exemplos CORRETOS para uma marca de fitness: #treino #musculacao #nutrição (não #fitness #gym #health)\n- Exemplos CORRETOS para uma marca de tech: #startuptech #desenvolvedores #ux (não #technology #innovation)\n- Máximo 5 hashtags — qualidade sobre quantidade`;\n\nconst systemPrompt = `És um copywriter sénior de redes sociais especializado em conteúdo de marca para o mercado português. Escreves em PORTUGUÊS EUROPEU (pt-PT) — nunca em pt-BR, nunca em inglês.\n\nIDENTIDADE DE MARCA:\nMarca: ${bsp.brand_name}\nTom de voz: ${(tov.adjectives||[]).join(', ')}\n\nFAZER (obrigatório — todos os posts seguem TODAS estas regras):\n${(tov.do||[]).join('\\n')}\n\nNÃO FAZER (violação = falha):\n${(tov.dont||[]).join('\\n')}\n\nREFERÊNCIAS DE VOZ — as legendas devem soar como estas frases:\n${(tov.sample_phrases||[]).join('\\n')}\n\nIDENTIDADE VISUAL:\n${styleAnchor}\n\nPLATAFORMA: ${inputs.platform}\nREGRAS: ${rule}\n\n${hashtagRules}\n\nTAREFA:\nTema: ${inputs.theme}\nObjetivo: ${inputs.goal}\nFormato: ${inputs.format||'Post simples'}\nContexto extra: ${inputs.extraContext||'nenhum'}\n\nGera 3 variações de legenda com ângulos diferentes:\n1. EMOCIONAL — apela à emoção, aspiração ou identidade do utilizador\n2. INFORMATIVO — entrega um facto, dica ou insight concreto\n3. PROVOCADOR — faz uma afirmação ousada, pergunta ou desafio que gera debate\n\nPara cada variação, gera também um visual_concept de 3 frases exatas:\nFrase 1: Estilo fotográfico (fotografia de produto comercial / lifestyle editorial / etc.) e descrição do sujeito com materiais e texturas.\nFrase 2: Setup de iluminação — key light (direção, tipo, temperatura em Kelvin, ex: 45° superior esquerdo, softbox grande, 5500K) e especificação da câmara (focal length mm, abertura f/).\nFrase 3: \"As ÚNICAS cores presentes são: primária ${p.primary||'N/A'} como [papel], secundária ${p.secondary||'N/A'} como [papel], accent ${p.accent||'N/A'} como [papel]. ${(img.composition_rules||['composição profissional']).join(', ')}. Tratamento: ${img.filters||'limpo profissional'}.\"\n\nOUTPUT — JSON válido apenas, sem markdown:\n{\n  \"caption\": \"legenda principal (variação emocional)\",\n  \"hashtags\": [\"#tag_especifica1\",\"#tag_especifica2\",\"#tag_especifica3\"],\n  \"cta\": \"chamada para ação\",\n  \"visual_concept\": \"brief visual de 3 frases com specs de iluminação e hex codes da paleta\",\n  \"variations\": {\n    \"emocional\":   { \"caption\": \"...\", \"hashtags\": [\"...\"], \"visual_concept\": \"...\" },\n    \"informativo\": { \"caption\": \"...\", \"hashtags\": [\"...\"], \"visual_concept\": \"...\" },\n    \"provocador\":  { \"caption\": \"...\", \"hashtags\": [\"...\"], \"visual_concept\": \"...\" }\n  }\n}`;\n\nconst userMessage = `Tema: ${inputs.theme}\\nPlataforma: ${inputs.platform}\\nObjetivo: ${inputs.goal}` +\n  (inputs.extraContext ? `\\nContexto extra: ${inputs.extraContext}` : '');\n\nconst payload = {\n  model: 'gpt-4o',\n  max_tokens: 3000,\n  response_format: { type: 'json_object' },\n  messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userMessage }]\n};\nreturn [{ json: { payload, brandId: inputs.brandId, bspName: bsp.brand_name } }];"
+          }
+        },
+        {
+          "id": "n-openai",
+          "name": "OpenAI GPT-4o",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.2,
+          "position": [
+            1120,
+            300
+          ],
+          "parameters": {
+            "method": "POST",
+            "url": "https://api.openai.com/v1/chat/completions",
+            "authentication": "predefinedCredentialType",
+            "nodeCredentialType": "openAiApi",
+            "sendBody": true,
+            "contentType": "raw",
+            "rawContentType": "application/json",
+            "body": "={{ JSON.stringify($json.payload) }}",
+            "options": {
+              "timeout": 60000
+            }
+          },
+          "credentials": {
+            "openAiApi": {
+              "id": "8QZH2HYI3IvfDZQo",
+              "name": "OpenAI account"
+            }
+          }
+        },
+        {
+          "id": "n-parse",
+          "name": "Parsear Resultado",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            1340,
+            300
+          ],
+          "parameters": {
+            "jsCode": "const openAiResp = $input.first().json;\nconst rawText = openAiResp.choices?.[0]?.message?.content || '';\nif (!rawText) throw new Error('OpenAI empty response');\nlet result;\ntry { result = JSON.parse(rawText); }\ncatch(e) { throw new Error('JSON parse failed: ' + rawText.slice(0,200)); }\nreturn [{ json: {\n  caption: result.caption || '',\n  hashtags: result.hashtags || [],\n  cta: result.cta || '',\n  visual_concept: result.visual_concept || '',\n  variations: result.variations || {}\n} }];"
+          }
+        }
+      ],
+      "connections": {
+        "Webhook": {
+          "main": [
+            [
+              {
+                "node": "Extrair Input",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Extrair Input": {
+          "main": [
+            [
+              {
+                "node": "Buscar BSP Supabase",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Buscar BSP Supabase": {
+          "main": [
+            [
+              {
+                "node": "Montar Payload OpenAI",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Montar Payload OpenAI": {
+          "main": [
+            [
+              {
+                "node": "OpenAI GPT-4o",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "OpenAI GPT-4o": {
+          "main": [
+            [
+              {
+                "node": "Parsear Resultado",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        }
+      },
+      "settings": {
+        "executionOrder": "v1"
+      },
+      "staticData": null,
+      "pinData": {},
+      "tags": []
+    },
+    "w3-generate-visual": {
+      "_n8n_id": "Vm15borjq3jdaKRS",
+      "_description": "W3 — Generate Visual",
+      "_updatedAt": "2026-06-28T22:08:53.387Z",
+      "name": "W3 — Generate Visual",
+      "nodes": [
+        {
+          "id": "n-wh",
+          "name": "Webhook",
+          "type": "n8n-nodes-base.webhook",
+          "typeVersion": 2.1,
+          "position": [
+            240,
+            300
+          ],
+          "parameters": {
+            "httpMethod": "POST",
+            "path": "generate-visual",
+            "responseMode": "lastNode",
+            "options": {}
+          },
+          "webhookId": "gen-visual-wh-v2"
+        },
+        {
+          "id": "n-ex",
+          "name": "Extrair Input",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            460,
+            300
+          ],
+          "parameters": {
+            "jsCode": "const body = $input.first().json.body || $input.first().json;\nconst brandId = body.brand_id || ''; if (!brandId) throw new Error('brand_id required');\nconst concept = body.concept || 'Brand social media post';\nconst textOverlay = body.text_overlay || '';\nconst aspectRatio = body.aspect_ratio || '1:1 (Feed)';\nreturn [{ json: { brandId, concept, textOverlay, aspectRatio } }];"
+          }
+        },
+        {
+          "id": "n-supa",
+          "name": "Buscar BSP Supabase",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.2,
+          "position": [
+            680,
+            300
+          ],
+          "parameters": {
+            "method": "GET",
+            "url": "=https://rgbszdjyubbxhzhspuqv.supabase.co/rest/v1/brand_profiles?id=eq.{{ $json.brandId }}&select=*",
+            "sendHeaders": true,
+            "headerParameters": {
+              "parameters": [
+                {
+                  "name": "apikey",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJnYnN6ZGp5dWJieGh6aHNwdXF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3MDU4MzMsImV4cCI6MjA5MzI4MTgzM30.y-9yb6tKrjlCI43fIT_XtDnUEcqLuA_7hVlg5-wvE80"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJnYnN6ZGp5dWJieGh6aHNwdXF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3MDU4MzMsImV4cCI6MjA5MzI4MTgzM30.y-9yb6tKrjlCI43fIT_XtDnUEcqLuA_7hVlg5-wvE80"
+                },
+                {
+                  "name": "Accept",
+                  "value": "application/json"
+                }
+              ]
+            },
+            "options": {}
+          }
+        },
+        {
+          "id": "n-anchor",
+          "name": "Construir Style Anchor",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            900,
+            300
+          ],
+          "parameters": {
+            "jsCode": "const rawBsp = $input.first().json;\nconst bsp = Array.isArray(rawBsp) ? rawBsp[0] : rawBsp;\nif (!bsp || !bsp.brand_name) throw new Error('Brand not found');\nconst p = bsp.palette || {};\nconst img = bsp.imagery_style || {};\nconst lay = bsp.layout_patterns || {};\nconst typ = bsp.typography || {};\nconst tov = bsp.tone_of_voice || {};\nconst inputs = $('Extrair Input').first().json;\nconst extraColors = (p.extra || []).map((c, i) => `Extra${i+1}: ${c}`).join(', ');\nconst paletteStr = `Primary: ${p.primary||'N/A'} | Secondary: ${p.secondary||'N/A'} | Accent: ${p.accent||'N/A'} | Background: ${p.background||'N/A'} | Neutral: ${p.neutral||'N/A'} | Text: ${p.text||'N/A'}${extraColors ? ' | '+extraColors : ''}`;\nconst styleAnchor = `BRAND: ${bsp.brand_name}\\nCOLOR PALETTE (ONLY THESE HEX CODES — NO EXCEPTIONS): ${paletteStr}\\nIMAGERY: ${img.description||'clean professional commercial photography'}\\nCOMPOSITION RULES: ${(img.composition_rules||[]).join(' | ')||'professional composition'}\\nVISUAL TREATMENT: ${img.filters||'clean, sharp, professional'}\\nLAYOUT: ${lay.grid||'flexible'} | spacing: ${lay.spacing||'generous'} | alignment: ${lay.alignment||'left'}\\nTYPOGRAPHY: ${typ.heading_font||'sans-serif'} (${(typ.weights||['400','700']).join('/')})\\nTONE: ${(tov.adjectives||[]).join(', ')}`;\nreturn [{ json: { bsp, styleAnchor, ...inputs } }];"
+          }
+        },
+        {
+          "id": "n-enhpay",
+          "name": "Montar Enhancer Payload",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            1120,
+            300
+          ],
+          "parameters": {
+            "jsCode": "const { styleAnchor, concept, textOverlay, aspectRatio, bsp } = $input.first().json;\nconst brandName = bsp?.brand_name || 'a marca';\nconst p = bsp?.palette || {};\nconst img = bsp?.imagery_style || {};\n\nconst fullStyleAnchor = bsp?.style_anchor_prompt || styleAnchor;\n\nconst systemPrompt = `És um diretor de arte sénior e prompt engineer especializado em fotografia comercial de marca para redes sociais.\n\nA tua missão: expandir um conceito visual breve num prompt de geração de imagem ultra-detalhado (MÍNIMO 800 PALAVRAS) que garante precisão fotográfica e consistência de marca total.\n\nESTRUTURA OBRIGATÓRIA — segue EXATAMENTE esta ordem:\n\n1. GÉNERO FOTOGRÁFICO\nDeclara o estilo fotográfico exato: fotografia de produto comercial / editorial lifestyle / campanha de beleza / fotografia de comida / editorial de moda / reportagem de marca / UGC autêntico / etc.\nExplica porque este género serve o conceito.\n\n2. SUJEITO PRINCIPAL\nDescreve o sujeito com especificidade de materiais:\n- Acabamento superficial: matte / gloss / satin / texturizado / rugoso\n- Textura e material: metal escovado, vidro, couro vegetal, tecido orgânico, cerâmica, etc.\n- Dimensão relativa ao frame: ocupa X% do quadro\n- Posição exata no frame: terço superior direito / centro / âncora inferior esquerda\n- Orientação: frontal / 3/4 / perfil / overhead / inclinação de X°\n\n3. SETUP DE ILUMINAÇÃO — especificidade técnica total\nKey light:\n- Direção: X° a partir de Y (ex: 45° a partir do superior esquerdo)\n- Tipo: softbox grande (120x80cm) / janela natural difusa / beauty dish / painel LED / luz de teto\n- Temperatura de cor: XXXXXK (ex: 5500K luz do dia, 3200K tungsteno, 4000K neutro)\n- Intensidade: dominante\n\nFill light:\n- Fonte: reflector / segundo softbox / luz ambiente\n- Rácio key-to-fill: X:1 (ex: 3:1 para contraste moderado, 6:1 para dramático)\n- Lado: oposto ao key\n\nRim/separation light (se relevante):\n- Temperatura de cor diferente do key\n- Posição: posterior X°\n\nQualidade das sombras:\n- Duras/suaves\n- Direção e densidade\n- Descrição da sombra no chão/superfície\n\n4. CÂMARA E LENTE — especificações precisas\n- Focal length: XXmm (ex: 85mm para compressão de produto, 50mm para lifestyle, 35mm para ambiente)\n- Abertura: f/X.X (ex: f/1.8 para separação de fundo forte, f/8 para nitidez total do produto)\n- Profundidade de campo resultante em linguagem simples\n- Ângulo de câmara: nível dos olhos / 15° acima / nível do produto / overhead / X° abaixo\n\n5. COMPOSIÇÃO DETALHADA\n- Posicionamento do sujeito: terço superior direito / centro perfeito / diagonal de canto a canto\n- Espaço negativo: X% e localização exata\n- Linhas diretrizes: se presentes, onde e para onde conduzem o olho\n- Camadas de profundidade: primeiro plano / plano médio / fundo — o que está em cada um\n- Relação entre elementos: distâncias, sobreposições, escala relativa\n\n6. ENFORCEMENT DE CORES — NÃO NEGOCIÁVEL\n\"As ÚNICAS cores presentes nesta imagem são as cores da paleta da marca. Cada hex tem um papel específico:\n- ${p.primary||'cor primária'}: [papel dominante — fundo / sujeito / superfície]\n- ${p.secondary||'cor secundária'}: [papel de suporte — elemento de enquadramento / prop / textura]\n- ${p.accent||'cor de accent'}: [ponto focal — highlight / detalhe / CTA visual]\n- ${p.background||'cor de fundo'}: [fundo / superfície base]\nA temperatura de cor da iluminação REFORÇA estes tons. NÃO introduzir NENHUMA cor fora desta paleta. Sem tons concorrentes, sem cast de cor acidental do ambiente, sem cinzentos neutros que quebrem a paleta.\"\n\n7. SUPERFÍCIE E AMBIENTE\n- Superfície onde o sujeito repousa: material, cor exata da paleta, textura\n- O que existe atrás: material, tratamento, foco\n- Props se existirem: o que são, onde exatamente, que cor da paleta têm\n- Sensação de escala do espaço: íntimo / estúdio / ambiente natural\n\n8. COLOR GRADING E PÓS-PROCESSAMENTO\n- Temperatura geral: tom quente / frio / neutro\n- Saturação: ex: \"ligeiramente desaturado, -15%, estilo film\" / \"vívido e saturado\" / \"pastel suave\"\n- Contraste: low-key / high-key / contraste cinematográfico médio\n- Tratamento das luzes: preservadas e detalhadas / suavemente esbatidas / halo luminoso\n- Tratamento das sombras: preto esmagado / detalhe de sombra levantado / tom azulado\n- Grain/noise se relevante: ausente / ligeiro grain analógico\n\n9. ÂNCORA DE CONSISTÊNCIA DE MARCA\n\"Esta imagem pertence a uma série visual para ${brandName}. Cada elemento — direção da iluminação, paleta de cores, abordagem de composição, tratamento de pós-processamento, escolha de profundidade de campo — deve ser idêntico em abordagem a todas as outras imagens desta série. Desvio visual não é aceitável. Um utilizador que veja esta imagem ao lado de outra da série deve reconhecer imediatamente que pertencem ao mesmo mundo de marca.\"\n\n10. ÂNCORA DE ESTILO DE MARCA (referência visual completa)\n${fullStyleAnchor}\n\n11. NEGATIVE PROMPT — elementos proibidos explícitos\n\"NÃO incluir: nenhuma cor fora da paleta da marca definida, marcas de água, logos ou texto exceto se especificado, fundos sobrecarregados, sombras duras e desagradáveis, estética de stock photo ou look genérico, iluminação irreal ou artificial, saturação excessiva, efeito HDR, vinheta pesada, distorção de lente, motion blur, aparência de baixa resolução, plástico ou textura de pele sintética se houver pessoas.\"\n\nREGRA DE OUTPUT: Devolve APENAS o texto do prompt. Sem cabeçalhos, sem labels de secção, sem JSON, sem markdown. Texto descritivo fluente e puro, mínimo 800 palavras.`;\n\nconst userMessage = `IDENTIDADE VISUAL DA MARCA:\\n${fullStyleAnchor}\\n\\nCONCEITO VISUAL A EXPANDIR: ${concept}` +\n  (textOverlay ? `\\nTEXTO A RENDERIZAR NA IMAGEM: \"${textOverlay}\" — tipografia da marca, garantir legibilidade sobre o fundo` : '') +\n  `\\nFORMATO ALVO: ${aspectRatio}\\n\\nExpande num prompt ultra-detalhado de 800+ palavras.`;\n\nconst payload = {\n  model: 'gpt-4o',\n  max_tokens: 2200,\n  temperature: 0.7,\n  messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userMessage }]\n};\nreturn [{ json: { payload } }];"
+          }
+        },
+        {
+          "id": "n-enh",
+          "name": "GPT-4o Enhancer",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.2,
+          "position": [
+            1340,
+            300
+          ],
+          "parameters": {
+            "method": "POST",
+            "url": "https://api.openai.com/v1/chat/completions",
+            "authentication": "predefinedCredentialType",
+            "nodeCredentialType": "openAiApi",
+            "sendBody": true,
+            "contentType": "raw",
+            "rawContentType": "application/json",
+            "body": "={{ JSON.stringify($json.payload) }}",
+            "options": {
+              "timeout": 90000
+            }
+          },
+          "credentials": {
+            "openAiApi": {
+              "id": "8QZH2HYI3IvfDZQo",
+              "name": "OpenAI account"
+            }
+          }
+        },
+        {
+          "id": "n-build",
+          "name": "Montar Request Imagem",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            1560,
+            300
+          ],
+          "parameters": {
+            "jsCode": "const enhancedPrompt = $input.first().json.choices?.[0]?.message?.content || '';\nif (!enhancedPrompt) throw new Error('GPT-4o Enhancer devolveu resposta vazia');\nconst inputs = $('Extrair Input').first().json;\nconst sizeMap = {\n  '1:1 (Feed)': '1024x1024',\n  '9:16 (Story/Reel)': '1024x1792',\n  '16:9 (Landscape)': '1792x1024',\n  '4:5 (Feed vertical)': '1024x1280'\n};\nconst size = sizeMap[inputs.aspectRatio] || '1024x1024';\nconst payload = { model: 'gpt-image-2', prompt: enhancedPrompt, n: 1, size, quality: 'high' };\nreturn [{ json: { payload, enhancedPrompt } }];"
+          }
+        },
+        {
+          "id": "n-img",
+          "name": "OpenAI Imagens",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.2,
+          "position": [
+            1780,
+            300
+          ],
+          "parameters": {
+            "method": "POST",
+            "url": "https://api.openai.com/v1/images/generations",
+            "authentication": "predefinedCredentialType",
+            "nodeCredentialType": "openAiApi",
+            "sendBody": true,
+            "contentType": "raw",
+            "rawContentType": "application/json",
+            "body": "={{ JSON.stringify($json.payload) }}",
+            "options": {
+              "timeout": 120000
+            }
+          },
+          "credentials": {
+            "openAiApi": {
+              "id": "8QZH2HYI3IvfDZQo",
+              "name": "OpenAI account"
+            }
+          }
+        },
+        {
+          "id": "n-prep",
+          "name": "Preparar Upload",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            2000,
+            300
+          ],
+          "parameters": {
+            "jsCode": "const resp = $input.first().json;\nconst b64 = resp.data?.[0]?.b64_json || '';\nif (!b64) throw new Error('No b64_json in OpenAI response: ' + JSON.stringify(resp).slice(0,200));\nconst filename = `brand-image-${Date.now()}.png`;\nreturn [{\n  json: { filename },\n  binary: {\n    data: { data: b64, mimeType: 'image/png', fileName: filename, fileExtension: 'png' }\n  }\n}];"
+          }
+        },
+        {
+          "id": "n-drive",
+          "name": "Subir para Drive",
+          "type": "n8n-nodes-base.googleDrive",
+          "typeVersion": 3,
+          "position": [
+            2220,
+            300
+          ],
+          "parameters": {
+            "inputDataFieldName": "data",
+            "name": "={{ $json.filename }}",
+            "driveId": {
+              "__rl": true,
+              "mode": "list",
+              "value": "My Drive"
+            },
+            "options": {}
+          },
+          "credentials": {
+            "googleDriveOAuth2Api": {
+              "id": "zo3RWHxQ7i77FtuF",
+              "name": "Google Drive account"
+            }
+          }
+        },
+        {
+          "id": "n-pub",
+          "name": "Tornar Publico",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.2,
+          "position": [
+            2440,
+            300
+          ],
+          "parameters": {
+            "method": "POST",
+            "url": "=https://www.googleapis.com/drive/v3/files/{{ $json.id }}/permissions",
+            "authentication": "predefinedCredentialType",
+            "nodeCredentialType": "googleDriveOAuth2Api",
+            "sendBody": true,
+            "contentType": "raw",
+            "rawContentType": "application/json",
+            "body": "{\"type\":\"anyone\",\"role\":\"reader\"}",
+            "options": {
+              "timeout": 15000
+            }
+          },
+          "credentials": {
+            "googleDriveOAuth2Api": {
+              "id": "zo3RWHxQ7i77FtuF",
+              "name": "Google Drive account"
+            }
+          }
+        },
+        {
+          "id": "n-fmt",
+          "name": "Formatar URL",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            2660,
+            300
+          ],
+          "parameters": {
+            "jsCode": "const fileId = $('Subir para Drive').first().json.id;\nif (!fileId) throw new Error('No file id from Drive: ' + JSON.stringify($('Subir para Drive').first().json).slice(0,200));\nreturn [{ json: {\n  image_url:    `https://drive.google.com/thumbnail?id=${fileId}&sz=w1024`,\n  viewLink:     `https://drive.google.com/file/d/${fileId}/view?usp=sharing`,\n  downloadLink: `https://drive.google.com/uc?export=download&id=${fileId}`,\n  fileId\n} }];"
+          }
+        }
+      ],
+      "connections": {
+        "Webhook": {
+          "main": [
+            [
+              {
+                "node": "Extrair Input",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Extrair Input": {
+          "main": [
+            [
+              {
+                "node": "Buscar BSP Supabase",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Buscar BSP Supabase": {
+          "main": [
+            [
+              {
+                "node": "Construir Style Anchor",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Construir Style Anchor": {
+          "main": [
+            [
+              {
+                "node": "Montar Enhancer Payload",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Montar Enhancer Payload": {
+          "main": [
+            [
+              {
+                "node": "GPT-4o Enhancer",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "GPT-4o Enhancer": {
+          "main": [
+            [
+              {
+                "node": "Montar Request Imagem",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Montar Request Imagem": {
+          "main": [
+            [
+              {
+                "node": "OpenAI Imagens",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "OpenAI Imagens": {
+          "main": [
+            [
+              {
+                "node": "Preparar Upload",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Preparar Upload": {
+          "main": [
+            [
+              {
+                "node": "Subir para Drive",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Subir para Drive": {
+          "main": [
+            [
+              {
+                "node": "Tornar Publico",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Tornar Publico": {
+          "main": [
+            [
+              {
+                "node": "Formatar URL",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        }
+      },
+      "settings": {
+        "executionOrder": "v1",
+        "binaryMode": "separate"
+      },
+      "staticData": null,
+      "pinData": {},
+      "tags": []
+    },
+    "w4-generate-carousel": {
+      "_n8n_id": "pXnU5P5gp3ko8kfk",
+      "_description": "W4 — Generate Carousel",
+      "_updatedAt": "2026-06-28T22:08:53.446Z",
+      "name": "W4 — Generate Carousel",
+      "nodes": [
+        {
+          "parameters": {
+            "httpMethod": "POST",
+            "path": "generate-carousel",
+            "responseMode": "lastNode",
+            "options": {}
+          },
+          "id": "654008d8-3fbf-4e1b-bedf-45c6d0163b7d",
+          "name": "Webhook",
+          "type": "n8n-nodes-base.webhook",
+          "typeVersion": 2.1,
+          "position": [
+            224,
+            496
+          ],
+          "webhookId": "gen-carousel-wh"
+        },
+        {
+          "parameters": {
+            "jsCode": "const body = $input.first().json.body || $input.first().json;\nconst brandId = body.brand_id || ''; if (!brandId) throw new Error('brand_id required');\nconst topic = body.topic || 'Brand tips';\nconst numSlides = parseInt(body.num_slides || '5');\nconst platform = body.platform || 'Instagram';\nreturn [{ json: { brandId, topic, numSlides, platform } }];"
+          },
+          "id": "a84b0ce0-6066-4b77-87ee-f0b4c7dfda13",
+          "name": "Extrair Input",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            448,
+            496
+          ]
+        },
+        {
+          "parameters": {
+            "url": "=https://rgbszdjyubbxhzhspuqv.supabase.co/rest/v1/brand_profiles?id=eq.{{ $json.brandId }}&select=*",
+            "sendHeaders": true,
+            "headerParameters": {
+              "parameters": [
+                {
+                  "name": "apikey",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJnYnN6ZGp5dWJieGh6aHNwdXF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3MDU4MzMsImV4cCI6MjA5MzI4MTgzM30.y-9yb6tKrjlCI43fIT_XtDnUEcqLuA_7hVlg5-wvE80"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJnYnN6ZGp5dWJieGh6aHNwdXF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3MDU4MzMsImV4cCI6MjA5MzI4MTgzM30.y-9yb6tKrjlCI43fIT_XtDnUEcqLuA_7hVlg5-wvE80"
+                },
+                {
+                  "name": "Accept",
+                  "value": "application/json"
+                }
+              ]
+            },
+            "options": {}
+          },
+          "id": "d6f00f43-2347-42df-bff0-cb34130ebe1a",
+          "name": "Buscar BSP Supabase",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.2,
+          "position": [
+            672,
+            496
+          ]
+        },
+        {
+          "parameters": {
+            "jsCode": "const inputs = $('Extrair Input').first().json;\nconst bsp = ($input.first().json || [])[0] || $input.first().json;\nif (!bsp || !bsp.brand_name) throw new Error('BSP não encontrado');\n\nconst tov = bsp.tone_of_voice || {};\nconst img = bsp.imagery_style || {};\nconst p   = bsp.palette || {};\n\nconst styleAnchor = bsp.style_anchor_prompt ||\n  `Marca: ${bsp.brand_name}. Paleta: primária ${p.primary||'N/A'}, secundária ${p.secondary||'N/A'}, accent ${p.accent||'N/A'}. Imagem: ${img.description||'fotografia comercial'}. Composição: ${(img.composition_rules||[]).join(', ')}. Tratamento: ${img.filters||'limpo profissional'}.`;\n\nconst systemPrompt = `És um estratega de conteúdo sénior e diretor de arte para ${bsp.brand_name}. Crias carrosséis que param o scroll e são publicáveis diretamente no feed de uma marca premium.\n\nESCREVE SEMPRE EM PORTUGUÊS EUROPEU (pt-PT). Nunca em pt-BR, nunca em inglês.\n\nIDENTIDADE DE MARCA:\nTom de voz: ${(tov.adjectives||[]).join(', ')}\nFAZER: ${(tov.do||[]).join('; ')}\nNÃO FAZER: ${(tov.dont||[]).join('; ')}\nReferências de voz: ${(tov.sample_phrases||[]).join(' | ')}\n\nIDENTIDADE VISUAL:\n${styleAnchor}\n\nREGRAS DO CARROSSEL:\nSlide 1 (HOOK VISUAL): Uma afirmação ousada, pergunta provocadora, ou facto surpreendente que faz o utilizador parar e deslizar. Máx 8 palavras no título. SEM \"Introdução\" ou \"Bem-vindo\". O primeiro slide é a razão pela qual alguém desliza — tem de ser impossível de ignorar.\nSlides do meio: UMA ideia por slide. Título curto e impactante (máx 6 palavras). Corpo máx 2 frases — direto ao ponto. Progressão narrativa real: cada slide constrói sobre o anterior.\nÚltimo slide (CTA): O que o utilizador deve fazer AGORA? CTA claro, específico, com urgência ou benefício.\n\nPROGRESSÃO NARRATIVA — o carrossel deve ter uma estrutura de storytelling:\n- Slide 1: Cria tensão ou curiosidade\n- Slides 2-N-1: Resolve progressivamente, constrói conhecimento ou demonstra transformação\n- Último: Convida à ação com benefício claro\n\nCONCEITO VISUAL POR SLIDE — exatamente 3 frases:\nFrase 1: Estilo fotográfico e sujeito com especificidade de materiais e posição.\nFrase 2: Iluminação — key light (direção, tipo, temperatura Kelvin, ex: 45° superior esquerdo, softbox grande, 5500K); especificação de câmara (focal length mm, abertura f/).\nFrase 3: \"As ÚNICAS cores presentes são: primária ${p.primary||'N/A'} como [papel], secundária ${p.secondary||'N/A'} como [papel], accent ${p.accent||'N/A'} como [papel]. ${(img.composition_rules||['composição profissional']).join(', ')}. Tratamento: ${img.filters||'limpo profissional'}.\"\n\nOUTPUT — JSON válido apenas, sem markdown:\n{\n  \"slides\": [\n    {\n      \"slide_number\": 1,\n      \"title\": \"...\",\n      \"body\": \"...\",\n      \"visual_concept\": \"brief de imagem de 3 frases com specs de iluminação e hex codes exatos\"\n    }\n  ],\n  \"caption\": \"legenda para o feed (em pt-PT)\",\n  \"hashtags\": [\"#hashtag_especifica_ao_nicho\"]\n}`;\n\nconst userMessage = `Cria um carrossel de ${inputs.numSlides} slides para ${inputs.platform} sobre: ${inputs.topic}`;\nconst payload = {\n  model: 'gpt-4o',\n  max_tokens: 4000,\n  response_format: { type: 'json_object' },\n  messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userMessage }]\n};\nreturn [{ json: { payload } }];"
+          },
+          "id": "e6ca346d-8c56-4bfd-bf90-712cf069a557",
+          "name": "Montar Payload OpenAI",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            896,
+            496
+          ]
+        },
+        {
+          "parameters": {
+            "method": "POST",
+            "url": "https://api.openai.com/v1/chat/completions",
+            "authentication": "predefinedCredentialType",
+            "nodeCredentialType": "openAiApi",
+            "sendBody": true,
+            "contentType": "raw",
+            "rawContentType": "application/json",
+            "body": "={{ JSON.stringify($json.payload) }}",
+            "options": {
+              "timeout": 90000
+            }
+          },
+          "id": "d45c0051-d467-48dc-8427-bb5725c9ea99",
+          "name": "OpenAI GPT-4o",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.2,
+          "position": [
+            1104,
+            496
+          ],
+          "credentials": {
+            "openAiApi": {
+              "id": "8QZH2HYI3IvfDZQo",
+              "name": "OpenAI account"
+            }
+          }
+        },
+        {
+          "parameters": {
+            "jsCode": "const rawText = $input.first().json.choices?.[0]?.message?.content || '';\nif (!rawText) throw new Error('OpenAI empty');\nlet r; try { r = JSON.parse(rawText); } catch(e) { throw new Error('Parse failed: ' + rawText.slice(0,200)); }\nreturn [{ json: { slides: r.slides || [], caption: r.caption || '', hashtags: r.hashtags || [] } }];"
+          },
+          "id": "a43309d3-2717-4188-9ed6-9252303335c2",
+          "name": "Parsear Resultado",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            1328,
+            496
+          ]
+        },
+        {
+          "parameters": {
+            "jsCode": "const { slides, caption, hashtags } = $input.first().json;\nreturn slides.map(slide => ({ json: slide }));"
+          },
+          "id": "a314b1a3-c024-4e7a-9f10-549cf54d71dc",
+          "name": "Split Slides",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            1552,
+            496
+          ]
+        },
+        {
+          "parameters": {
+            "method": "POST",
+            "url": "https://api.openai.com/v1/images/generations",
+            "authentication": "predefinedCredentialType",
+            "nodeCredentialType": "openAiApi",
+            "sendBody": true,
+            "contentType": "raw",
+            "rawContentType": "application/json",
+            "body": "={{ JSON.stringify($json.payload) }}",
+            "options": {
+              "timeout": 120000
+            }
+          },
+          "id": "cc475509-e6bb-4ee1-be42-45dde912884a",
+          "name": "Gerar Imagem",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.2,
+          "position": [
+            2448,
+            496
+          ],
+          "credentials": {
+            "openAiApi": {
+              "id": "8QZH2HYI3IvfDZQo",
+              "name": "OpenAI account"
+            }
+          }
+        },
+        {
+          "parameters": {
+            "jsCode": "const splitSlides = $('Split Slides').all();\nconst imageResults = $input.all();\nconst { caption, hashtags } = $('Parsear Resultado').first().json;\nconst slides = splitSlides.map((s, i) => {\n  const imgData = imageResults[i]?.json?.data?.[0];\n  const image_url = imgData?.url || (imgData?.b64_json ? `data:image/png;base64,${imgData.b64_json}` : '');\n  return { ...s.json, image_url };\n});\nreturn [{ json: { slides, caption, hashtags } }];"
+          },
+          "id": "a4fb400e-f159-4725-bcdf-8594d6c6662b",
+          "name": "Agregar Final",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            2672,
+            496
+          ]
+        },
+        {
+          "id": "w4-prep-slide",
+          "name": "Preparar Prompt Slide",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            1776,
+            496
+          ],
+          "parameters": {
+            "jsCode": "const slide = $input.first().json;\nconst rawBsp = $('Buscar BSP Supabase').first().json;\nconst bsp = Array.isArray(rawBsp) ? rawBsp[0] : rawBsp;\nconst p = bsp?.palette || {};\nconst img = bsp?.imagery_style || {};\n\nconst styleAnchor = bsp?.style_anchor_prompt ||\n  `MARCA: ${bsp?.brand_name||''}. PALETA: primária ${p.primary||'N/A'}, secundária ${p.secondary||'N/A'}, accent ${p.accent||'N/A'}, fundo ${p.background||'N/A'}. IMAGEM: ${img.description||'fotografia comercial profissional'}. COMPOSIÇÃO: ${(img.composition_rules||[]).join(', ')||'profissional'}. TRATAMENTO: ${img.filters||'limpo nítido profissional'}.`;\n\nconst visualConcept = slide.visual_concept || `${slide.title||''}: ${slide.body||''}`;\n\nconst systemPrompt = `És um diretor de arte sénior especializado em fotografia comercial de marca para carrosséis de redes sociais. Expandes conceitos visuais breves em prompts ultra-detalhados (MÍNIMO 800 PALAVRAS) para geração de imagem de qualidade profissional.\n\nESTRUTURA OBRIGATÓRIA (sem labels — texto fluente):\nComeça com o género fotográfico exato. Descreve o sujeito com especificidade de materiais (acabamento, textura, material, posição no frame). Setup de iluminação técnico completo: key light (direção em graus, tipo de fonte, temperatura em Kelvin, intensidade), fill light (rácio key-to-fill, lado), rim light se relevante, qualidade das sombras. Câmara: focal length em mm, abertura f/, profundidade de campo resultante, ângulo da câmara. Composição: posicionamento do sujeito, % de espaço negativo e localização, linhas diretrizes, camadas de profundidade (primeiro plano, plano médio, fundo). Enforcement de cores: \"As ÚNICAS cores presentes são [lista cada hex com o seu papel]. A temperatura de cor da iluminação reforça estes tons. NENHUMA cor fora desta paleta.\" Superfície e ambiente: material e textura da superfície, o que existe atrás. Color grading: temperatura geral, saturação, contraste, tratamento de luzes e sombras. Âncora de consistência: \"Esta imagem pertence a uma série de carrossel para a marca. Consistência visual total é obrigatória.\" Negative prompt: lista explícita do que não deve aparecer.\n\nOUTPUT: APENAS o texto do prompt. Sem cabeçalhos, sem JSON, sem markdown. Texto descritivo fluente, mínimo 800 palavras.`;\n\nconst userMessage = `IDENTIDADE VISUAL DA MARCA:\\n${styleAnchor}\\n\\nCONCEITO VISUAL DO SLIDE A EXPANDIR: ${visualConcept}\\nFORMATO: Quadrado 1:1 (slide de carrossel)\\n\\nExpande num prompt ultra-detalhado de 800+ palavras.`;\n\nconst payload = {\n  model: 'gpt-4o',\n  max_tokens: 2200,\n  temperature: 0.7,\n  messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userMessage }]\n};\nreturn [{ json: { payload } }];"
+          }
+        },
+        {
+          "id": "w4-gpt-slide",
+          "name": "GPT-4o Slide",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.2,
+          "position": [
+            2000,
+            496
+          ],
+          "parameters": {
+            "method": "POST",
+            "url": "https://api.openai.com/v1/chat/completions",
+            "authentication": "predefinedCredentialType",
+            "nodeCredentialType": "openAiApi",
+            "sendBody": true,
+            "contentType": "raw",
+            "rawContentType": "application/json",
+            "body": "={{ JSON.stringify($json.payload) }}",
+            "options": {
+              "timeout": 90000
+            }
+          },
+          "credentials": {
+            "openAiApi": {
+              "id": "8QZH2HYI3IvfDZQo",
+              "name": "OpenAI account"
+            }
+          }
+        },
+        {
+          "id": "w4-montar-img-slide",
+          "name": "Montar Imagem Slide",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            2224,
+            496
+          ],
+          "parameters": {
+            "jsCode": "const enhancedPrompt = $input.first().json.choices?.[0]?.message?.content || '';\nif (!enhancedPrompt) throw new Error('Slide enhancer devolveu resposta vazia');\nconst payload = { model: 'gpt-image-2', prompt: enhancedPrompt, n: 1, size: '1024x1024', quality: 'high' };\nreturn [{ json: { payload } }];"
+          }
+        }
+      ],
+      "connections": {
+        "Webhook": {
+          "main": [
+            [
+              {
+                "node": "Extrair Input",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Extrair Input": {
+          "main": [
+            [
+              {
+                "node": "Buscar BSP Supabase",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Buscar BSP Supabase": {
+          "main": [
+            [
+              {
+                "node": "Montar Payload OpenAI",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Montar Payload OpenAI": {
+          "main": [
+            [
+              {
+                "node": "OpenAI GPT-4o",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "OpenAI GPT-4o": {
+          "main": [
+            [
+              {
+                "node": "Parsear Resultado",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Parsear Resultado": {
+          "main": [
+            [
+              {
+                "node": "Split Slides",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Split Slides": {
+          "main": [
+            [
+              {
+                "node": "Preparar Prompt Slide",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Gerar Imagem": {
+          "main": [
+            [
+              {
+                "node": "Agregar Final",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Preparar Prompt Slide": {
+          "main": [
+            [
+              {
+                "node": "GPT-4o Slide",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "GPT-4o Slide": {
+          "main": [
+            [
+              {
+                "node": "Montar Imagem Slide",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Montar Imagem Slide": {
+          "main": [
+            [
+              {
+                "node": "Gerar Imagem",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        }
+      },
+      "settings": {
+        "executionOrder": "v1",
+        "binaryMode": "separate"
+      },
+      "staticData": null,
+      "pinData": {},
+      "tags": []
+    },
+    "w5-repurpose-content": {
+      "_n8n_id": "n7153a8dtV2Si6bG",
+      "_description": "W5 — Repurpose Content",
+      "_updatedAt": "2026-06-28T22:08:53.504Z",
+      "name": "W5 — Repurpose Content",
+      "nodes": [
+        {
+          "id": "n-wh",
+          "name": "Webhook",
+          "type": "n8n-nodes-base.webhook",
+          "typeVersion": 2.1,
+          "position": [
+            240,
+            300
+          ],
+          "webhookId": "repurpose-wh-v2",
+          "parameters": {
+            "httpMethod": "POST",
+            "path": "repurpose-content",
+            "responseMode": "lastNode",
+            "options": {}
+          }
+        },
+        {
+          "id": "n-ex",
+          "name": "Extrair Input",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            460,
+            300
+          ],
+          "parameters": {
+            "jsCode": "const body = $input.first().json.body || $input.first().json;\nconst brandId = body.brand_id || ''; if (!brandId) throw new Error('brand_id required');\nconst sourceText = body.source_text || '';\nconst sourceUrl = body.source_url || '';\nconst platforms = body.platforms || 'Instagram + LinkedIn';\nconst numPosts = parseInt(body.num_posts || '1');\nif (!sourceText && !sourceUrl) throw new Error('source_text or source_url required');\nreturn [{ json: { brandId, sourceText, sourceUrl, platforms, numPosts } }];"
+          }
+        },
+        {
+          "id": "n-supa",
+          "name": "Buscar BSP Supabase",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.2,
+          "position": [
+            680,
+            300
+          ],
+          "parameters": {
+            "method": "GET",
+            "url": "=https://rgbszdjyubbxhzhspuqv.supabase.co/rest/v1/brand_profiles?id=eq.{{ $json.brandId }}&select=*",
+            "sendHeaders": true,
+            "headerParameters": {
+              "parameters": [
+                {
+                  "name": "apikey",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJnYnN6ZGp5dWJieGh6aHNwdXF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3MDU4MzMsImV4cCI6MjA5MzI4MTgzM30.y-9yb6tKrjlCI43fIT_XtDnUEcqLuA_7hVlg5-wvE80"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJnYnN6ZGp5dWJieGh6aHNwdXF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3MDU4MzMsImV4cCI6MjA5MzI4MTgzM30.y-9yb6tKrjlCI43fIT_XtDnUEcqLuA_7hVlg5-wvE80"
+                },
+                {
+                  "name": "Accept",
+                  "value": "application/json"
+                }
+              ]
+            },
+            "options": {}
+          }
+        },
+        {
+          "id": "n-build",
+          "name": "Montar Payload OpenAI",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            900,
+            300
+          ],
+          "parameters": {
+            "jsCode": "const inputs = $('Extrair Input').first().json;\nconst bsp = ($input.first().json || [])[0] || $input.first().json;\nif (!bsp || !bsp.brand_name) throw new Error('BSP não encontrado');\n\nconst tov = bsp.tone_of_voice || {};\nconst img = bsp.imagery_style || {};\nconst p   = bsp.palette || {};\nconst content = inputs.sourceText || ('Conteúdo de: ' + inputs.sourceUrl);\n\nconst styleAnchor = bsp.style_anchor_prompt ||\n  `Marca: ${bsp.brand_name}. Paleta: primária ${p.primary||'N/A'}, secundária ${p.secondary||'N/A'}, accent ${p.accent||'N/A'}. Imagem: ${img.description||'fotografia comercial'}. Composição: ${(img.composition_rules||[]).join(', ')}. Tratamento: ${img.filters||'limpo profissional'}.`;\n\nconst systemPrompt = `És um estratega de conteúdo sénior especializado em repurposing de conteúdo de marca para o mercado português.\n\nESCREVE SEMPRE EM PORTUGUÊS EUROPEU (pt-PT). Nunca em pt-BR, nunca em inglês.\n\nIDENTIDADE DE MARCA:\nMarca: ${bsp.brand_name}\nTom de voz: ${(tov.adjectives||[]).join(', ')}\nFAZER: ${(tov.do||[]).join('\\n')}\nNÃO FAZER: ${(tov.dont||[]).join('\\n')}\nReferências de voz: ${(tov.sample_phrases||[]).join('\\n')}\n\nIDENTIDADE VISUAL:\n${styleAnchor}\n\nREGRAS DE ADAPTAÇÃO POR PLATAFORMA:\n- Instagram: Ângulo mais emocional/visual. Hook na primeira linha. 3-5 hashtags específicos ao nicho. Parágrafos curtos.\n- LinkedIn: Insight profissional ou dado concreto. Ângulo de thought-leadership. Máx 3 hashtags.\n- TikTok: Facto surpreendente ou ângulo contraintuitivo. Estilo de guião conversacional. Máx 300 caract.\n- Twitter/X: A afirmação mais citável ou provocadora. Máx 280 caract.\n\nCada post deve sentir-se NATIVO à plataforma — não é cópia-colagem adaptada. Preserva a mensagem central mas muda completamente o ângulo, duração e formato.\n\nHASHTAGS: NUNCA genéricas (#marketing #negócios). Específicas ao nicho e comunidade da marca.\n\nCONCEITO VISUAL POR POST — exatamente 3 frases:\nFrase 1: Estilo fotográfico e sujeito com materiais e posição.\nFrase 2: Iluminação (key light direção + tipo + Kelvin) e câmara (focal length + abertura).\nFrase 3: \"As ÚNICAS cores presentes são: primária ${p.primary||'N/A'} como [papel], secundária ${p.secondary||'N/A'} como [papel], accent ${p.accent||'N/A'} como [papel]. ${(img.composition_rules||['composição profissional']).join(', ')}. Tratamento: ${img.filters||'limpo profissional'}.\"\n\nOUTPUT — JSON válido apenas:\n{\n  \"posts\": [\n    {\n      \"platform\": \"Instagram\",\n      \"caption\": \"...\",\n      \"hashtags\": [\"#tag_especifica\"],\n      \"cta\": \"...\",\n      \"visual_concept\": \"brief de 3 frases com specs de iluminação e hex codes exatos\"\n    }\n  ]\n}`;\n\nconst userMessage = `Conteúdo fonte:\\n---\\n${content}\\n---\\nCria ${inputs.numPosts} post(s) por plataforma para: ${inputs.platforms}`;\nconst payload = {\n  model: 'gpt-4o',\n  max_tokens: 4000,\n  response_format: { type: 'json_object' },\n  messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userMessage }]\n};\nreturn [{ json: { payload } }];"
+          }
+        },
+        {
+          "id": "n-oai",
+          "name": "OpenAI GPT-4o",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.2,
+          "position": [
+            1120,
+            300
+          ],
+          "parameters": {
+            "method": "POST",
+            "url": "https://api.openai.com/v1/chat/completions",
+            "authentication": "predefinedCredentialType",
+            "nodeCredentialType": "openAiApi",
+            "sendBody": true,
+            "contentType": "raw",
+            "rawContentType": "application/json",
+            "body": "={{ JSON.stringify($json.payload) }}",
+            "options": {
+              "timeout": 90000
+            }
+          },
+          "credentials": {
+            "openAiApi": {
+              "id": "8QZH2HYI3IvfDZQo",
+              "name": "OpenAI account"
+            }
+          }
+        },
+        {
+          "id": "n-parse",
+          "name": "Parsear Resultado",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            1340,
+            300
+          ],
+          "parameters": {
+            "jsCode": "const rawText = $input.first().json.choices?.[0]?.message?.content || '';\nif (!rawText) throw new Error('OpenAI empty');\nlet r; try { r = JSON.parse(rawText); } catch(e) { throw new Error('Parse failed: ' + rawText.slice(0,200)); }\nreturn [{ json: { posts: r.posts || [] } }];"
+          }
+        }
+      ],
+      "connections": {
+        "Webhook": {
+          "main": [
+            [
+              {
+                "node": "Extrair Input",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Extrair Input": {
+          "main": [
+            [
+              {
+                "node": "Buscar BSP Supabase",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Buscar BSP Supabase": {
+          "main": [
+            [
+              {
+                "node": "Montar Payload OpenAI",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Montar Payload OpenAI": {
+          "main": [
+            [
+              {
+                "node": "OpenAI GPT-4o",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "OpenAI GPT-4o": {
+          "main": [
+            [
+              {
+                "node": "Parsear Resultado",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        }
+      },
+      "settings": {
+        "executionOrder": "v1"
+      },
+      "staticData": null,
+      "pinData": {},
+      "tags": []
+    },
+    "w6-weekly-batch": {
+      "_n8n_id": "l6sP9TE64DwPsSa7",
+      "_description": "W6 — Weekly Batch",
+      "_updatedAt": "2026-06-28T22:08:53.557Z",
+      "name": "W6 — Weekly Batch",
+      "nodes": [
+        {
+          "id": "n-wh",
+          "name": "Webhook",
+          "type": "n8n-nodes-base.webhook",
+          "typeVersion": 2.1,
+          "position": [
+            240,
+            300
+          ],
+          "webhookId": "weekly-batch-wh",
+          "parameters": {
+            "httpMethod": "POST",
+            "path": "weekly-batch",
+            "responseMode": "lastNode",
+            "options": {}
+          }
+        },
+        {
+          "id": "n-ex",
+          "name": "Extrair Input",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            460,
+            300
+          ],
+          "parameters": {
+            "jsCode": "const body = $input.first().json.body || $input.first().json;\nconst brandId = body.brand_id || ''; if (!brandId) throw new Error('brand_id required');\nconst themes = body.themes || 'Produto novo\\nDica da semana\\nTestemunho de cliente';\nconst platform = body.platform || 'Instagram';\nconst postFrequency = body.post_frequency || '1 post/dia (7 posts)';\nreturn [{ json: { brandId, themes, platform, postFrequency } }];"
+          }
+        },
+        {
+          "id": "n-supa",
+          "name": "Buscar BSP Supabase",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.2,
+          "position": [
+            680,
+            300
+          ],
+          "parameters": {
+            "method": "GET",
+            "url": "=https://rgbszdjyubbxhzhspuqv.supabase.co/rest/v1/brand_profiles?id=eq.{{ $json.brandId }}&select=*",
+            "sendHeaders": true,
+            "headerParameters": {
+              "parameters": [
+                {
+                  "name": "apikey",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJnYnN6ZGp5dWJieGh6aHNwdXF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3MDU4MzMsImV4cCI6MjA5MzI4MTgzM30.y-9yb6tKrjlCI43fIT_XtDnUEcqLuA_7hVlg5-wvE80"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJnYnN6ZGp5dWJieGh6aHNwdXF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3MDU4MzMsImV4cCI6MjA5MzI4MTgzM30.y-9yb6tKrjlCI43fIT_XtDnUEcqLuA_7hVlg5-wvE80"
+                },
+                {
+                  "name": "Accept",
+                  "value": "application/json"
+                }
+              ]
+            },
+            "options": {}
+          }
+        },
+        {
+          "id": "n-build",
+          "name": "Montar Payload OpenAI",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            900,
+            300
+          ],
+          "parameters": {
+            "jsCode": "const inputs = $('Extrair Input').first().json;\nconst bsp = ($input.first().json || [])[0] || $input.first().json;\nif (!bsp || !bsp.brand_name) throw new Error('BSP não encontrado');\n\nconst tov = bsp.tone_of_voice || {};\nconst img = bsp.imagery_style || {};\nconst p   = bsp.palette || {};\n\nconst styleAnchor = bsp.style_anchor_prompt ||\n  `Marca: ${bsp.brand_name}. Paleta: primária ${p.primary||'N/A'}, secundária ${p.secondary||'N/A'}, accent ${p.accent||'N/A'}. Imagem: ${img.description||'fotografia comercial'}. Composição: ${(img.composition_rules||[]).join(', ')}. Tratamento: ${img.filters||'limpo profissional'}.`;\n\nconst systemPrompt = `És um estratega de conteúdo sénior para ${bsp.brand_name}. Planeias calendários semanais que parecem criados por uma equipa criativa interna — coerentes, variados e prontos a publicar.\n\nESCREVE SEMPRE EM PORTUGUÊS EUROPEU (pt-PT). Nunca em pt-BR, nunca em inglês.\n\nIDENTIDADE DE MARCA:\nTom de voz: ${(tov.adjectives||[]).join(', ')}\nFAZER: ${(tov.do||[]).join('\\n')}\nNÃO FAZER: ${(tov.dont||[]).join('\\n')}\nReferências de voz: ${(tov.sample_phrases||[]).join('\\n')}\n\nIDENTIDADE VISUAL:\n${styleAnchor}\n\nREGRAS DE ESTRATÉGIA SEMANAL:\n1. VARIAÇÃO DE FORMATO OBRIGATÓRIA: nunca repetir o mesmo formato em dias consecutivos. Sequência recomendada: Post → Carrossel → Reel → Story → Post → Carrossel → Reel (ou similar). NUNCA dois Posts seguidos, NUNCA dois Carrosséis seguidos.\n2. VARIAÇÃO EMOCIONAL: educacional, inspiracional, entretenimento, promocional. Máx 2 posts promocionais por semana.\n3. HOOKS ÚNICOS: cada legenda abre de forma diferente — nunca dois posts começam com a mesma palavra.\n4. ARCO NARRATIVO: o calendário deve ter uma lógica estratégica — não são 7 posts independentes, é uma semana com progressão.\n5. LEGENDAS PRONTAS A PUBLICAR: completas, com valor real, não placeholders.\n\nHASHTAGS: NUNCA genéricas. Específicas ao nicho, produto e comunidade da marca.\n\nCONCEITO VISUAL POR ENTRADA — exatamente 3 frases:\nFrase 1: Estilo fotográfico e sujeito com materiais e posição.\nFrase 2: Iluminação (key light direção + tipo + Kelvin) e câmara (focal length + abertura).\nFrase 3: \"As ÚNICAS cores presentes são: primária ${p.primary||'N/A'} como [papel], secundária ${p.secondary||'N/A'} como [papel], accent ${p.accent||'N/A'} como [papel]. ${(img.composition_rules||['composição profissional']).join(', ')}. Tratamento: ${img.filters||'limpo profissional'}.\"\n\nOUTPUT — JSON válido apenas:\n{\n  \"calendar\": [\n    {\n      \"day\": \"Segunda, 30 Jun\",\n      \"theme\": \"nome do tema\",\n      \"format\": \"Post simples | Carrossel | Reel | Story\",\n      \"caption\": \"legenda completa pronta a publicar (em pt-PT)\",\n      \"hashtags\": [\"#hashtag_especifica\"],\n      \"cta\": \"chamada para ação\",\n      \"visual_concept\": \"brief de 3 frases com specs de iluminação e hex codes exatos\"\n    }\n  ]\n}`;\n\nconst userMessage = `Plataforma: ${inputs.platform}\\nFrequência: ${inputs.postFrequency}\\nTemas a cobrir (um por linha):\\n${inputs.themes}`;\nconst payload = {\n  model: 'gpt-4o',\n  max_tokens: 5000,\n  response_format: { type: 'json_object' },\n  messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userMessage }]\n};\nreturn [{ json: { payload } }];"
+          }
+        },
+        {
+          "id": "n-oai",
+          "name": "OpenAI GPT-4o",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.2,
+          "position": [
+            1120,
+            300
+          ],
+          "parameters": {
+            "method": "POST",
+            "url": "https://api.openai.com/v1/chat/completions",
+            "authentication": "predefinedCredentialType",
+            "nodeCredentialType": "openAiApi",
+            "sendBody": true,
+            "contentType": "raw",
+            "rawContentType": "application/json",
+            "body": "={{ JSON.stringify($json.payload) }}",
+            "options": {
+              "timeout": 90000
+            }
+          },
+          "credentials": {
+            "openAiApi": {
+              "id": "8QZH2HYI3IvfDZQo",
+              "name": "OpenAI account"
+            }
+          }
+        },
+        {
+          "id": "n-parse",
+          "name": "Parsear Resultado",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            1340,
+            300
+          ],
+          "parameters": {
+            "jsCode": "const rawText = $input.first().json.choices?.[0]?.message?.content || '';\nif (!rawText) throw new Error('OpenAI empty');\nlet r; try { r = JSON.parse(rawText); } catch(e) { throw new Error('Parse failed: ' + rawText.slice(0,200)); }\nreturn [{ json: { calendar: r.calendar || [] } }];"
+          }
+        }
+      ],
+      "connections": {
+        "Webhook": {
+          "main": [
+            [
+              {
+                "node": "Extrair Input",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Extrair Input": {
+          "main": [
+            [
+              {
+                "node": "Buscar BSP Supabase",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Buscar BSP Supabase": {
+          "main": [
+            [
+              {
+                "node": "Montar Payload OpenAI",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Montar Payload OpenAI": {
+          "main": [
+            [
+              {
+                "node": "OpenAI GPT-4o",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "OpenAI GPT-4o": {
+          "main": [
+            [
+              {
+                "node": "Parsear Resultado",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        }
+      },
+      "settings": {
+        "executionOrder": "v1"
+      },
+      "staticData": null,
+      "pinData": {},
+      "tags": []
+    },
+    "w7-generate-bio": {
+      "_n8n_id": "DpTKQKuko2MwJDT0",
+      "_description": "W7 — Generate Bio",
+      "_updatedAt": "2026-06-28T22:08:53.611Z",
+      "name": "W7 — Generate Bio",
+      "nodes": [
+        {
+          "id": "n-wh",
+          "name": "Webhook",
+          "type": "n8n-nodes-base.webhook",
+          "typeVersion": 2.1,
+          "position": [
+            240,
+            300
+          ],
+          "webhookId": "generate-bio-wh",
+          "parameters": {
+            "httpMethod": "POST",
+            "path": "generate-bio",
+            "responseMode": "lastNode",
+            "options": {}
+          }
+        },
+        {
+          "id": "n-ex",
+          "name": "Extrair Input",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            460,
+            300
+          ],
+          "parameters": {
+            "jsCode": "const body = $input.first().json.body || $input.first().json;\nconst brandId = body.brand_id || ''; if (!brandId) throw new Error('brand_id required');\nconst platform = body.platform || 'Instagram';\nconst toneExtra = body.tone_extra || '';\nreturn [{ json: { brandId, platform, toneExtra } }];"
+          }
+        },
+        {
+          "id": "n-supa",
+          "name": "Buscar BSP Supabase",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.2,
+          "position": [
+            680,
+            300
+          ],
+          "parameters": {
+            "method": "GET",
+            "url": "=https://rgbszdjyubbxhzhspuqv.supabase.co/rest/v1/brand_profiles?id=eq.{{ $json.brandId }}&select=*",
+            "sendHeaders": true,
+            "headerParameters": {
+              "parameters": [
+                {
+                  "name": "apikey",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJnYnN6ZGp5dWJieGh6aHNwdXF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3MDU4MzMsImV4cCI6MjA5MzI4MTgzM30.y-9yb6tKrjlCI43fIT_XtDnUEcqLuA_7hVlg5-wvE80"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJnYnN6ZGp5dWJieGh6aHNwdXF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3MDU4MzMsImV4cCI6MjA5MzI4MTgzM30.y-9yb6tKrjlCI43fIT_XtDnUEcqLuA_7hVlg5-wvE80"
+                },
+                {
+                  "name": "Accept",
+                  "value": "application/json"
+                }
+              ]
+            },
+            "options": {}
+          }
+        },
+        {
+          "id": "n-build",
+          "name": "Montar Payload OpenAI",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            900,
+            300
+          ],
+          "parameters": {
+            "jsCode": "const inputs = $('Extrair Input').first().json;\nconst bsp = ($input.first().json || [])[0] || $input.first().json;\nif (!bsp || !bsp.brand_name) throw new Error('BSP não encontrado');\n\nconst tov = bsp.tone_of_voice || {};\nconst pl  = bsp.platforms || {};\nconst platformData = pl[inputs.platform.toLowerCase()] || {};\n\nconst charLimits = { 'Instagram': 150, 'LinkedIn': 220, 'TikTok': 80, 'Twitter/X': 160, 'YouTube': 1000 };\nconst charLimit = charLimits[inputs.platform] || 150;\n\nconst platformGuides = {\n  Instagram: 'Abre com uma afirmação de valor ou nicho impactante. Máx 1 emoji por linha. CTA claro com referência ao link na bio. Line breaks para escaneabilidade. 1-3 hashtags de marca no fim.',\n  LinkedIn:  'Abre com o teu diferenciador profissional, não o cargo. O que fazes, para quem, e uma prova de valor. CTA subtil no fim. Sem hashtags. Sem emojis.',\n  TikTok:    'Curto, direto, divertido. Declara exatamente que conteúdo crias. Máx 2 emojis. Uma palavra-chave para descoberta.',\n  'Twitter/X': 'Abre com o nicho ou perspetiva. 1-2 emojis. Uma afirmação forte. CTA opcional.',\n  YouTube:   'Declara exatamente o que o canal aborda e para quem. Frequência de publicação se consistente. Prova social ou credibilidade de nicho. CTA para subscrever.'\n};\nconst guide = platformGuides[inputs.platform] || 'Sê claro, conciso e consistente com a marca.';\n\nconst systemPrompt = `És um copywriter sénior especializado em bios de redes sociais para marcas portuguesas.\n\nESCREVE SEMPRE EM PORTUGUÊS EUROPEU (pt-PT). Nunca em pt-BR, nunca em inglês.\n\nMARCA: ${bsp.brand_name}\nTOM: ${(tov.adjectives||[]).join(', ')}\nFAZER: ${(tov.do||[]).join('; ')}\nNÃO FAZER: ${(tov.dont||[]).join('; ')}\nREFERÊNCIAS DE VOZ: ${(tov.sample_phrases||[]).join(' | ')}\n\nPLATAFORMA: ${inputs.platform} — máx ${charLimit} caracteres (limite RÍGIDO)\nMELHORES PRÁTICAS: ${guide}\n\n${inputs.toneExtra ? 'NOTA EXTRA DE TOM: ' + inputs.toneExtra : ''}\n${platformData.bio_template ? 'REFERÊNCIA DE BIO EXISTENTE: ' + platformData.bio_template : ''}\n\nEscreve uma bio que:\n1. Está ABAIXO de ${charLimit} caracteres (crítico — conta os caracteres)\n2. Soa inconfundivelmente como ${bsp.brand_name} — um humano que conhece a marca não pode detetar IA\n3. Tem propósito claro: quem são, o que fazem, porque importa para a audiência\n4. Segue as melhores práticas da plataforma acima\n\nGera também 3 variações alternativas com ângulos diferentes e 3 dicas de melhoria acionáveis.\n\nOUTPUT — JSON válido apenas, sem markdown:\n{\n  \"bio\": \"bio principal\",\n  \"character_count\": 0,\n  \"alternatives\": [\n    { \"label\": \"Valor-em-primeiro\", \"bio\": \"...\", \"character_count\": 0 },\n    { \"label\": \"Prova social\", \"bio\": \"...\", \"character_count\": 0 },\n    { \"label\": \"CTA-direto\", \"bio\": \"...\", \"character_count\": 0 }\n  ],\n  \"tips\": [\"dica1\", \"dica2\", \"dica3\"]\n}`;\n\nconst userMessage = `Escreve uma bio para ${inputs.platform} para a marca ${bsp.brand_name}. Máx ${charLimit} caracteres.`;\nconst payload = {\n  model: 'gpt-4o',\n  max_tokens: 1200,\n  response_format: { type: 'json_object' },\n  messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userMessage }]\n};\nreturn [{ json: { payload } }];"
+          }
+        },
+        {
+          "id": "n-oai",
+          "name": "OpenAI GPT-4o",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.2,
+          "position": [
+            1120,
+            300
+          ],
+          "parameters": {
+            "method": "POST",
+            "url": "https://api.openai.com/v1/chat/completions",
+            "authentication": "predefinedCredentialType",
+            "nodeCredentialType": "openAiApi",
+            "sendBody": true,
+            "contentType": "raw",
+            "rawContentType": "application/json",
+            "body": "={{ JSON.stringify($json.payload) }}",
+            "options": {
+              "timeout": 60000
+            }
+          },
+          "credentials": {
+            "openAiApi": {
+              "id": "8QZH2HYI3IvfDZQo",
+              "name": "OpenAI account"
+            }
+          }
+        },
+        {
+          "id": "n-parse",
+          "name": "Parsear Resultado",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            1340,
+            300
+          ],
+          "parameters": {
+            "jsCode": "const raw = $input.first().json.choices?.[0]?.message?.content || '';\nif (!raw) throw new Error('OpenAI empty response');\nlet r; try { r = JSON.parse(raw); } catch(e) { throw new Error('Parse failed: ' + raw.slice(0,200)); }\nreturn [{ json: {\n  bio: r.bio || '',\n  character_count: r.character_count || (r.bio || '').length,\n  tips: r.tips || []\n} }];"
+          }
+        }
+      ],
+      "connections": {
+        "Webhook": {
+          "main": [
+            [
+              {
+                "node": "Extrair Input",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Extrair Input": {
+          "main": [
+            [
+              {
+                "node": "Buscar BSP Supabase",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Buscar BSP Supabase": {
+          "main": [
+            [
+              {
+                "node": "Montar Payload OpenAI",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Montar Payload OpenAI": {
+          "main": [
+            [
+              {
+                "node": "OpenAI GPT-4o",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "OpenAI GPT-4o": {
+          "main": [
+            [
+              {
+                "node": "Parsear Resultado",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        }
+      },
+      "settings": {
+        "executionOrder": "v1"
+      },
+      "staticData": null,
+      "pinData": {},
+      "tags": []
+    },
     "design-agent": {
-      "_file": "workflows/design-agent.json",
-      "_description": "Agente de design conversacional com tool-calling. Webhook: POST /webhook/design-agent",
+      "_n8n_id": "0wrgT9sKRLlHlczU",
+      "_description": "design-agent",
+      "_updatedAt": "2026-06-28T22:08:53.664Z",
       "name": "design-agent",
       "nodes": [
         {
@@ -132,7 +2101,10 @@
           "name": "Webhook",
           "type": "n8n-nodes-base.webhook",
           "typeVersion": 2.1,
-          "position": [240, 400],
+          "position": [
+            240,
+            400
+          ],
           "parameters": {
             "httpMethod": "POST",
             "path": "design-agent",
@@ -146,9 +2118,12 @@
           "name": "Build Context",
           "type": "n8n-nodes-base.code",
           "typeVersion": 2,
-          "position": [460, 400],
+          "position": [
+            460,
+            400
+          ],
           "parameters": {
-            "jsCode": "const body = $input.first().json.body || $input.first().json;\nconst message = body.message || '';\nconst brandId = body.brand_id || '';\nconst history = (body.history || []).slice(-8);\n\nconst TOOLS = [\n  { type: 'function', function: { name: 'generate_post', description: 'Gera um post completo com legenda, hashtags e CTA. Usa quando o utilizador pede um post, publicacao ou caption para redes sociais.', parameters: { type: 'object', properties: { theme: { type: 'string', description: 'Tema do post' }, platform: { type: 'string', enum: ['Instagram', 'LinkedIn', 'Facebook', 'TikTok', 'Twitter/X'] }, goal: { type: 'string', enum: ['Engagement', 'Awareness', 'Conversao', 'Educacao', 'Entretenimento'] }, format: { type: 'string', enum: ['Post simples', 'Carrossel', 'Story', 'Reel', 'Artigo'] }, extra_context: { type: 'string' } }, required: ['theme', 'platform', 'goal', 'format'] } } },\n  { type: 'function', function: { name: 'generate_visual', description: 'Gera uma imagem com IA para a marca. Usa quando o utilizador pede uma imagem, visual, arte ou ilustracao.', parameters: { type: 'object', properties: { concept: { type: 'string', description: 'Descricao detalhada do visual a criar' }, aspect_ratio: { type: 'string', enum: ['1:1 (Feed)', '9:16 (Story/Reel)', '16:9 (Landscape)', '4:5 (Feed vertical)'] }, text_overlay: { type: 'string' } }, required: ['concept', 'aspect_ratio'] } } },\n  { type: 'function', function: { name: 'generate_carousel', description: 'Cria slides de carrossel. Usa quando o utilizador pede um carrossel ou slides.', parameters: { type: 'object', properties: { topic: { type: 'string' }, num_slides: { type: 'string', enum: ['3', '5', '7', '10'] }, platform: { type: 'string', enum: ['Instagram', 'LinkedIn', 'Facebook'] } }, required: ['topic', 'num_slides', 'platform'] } } },\n  { type: 'function', function: { name: 'repurpose_content', description: 'Adapta conteudo existente para multiplas plataformas.', parameters: { type: 'object', properties: { source_url: { type: 'string' }, source_text: { type: 'string' }, platforms: { type: 'string', enum: ['Instagram + LinkedIn', 'Instagram + TikTok', 'LinkedIn + Twitter/X', 'Todas (Instagram, LinkedIn, TikTok, Twitter/X)'] }, num_posts: { type: 'string', enum: ['1', '2', '3'] } }, required: ['platforms', 'num_posts'] } } },\n  { type: 'function', function: { name: 'weekly_batch', description: 'Gera um calendario de conteudo para 7 dias. Usa quando o utilizador pede um plano semanal.', parameters: { type: 'object', properties: { themes: { type: 'string' }, platform: { type: 'string', enum: ['Instagram', 'LinkedIn', 'Facebook', 'TikTok'] }, post_frequency: { type: 'string', enum: ['1 post/dia (7 posts)', 'Dias uteis (5 posts)', '3 posts/semana'] } }, required: ['themes', 'platform', 'post_frequency'] } } },\n  { type: 'function', function: { name: 'generate_bio', description: 'Gera uma bio otimizada para redes sociais.', parameters: { type: 'object', properties: { platform: { type: 'string', enum: ['Instagram', 'LinkedIn', 'TikTok', 'Twitter/X', 'YouTube'] }, tone_extra: { type: 'string' } }, required: ['platform'] } } },\n];\n\nconst sysLines = [\n  'Es o Assistente de IA Design da Celeuma IA.',\n  'Ajudas a criar conteudo de marca coerente, estrategico e com impacto visual.',\n  'Respondes SEMPRE em portugues europeu.',\n  'Antes de usar uma ferramenta, dizes em 1-2 frases o que vais fazer.',\n  'Apos receber o resultado de uma ferramenta, apresentas-o de forma clara e concisa.',\n  'Faz perguntas de clarificacao APENAS quando falta informacao essencial.',\n  'Quando o utilizador pede conteudo sem especificar plataforma, escolhe a mais adequada e avanca.',\n];\nif (brandId) {\n  sysLines.push(`Marca ativa: brand_id=\"${brandId}\". O Brand Style Profile e carregado automaticamente pelos geradores.`);\n} else {\n  sysLines.push('Sem marca ativa. Podes criar conteudo generico. Se o utilizador pedir conteudo de marca, sugere selecionar uma na sidebar.');\n}\n\nconst messages = [\n  { role: 'system', content: sysLines.join(' ') },\n  ...history,\n  { role: 'user', content: message }\n];\n\nreturn [{ json: {\n  openai_body: { model: 'gpt-4o', messages, tools: TOOLS, tool_choice: 'auto', max_tokens: 900, temperature: 0.7 },\n  messages,\n  brand_id: brandId,\n} }];"
+            "jsCode": "const body = $input.first().json.body || $input.first().json;\nconst message  = body.message  || '';\nconst brandId  = body.brand_id || '';\nconst history  = (body.history || []).slice(-10);\n\nconst TOOLS = [\n  {\n    type: 'function',\n    function: {\n      name: 'generate_post',\n      description: 'Gera um post completo (legenda em pt-PT, hashtags específicos, CTA, conceito visual) para uma plataforma social. Usa quando o utilizador pede um post, publicação, legenda, caption ou texto para redes sociais.',\n      parameters: {\n        type: 'object',\n        properties: {\n          theme:         { type: 'string',  description: 'Tema ou assunto principal do post (ex: lançamento de produto, dica da semana, promoção)' },\n          platform:      { type: 'string',  enum: ['Instagram', 'LinkedIn', 'Facebook', 'TikTok', 'Twitter/X'] },\n          goal:          { type: 'string',  enum: ['Engagement', 'Awareness', 'Conversao', 'Educacao', 'Entretenimento'] },\n          format:        { type: 'string',  enum: ['Post simples', 'Carrossel', 'Story', 'Reel', 'Artigo'] },\n          extra_context: { type: 'string',  description: 'Contexto adicional ou instruções específicas (opcional)' }\n        },\n        required: ['theme', 'platform', 'goal', 'format']\n      }\n    }\n  },\n  {\n    type: 'function',\n    function: {\n      name: 'generate_visual',\n      description: 'Gera uma imagem com IA usando o Brand Style Profile da marca. O Enhancer GPT-4o cria um prompt de 800+ palavras antes de chamar gpt-image-2. Usa quando o utilizador pede uma imagem, visual, arte, banner, thumbnail ou foto.',\n      parameters: {\n        type: 'object',\n        properties: {\n          concept:      { type: 'string', description: 'Descrição do visual — o que deve aparecer, estilo, produto, cenário' },\n          aspect_ratio: { type: 'string', enum: ['1:1 (Feed)', '9:16 (Story/Reel)', '16:9 (Landscape)', '4:5 (Feed vertical)'] },\n          text_overlay: { type: 'string', description: 'Texto a incluir na imagem (opcional)' }\n        },\n        required: ['concept', 'aspect_ratio']\n      }\n    }\n  },\n  {\n    type: 'function',\n    function: {\n      name: 'generate_carousel',\n      description: 'Cria um carrossel com slides estruturados (título, corpo, conceito visual por slide). Cada slide tem um enhancer GPT-4o antes da geração de imagem com gpt-image-2. Usa quando o utilizador pede um carrossel, slides, apresentação.',\n      parameters: {\n        type: 'object',\n        properties: {\n          topic:      { type: 'string', description: 'Tema — o que vai ser ensinado, mostrado ou comunicado' },\n          num_slides: { type: 'string', enum: ['3', '5', '7', '10'] },\n          platform:   { type: 'string', enum: ['Instagram', 'LinkedIn', 'Facebook'] }\n        },\n        required: ['topic', 'num_slides', 'platform']\n      }\n    }\n  },\n  {\n    type: 'function',\n    function: {\n      name: 'repurpose_content',\n      description: 'Adapta conteúdo existente (URL ou texto) para múltiplas plataformas em pt-PT com tom de voz da marca. Usa quando o utilizador tem um artigo, vídeo, ou conteúdo que quer reutilizar.',\n      parameters: {\n        type: 'object',\n        properties: {\n          source_url:  { type: 'string', description: 'URL do conteúdo original' },\n          source_text: { type: 'string', description: 'Texto do conteúdo original' },\n          platforms:   { type: 'string', enum: ['Instagram + LinkedIn', 'Instagram + TikTok', 'LinkedIn + Twitter/X', 'Todas (Instagram, LinkedIn, TikTok, Twitter/X)'] },\n          num_posts:   { type: 'string', enum: ['1', '2', '3'] }\n        },\n        required: ['platforms', 'num_posts']\n      }\n    }\n  },\n  {\n    type: 'function',\n    function: {\n      name: 'weekly_batch',\n      description: 'Gera um calendário semanal completo com legendas em pt-PT, hashtags específicos e conceitos visuais. Formatos variados (post, carrossel, reel, story) sem repetição em dias consecutivos.',\n      parameters: {\n        type: 'object',\n        properties: {\n          themes:         { type: 'string', description: 'Lista de temas a cobrir, um por linha' },\n          platform:       { type: 'string', enum: ['Instagram', 'LinkedIn', 'Facebook', 'TikTok'] },\n          post_frequency: { type: 'string', enum: ['1 post/dia (7 posts)', 'Dias úteis (5 posts)', '3 posts/semana'] }\n        },\n        required: ['themes', 'platform', 'post_frequency']\n      }\n    }\n  },\n  {\n    type: 'function',\n    function: {\n      name: 'generate_bio',\n      description: 'Gera uma bio em pt-PT otimizada para redes sociais com 3 variações e dicas de melhoria.',\n      parameters: {\n        type: 'object',\n        properties: {\n          platform:   { type: 'string', enum: ['Instagram', 'LinkedIn', 'TikTok', 'Twitter/X', 'YouTube'] },\n          tone_extra: { type: 'string', description: 'Instruções adicionais de tom (opcional)' }\n        },\n        required: ['platform']\n      }\n    }\n  }\n];\n\nconst sysLines = [\n  'És o Assistente de IA da Celeuma IA — plataforma de criação de conteúdo de marca com IA.',\n  'IDIOMA OBRIGATÓRIO: PORTUGUÊS EUROPEU (pt-PT) em TODAS as respostas. Nunca em pt-BR, nunca em inglês.',\n  'A tua função é ajudar a criar conteúdo de marca coerente, estratégico e com qualidade profissional — publicável diretamente.',\n  '',\n  'REGRAS DE CONVERSAÇÃO:',\n  '1. Antes de usar uma ferramenta, diz em 1 frase o que vais fazer (em pt-PT).',\n  '2. Após receber o resultado de uma ferramenta, apresenta-o claramente — não limites a resposta ao JSON bruto.',\n  '3. Faz perguntas de clarificação APENAS quando falta informação ESSENCIAL. Se tens o suficiente, avança.',\n  '4. Quando o utilizador pede conteúdo sem especificar plataforma, escolhe a mais adequada ao contexto e avança.',\n  '5. Uma ferramenta de cada vez. Não encadeies chamadas automaticamente.',\n  '6. Nunca inventes dados do BSP — o Brand Style Profile é carregado automaticamente pelo brand_id.',\n];\n\nif (brandId) {\n  sysLines.push(`MARCA ATIVA: brand_id=\"${brandId}\". O BSP (cores, tom de voz, estilo visual) é carregado automaticamente por cada ferramenta.`);\n} else {\n  sysLines.push('SEM MARCA ATIVA: O utilizador não selecionou nenhuma marca. NÃO uses as ferramentas de geração — vão falhar. Responde com ideias genéricas e pede ao utilizador para selecionar uma marca na sidebar.');\n}\n\nconst messages = [\n  { role: 'system', content: sysLines.join('\\n') },\n  ...history,\n  { role: 'user', content: message }\n];\n\nreturn [{ json: {\n  openai_body: { model: 'gpt-4o', messages, tools: TOOLS, tool_choice: 'auto', max_tokens: 1200, temperature: 0.7 },\n  messages,\n  brand_id: brandId\n} }];"
           }
         },
         {
@@ -156,7 +2131,10 @@
           "name": "OpenAI First",
           "type": "n8n-nodes-base.httpRequest",
           "typeVersion": 4.2,
-          "position": [680, 400],
+          "position": [
+            680,
+            400
+          ],
           "parameters": {
             "method": "POST",
             "url": "https://api.openai.com/v1/chat/completions",
@@ -168,16 +2146,24 @@
             "body": "={{ JSON.stringify($json.openai_body) }}",
             "options": {}
           },
-          "credentials": { "openAiApi": { "id": "55MhlttgGrCNE3gx", "name": "OpenAI account" } }
+          "credentials": {
+            "openAiApi": {
+              "id": "8QZH2HYI3IvfDZQo",
+              "name": "OpenAI account"
+            }
+          }
         },
         {
-          "id": "da-handle",
-          "name": "Handle & Execute",
+          "id": "da-parse",
+          "name": "Parse Response",
           "type": "n8n-nodes-base.code",
           "typeVersion": 2,
-          "position": [900, 400],
+          "position": [
+            900,
+            400
+          ],
           "parameters": {
-            "jsCode": "const oai = $input.first().json;\nconst ctx = $('Build Context').first().json;\nconst choice = oai.choices?.[0];\nconst finishReason = choice?.finish_reason;\n\nif (finishReason === 'stop' || !choice?.message?.tool_calls?.length) {\n  return [{ json: { done: true, reply: choice?.message?.content || 'Pronto!', actions: [] } }];\n}\n\nconst toolCalls = choice.message.tool_calls;\nconst actions = [];\nconst toolResults = [];\n\nconst TOOL_PATHS = {\n  generate_post: 'generate-post',\n  generate_visual: 'generate-visual',\n  generate_carousel: 'generate-carousel',\n  repurpose_content: 'repurpose-content',\n  weekly_batch: 'weekly-batch',\n  generate_bio: 'generate-bio',\n  extract_brand_style: 'extract-brand-style',\n};\n\nfor (const tc of toolCalls) {\n  const fnName = tc.function.name;\n  let args;\n  try { args = JSON.parse(tc.function.arguments || '{}'); } catch { args = {}; }\n  const path = TOOL_PATHS[fnName];\n\n  if (!path) {\n    toolResults.push({ tool_call_id: tc.id, role: 'tool', content: 'Ferramenta desconhecida.' });\n    continue;\n  }\n\n  const payload = { ...args, brand_id: ctx.brand_id };\n\n  try {\n    const res = await fetch(`http://localhost:5678/webhook/${path}`, {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json' },\n      body: JSON.stringify(payload),\n      signal: AbortSignal.timeout(90000),\n    });\n    const output = await res.json();\n    actions.push({ workflowId: fnName.replace(/_/g, '-'), output });\n    toolResults.push({ tool_call_id: tc.id, role: 'tool', content: JSON.stringify(output).slice(0, 3000) });\n  } catch (e) {\n    const msg = `Erro ao executar ${fnName}: ${e.message}`;\n    actions.push({ workflowId: fnName.replace(/_/g, '-'), output: { message: msg } });\n    toolResults.push({ tool_call_id: tc.id, role: 'tool', content: msg });\n  }\n}\n\nconst secondMessages = [ ...ctx.messages, choice.message, ...toolResults ];\n\nreturn [{ json: {\n  done: false,\n  second_body: { model: 'gpt-4o', messages: secondMessages, max_tokens: 500, temperature: 0.7 },\n  actions,\n} }];"
+            "jsCode": "const oai = $input.first().json;\nconst ctx = $('Build Context').first().json;\nconst choice = oai.choices?.[0];\nconst finishReason = choice?.finish_reason;\n\nif (finishReason === 'stop' || !choice?.message?.tool_calls?.length) {\n  return [{ json: { done: true, reply: choice?.message?.content || 'Pronto!', actions: [] } }];\n}\n\nconst tc = choice.message.tool_calls[0];\nconst fnName = tc.function.name;\nlet args;\ntry { args = JSON.parse(tc.function.arguments || '{}'); } catch { args = {}; }\n\nconst TOOL_PATHS = {\n  generate_post: 'generate-post',\n  generate_visual: 'generate-visual',\n  generate_carousel: 'generate-carousel',\n  repurpose_content: 'repurpose-content',\n  weekly_batch: 'weekly-batch',\n  generate_bio: 'generate-bio',\n  extract_brand_style: 'extract-brand-style',\n};\n\nconst path = TOOL_PATHS[fnName] || fnName;\nconst toolPayload = { ...args, brand_id: ctx.brand_id };\nconst assistantMessage = choice.message;\n\nreturn [{ json: {\n  done: false,\n  tool_name: fnName,\n  tool_id: tc.id,\n  workflow_id: fnName.replace(/_/g, '-'),\n  tool_path: path,\n  tool_payload: toolPayload,\n  messages_before: JSON.stringify([...ctx.messages, assistantMessage]),\n} }];"
           }
         },
         {
@@ -185,11 +2171,28 @@
           "name": "Done?",
           "type": "n8n-nodes-base.if",
           "typeVersion": 2.2,
-          "position": [1120, 400],
+          "position": [
+            1120,
+            400
+          ],
           "parameters": {
             "conditions": {
-              "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
-              "conditions": [{ "id": "cond-done", "leftValue": "={{ $json.done }}", "rightValue": true, "operator": { "type": "boolean", "operation": "equals" } }],
+              "options": {
+                "caseSensitive": true,
+                "leftValue": "",
+                "typeValidation": "strict"
+              },
+              "conditions": [
+                {
+                  "id": "cond-done",
+                  "leftValue": "={{ $json.done }}",
+                  "rightValue": true,
+                  "operator": {
+                    "type": "boolean",
+                    "operation": "equals"
+                  }
+                }
+              ],
               "combinator": "and"
             },
             "options": {}
@@ -200,15 +2203,55 @@
           "name": "Format Direct",
           "type": "n8n-nodes-base.code",
           "typeVersion": 2,
-          "position": [1340, 280],
-          "parameters": { "jsCode": "const d = $input.first().json;\nreturn [{ json: { reply: d.reply || '', actions: d.actions || [] } }];" }
+          "position": [
+            1340,
+            260
+          ],
+          "parameters": {
+            "jsCode": "const d = $input.first().json;\nreturn [{ json: { reply: d.reply || '', actions: d.actions || [] } }];"
+          }
+        },
+        {
+          "id": "da-call-gen",
+          "name": "Call Generator",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.2,
+          "position": [
+            1340,
+            540
+          ],
+          "parameters": {
+            "method": "POST",
+            "url": "=http://localhost:5678/webhook/{{ $json.tool_path }}",
+            "sendBody": true,
+            "contentType": "raw",
+            "rawContentType": "application/json",
+            "body": "={{ JSON.stringify($json.tool_payload) }}",
+            "options": {}
+          }
+        },
+        {
+          "id": "da-build2",
+          "name": "Build Second Request",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            1560,
+            540
+          ],
+          "parameters": {
+            "jsCode": "const genOut = $input.first().json;\nconst parseData = $('Parse Response').first().json;\n\nconst messagesBefore = JSON.parse(parseData.messages_before);\nconst toolContent = typeof genOut === 'object' ? JSON.stringify(genOut).slice(0, 3000) : String(genOut).slice(0, 3000);\nconst toolResult = { tool_call_id: parseData.tool_id, role: 'tool', content: toolContent };\nconst secondMessages = [...messagesBefore, toolResult];\n\nreturn [{ json: {\n  second_body: { model: 'gpt-4o', messages: secondMessages, max_tokens: 500, temperature: 0.7 },\n  actions: [{ workflowId: parseData.workflow_id, output: genOut }],\n} }];"
+          }
         },
         {
           "id": "da-oai2",
           "name": "OpenAI Second",
           "type": "n8n-nodes-base.httpRequest",
           "typeVersion": 4.2,
-          "position": [1340, 520],
+          "position": [
+            1780,
+            540
+          ],
           "parameters": {
             "method": "POST",
             "url": "https://api.openai.com/v1/chat/completions",
@@ -220,162 +2263,130 @@
             "body": "={{ JSON.stringify($json.second_body) }}",
             "options": {}
           },
-          "credentials": { "openAiApi": { "id": "55MhlttgGrCNE3gx", "name": "OpenAI account" } }
+          "credentials": {
+            "openAiApi": {
+              "id": "8QZH2HYI3IvfDZQo",
+              "name": "OpenAI account"
+            }
+          }
         },
         {
-          "id": "da-extract",
-          "name": "Extract Final",
+          "id": "da-format-actions",
+          "name": "Format Actions",
           "type": "n8n-nodes-base.code",
           "typeVersion": 2,
-          "position": [1560, 520],
-          "parameters": { "jsCode": "const oai = $input.first().json;\nconst toolData = $('Handle & Execute').first().json;\nconst text = oai.choices?.[0]?.message?.content || 'Feito!';\nreturn [{ json: { reply: text, actions: toolData.actions || [] } }];" }
+          "position": [
+            2000,
+            540
+          ],
+          "parameters": {
+            "jsCode": "const oai = $input.first().json;\nconst prev = $('Build Second Request').first().json;\nconst text = oai.choices?.[0]?.message?.content || 'Feito!';\nreturn [{ json: { reply: text, actions: prev.actions || [] } }];"
+          }
         }
       ],
       "connections": {
-        "Webhook":          { "main": [[{ "node": "Build Context",    "type": "main", "index": 0 }]] },
-        "Build Context":    { "main": [[{ "node": "OpenAI First",     "type": "main", "index": 0 }]] },
-        "OpenAI First":     { "main": [[{ "node": "Handle & Execute", "type": "main", "index": 0 }]] },
-        "Handle & Execute": { "main": [[{ "node": "Done?",            "type": "main", "index": 0 }]] },
-        "Done?":            { "main": [[{ "node": "Format Direct",    "type": "main", "index": 0 }], [{ "node": "OpenAI Second", "type": "main", "index": 0 }]] },
-        "OpenAI Second":    { "main": [[{ "node": "Extract Final",    "type": "main", "index": 0 }]] }
-      },
-      "settings": { "executionOrder": "v1" },
-      "staticData": null,
-      "tags": [],
-      "triggerCount": 0,
-      "versionId": "1"
-    },
-
-    "identidade-visual-posts": {
-      "_file": "workflows/identidade-visual-posts.json",
-      "_description": "Gerador de posts com identidade visual. Webhook: POST /webhook/identidadevisual18 → analisa imagem → gera prompt → GPT Image → Google Drive",
-      "name": "My workflow 3",
-      "nodes": [
-        {
-          "parameters": { "httpMethod": "POST", "path": "identidadevisual18", "responseMode": "lastNode", "options": { "rawBody": false } },
-          "id": "1cfb0083-2d5f-40b7-bda8-d298149c8a41",
-          "name": "Webhook",
-          "type": "n8n-nodes-base.webhook",
-          "typeVersion": 2.1,
-          "position": [336, 1328],
-          "webhookId": "5b8b3440-bec1-43ae-958b-f491dadfe934"
+        "Webhook": {
+          "main": [
+            [
+              {
+                "node": "Build Context",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
         },
-        {
-          "parameters": { "jsCode": "const item = $input.first();\n\nconst debugInfo = {\n  jsonKeys: Object.keys(item.json || {}),\n  binaryKeys: Object.keys(item.binary || {}),\n  bodyKeys: Object.keys(item.json?.body || {}),\n  filesKeys: Object.keys(item.json?.files || {}),\n};\n\nconst body = item.json.body || item.json || {};\nconst files = item.json.files || {};\n\nconst uploadedFile =\n  item.binary?.file ||\n  item.binary?.data ||\n  item.binary?.image ||\n  files.file?.[0] ||\n  files.data?.[0] ||\n  files.image?.[0];\n\nif (!uploadedFile) {\n  throw new Error('File not found. Debug: ' + JSON.stringify(debugInfo));\n}\n\nreturn [{\n  json: {\n    postType: body.postType || body.post_type || 'quote post',\n    topic: body.topic || '',\n    mainMessage: body.mainMessage || body.main_message || body.message || '',\n    format: body.format || '1:1',\n    headline: body.headline || body.mainMessage || body.message || '',\n    secondaryText: body.secondaryText || body.secondary_text || ''\n  },\n  binary: {\n    data: uploadedFile\n  }\n}];" },
-          "id": "557c4927-af10-4f68-8c90-20bf95580adb",
-          "name": "Extract Form Data1",
-          "type": "n8n-nodes-base.code",
-          "typeVersion": 2,
-          "position": [560, 1328]
+        "Build Context": {
+          "main": [
+            [
+              {
+                "node": "OpenAI First",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
         },
-        {
-          "parameters": {
-            "resource": "image", "operation": "analyze",
-            "modelId": { "__rl": true, "value": "gpt-4o", "mode": "list" },
-            "text": "Your job is to describe the brand's visual DNA with enough precision that another AI image model can generate new posts that feel consistent with this brand.\n\nAnalyze only what is visible in the reference. If something is uncertain, mark it as inferred.\n\nExtract the following:\n\nBrand feeling\n\nDescribe the brand's emotional tone in 3 to 6 precise words.\n\nVisual category\n\nIdentify the visual world this brand belongs to: luxury, playful, editorial, tech, wellness, streetwear, educational, creator-led, minimal, chaotic, cinematic, corporate, handcrafted, futuristic, etc.\n\nColor system\n\nExtract the main palette with approximate HEX colors:\n\nPrimary color\n\nSecondary color\n\nAccent color\n\nBackground color\n\nText color\n\nHighlight color\n\nAlso describe saturation, contrast, warmth, and whether the palette feels soft, bold, muted, glossy, earthy, neon, pastel, monochrome, or high contrast.\n\nTypography and text style\n\nDescribe the visible typography:\n\nFont category\n\nWeight\n\nLetter spacing\n\nCase style\n\nHierarchy\n\nText placement\n\nText-to-image ratio\n\nHow headlines are treated\n\nHow secondary text is treated\n\nLayout system\n\nDescribe the composition rules:\n\nGrid style\n\nAlignment\n\nMargins\n\nNegative space\n\nImage placement\n\nText placement\n\nUse of frames, borders, cards, overlays, stickers, labels, or badges\n\nHow crowded or spacious the design feels\n\nImage style\n\nDescribe the imagery:\n\nPhotography, illustration, 3D, collage, flat graphics, mixed media, UI screenshot, editorial, UGC, cinematic, product-focused, character-focused, abstract\n\nSubject framing\n\nCamera angle\n\nDepth of field\n\nCropping style\n\nTexture and sharpness\n\nLighting and surface treatment\n\nDescribe:\n\nLighting direction\n\nLighting quality\n\nShadow softness\n\nHighlight style\n\nGloss, grain, blur, noise, gradients, glass, paper, metal, fabric, or other visible materials\n\nGraphic elements\n\nList recurring visual motifs:\n\nShapes\n\nIcons\n\nLines\n\nArrows\n\nPatterns\n\nGradients\n\nTexture overlays\n\nDecorative marks\n\nMotion cues\n\nUI elements\n\nSocial media adaptation rules\n\nExplain how to create new posts in this identity:\n\nHow a quote post should look\n\nHow an announcement post should look\n\nHow a carousel cover should look\n\nHow a product or feature post should look\n\nHow a story or vertical post should look\n\nAnti-drift rules\n\nList the visual choices that must stay consistent so future generations do not drift away from the brand.\n\nOutput the final result as:\n\nA. Short Brand DNA Summary\n\nB. Detailed Visual Identity Notes\n\nC. Reusable Brand Identity Block in JSON:\n\n{\n\n  \"brand_style\": {\n\n    \"name\": \"\",\n\n    \"mood\": [],\n\n    \"color_palette\": {\n\n      \"primary\": \"\",\n\n      \"secondary\": \"\",\n\n      \"accent\": \"\",\n\n      \"background\": \"\",\n\n      \"text\": \"\",\n\n      \"highlight\": \"\"\n\n    },\n\n    \"typography\": {\n\n      \"font_category\": \"\",\n\n      \"weight\": \"\",\n\n      \"case_style\": \"\",\n\n      \"hierarchy\": \"\",\n\n      \"text_placement\": \"\"\n\n    },\n\n    \"layout\": {\n\n      \"composition\": \"\",\n\n      \"alignment\": \"\",\n\n      \"spacing\": \"\",\n\n      \"graphic_system\": \"\"\n\n    },\n\n    \"imagery\": {\n\n      \"style\": \"\",\n\n      \"cameraorrendering\": \"\",\n\n      \"subject_framing\": \"\",\n\n      \"texture\": \"\"\n\n    },\n\n    \"lighting\": {\n\n      \"direction\": \"\",\n\n      \"quality\": \"\",\n\n      \"shadow_style\": \"\",\n\n      \"highlight_style\": \"\"\n\n    },\n\n    \"social_rules\": {\n\n      \"quote_post\": \"\",\n\n      \"announcement_post\": \"\",\n\n      \"carousel_cover\": \"\",\n\n      \"feature_post\": \"\",\n\n      \"story_post\": \"\"\n\n    },\n\n    \"antidriftrules\": []\n\n  }\n\n}\n\nD. One reusable generation prompt template that uses this identity block.",
-            "inputType": "base64", "options": {}
-          },
-          "id": "414db7e8-7de8-4753-bc2c-ec9b09b0ba2e",
-          "name": "Analyze Product Image",
-          "type": "@n8n/n8n-nodes-langchain.openAi",
-          "typeVersion": 2.3,
-          "position": [784, 1328],
-          "credentials": { "openAiApi": { "id": "55MhlttgGrCNE3gx", "name": "OpenAI account" } }
+        "OpenAI First": {
+          "main": [
+            [
+              {
+                "node": "Parse Response",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
         },
-        {
-          "parameters": {
-            "modelId": { "__rl": true, "value": "gpt-4o", "mode": "list" },
-            "messages": { "values": [
-              { "content": "=You are a prompt-writer for an AI image generation model.\n\nYou will receive a brand visual identity analysis (derived ONLY from the reference image) and some post inputs (post type, topic, headline, format).\n\nTask: write ONE final image-generation prompt for the model to create a new social media post image that fits the same feed/brand identity.\n\nRules:\n- Preserve the brand's visual identity exactly (colors, typography feel, layout logic, imagery treatment, graphic motifs).\n- If something in the identity is uncertain, keep it conservative and do not invent specifics.\n- Make text readable with strong hierarchy and brand-consistent spacing.\n- Output ONLY the final prompt text (no markdown, no JSON).", "role": "system" },
-              { "content": "=Using the brand identity block below, create a new social media post image for:\n\nPost type: {{ $(\"Extract Form Data1\").item.json.postType }}\nTopic: {{ $(\"Extract Form Data1\").item.json.topic }}\nMain message: {{ $(\"Extract Form Data1\").item.json.mainMessage }}\nFormat: {{ $(\"Extract Form Data1\").item.json.format }}\n\nPreserve the brand's visual identity exactly:\n\n{{ $(\"Analyze Product Image\").item.json.content || $(\"Analyze Product Image\").item.json.message?.content || \"\" }}\n\nGenerate a new design that follows the same color system, typography style, layout logic, image treatment, lighting, textures, and graphic motifs. Make it feel like part of the same social feed, while creating a fresh composition for this specific post.\n\nUse the main message as the headline:\n\"{{ $(\"Extract Form Data1\").item.json.headline }}\"\n\nIf secondary text is needed, use:\n\"{{ $(\"Extract Form Data1\").item.json.secondaryText }}\"" }
-            ]},
-            "options": {}
-          },
-          "id": "9a20744f-e512-4e56-b187-8ac21356b835",
-          "name": "Create Image Prompt",
-          "type": "@n8n/n8n-nodes-langchain.openAi",
-          "typeVersion": 1.8,
-          "position": [1008, 1328],
-          "credentials": { "openAiApi": { "id": "55MhlttgGrCNE3gx", "name": "OpenAI account" } }
+        "Parse Response": {
+          "main": [
+            [
+              {
+                "node": "Done?",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
         },
-        {
-          "parameters": {
-            "method": "POST",
-            "url": "https://api.openai.com/v1/images/generations",
-            "authentication": "predefinedCredentialType",
-            "nodeCredentialType": "openAiApi",
-            "sendHeaders": true,
-            "headerParameters": { "parameters": [{ "name": "Content-Type", "value": "application/json" }] },
-            "sendBody": true,
-            "contentType": "raw",
-            "rawContentType": "application/json",
-            "body": "={{ JSON.stringify({ model: \"gpt-image-2\", prompt: $json.message.content, n: 1, size: (() => { const f = $(\"Extract Form Data1\").item.json.format || \"1:1\"; if (f === \"9:16\") return \"1024x1792\"; if (f === \"16:9\") return \"1792x1024\"; if (f === \"4:5\") return \"1024x1280\"; return \"1024x1024\"; })() }) }}",
-            "options": { "timeout": 120000 }
-          },
-          "id": "6d2d3d1e-fab2-49f7-9f82-29400b1728ed",
-          "name": "GPT Image API",
-          "type": "n8n-nodes-base.httpRequest",
-          "typeVersion": 4.2,
-          "position": [1360, 1328],
-          "credentials": { "openAiApi": { "id": "55MhlttgGrCNE3gx", "name": "OpenAI account" } }
+        "Done?": {
+          "main": [
+            [
+              {
+                "node": "Format Direct",
+                "type": "main",
+                "index": 0
+              }
+            ],
+            [
+              {
+                "node": "Call Generator",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
         },
-        {
-          "parameters": { "operation": "toBinary", "sourceProperty": "data[0].b64_json", "options": {} },
-          "id": "0e981003-0466-4f1a-98d0-02fceea933a5",
-          "name": "Convert To Binary",
-          "type": "n8n-nodes-base.convertToFile",
-          "typeVersion": 1.1,
-          "position": [1584, 1328]
+        "Call Generator": {
+          "main": [
+            [
+              {
+                "node": "Build Second Request",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
         },
-        {
-          "parameters": {
-            "name": "createdImage",
-            "driveId": { "__rl": true, "mode": "list", "value": "My Drive" },
-            "folderId": { "__rl": true, "value": "1rrdo_-_j_2FsGBEkUcTuTQRHfG0-AXHF", "mode": "list", "cachedResultName": "Imagens n8n", "cachedResultUrl": "https://drive.google.com/drive/folders/1rrdo_-_j_2FsGBEkUcTuTQRHfG0-AXHF" },
-            "options": {}
-          },
-          "id": "6eb379ba-2f33-4329-8855-b6ca006e0467",
-          "name": "Upload Image",
-          "type": "n8n-nodes-base.googleDrive",
-          "typeVersion": 3,
-          "position": [1808, 1328]
+        "Build Second Request": {
+          "main": [
+            [
+              {
+                "node": "OpenAI Second",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
         },
-        {
-          "parameters": {
-            "assignments": { "assignments": [
-              { "name": "success",               "value": "=true",                                                                                   "type": "boolean", "id": "a1" },
-              { "name": "fileId",                "value": "={{ $json.id }}",                                                                         "type": "string",  "id": "a2" },
-              { "name": "fileName",              "value": "={{ $json.name }}",                                                                        "type": "string",  "id": "a3" },
-              { "name": "viewLink",              "value": "={{ $json.webViewLink }}",                                                                 "type": "string",  "id": "a4" },
-              { "name": "downloadLink",          "value": "={{ $json.webContentLink }}",                                                              "type": "string",  "id": "a5" },
-              { "name": "thumbnailLink",         "value": "={{ $json.thumbnailLink }}",                                                               "type": "string",  "id": "a6" },
-              { "name": "createdAt",             "value": "={{ $json.createdTime }}",                                                                 "type": "string",  "id": "a7" },
-              { "name": "imagePrompt",           "value": "={{ $('Create Image Prompt').item.json.message.content }}",                               "type": "string",  "id": "a8" },
-              { "name": "brandIdentityAnalysis", "value": "={{ $('Analyze Product Image').item.json.content || $('Analyze Product Image').item.json.message?.content || '' }}", "type": "string", "id": "a9" }
-            ]},
-            "options": {}
-          },
-          "id": "c8f1e96a-4ee7-4f33-a5dc-889df5a8456c",
-          "name": "Format Response",
-          "type": "n8n-nodes-base.set",
-          "typeVersion": 3.4,
-          "position": [2032, 1328]
+        "OpenAI Second": {
+          "main": [
+            [
+              {
+                "node": "Format Actions",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
         }
-      ],
-      "connections": {
-        "Webhook":              { "main": [[{ "node": "Extract Form Data1",    "type": "main", "index": 0 }]] },
-        "Extract Form Data1":   { "main": [[{ "node": "Analyze Product Image", "type": "main", "index": 0 }]] },
-        "Analyze Product Image":{ "main": [[{ "node": "Create Image Prompt",   "type": "main", "index": 0 }]] },
-        "Create Image Prompt":  { "main": [[{ "node": "GPT Image API",         "type": "main", "index": 0 }]] },
-        "GPT Image API":        { "main": [[{ "node": "Convert To Binary",     "type": "main", "index": 0 }]] },
-        "Convert To Binary":    { "main": [[{ "node": "Upload Image",          "type": "main", "index": 0 }]] },
-        "Upload Image":         { "main": [[{ "node": "Format Response",       "type": "main", "index": 0 }]] }
       },
-      "settings": { "executionOrder": "v1", "binaryMode": "separate" },
+      "settings": {
+        "executionOrder": "v1"
+      },
       "staticData": null,
       "pinData": {},
-      "triggerCount": 0,
-      "meta": null
+      "tags": []
     }
   }
 }

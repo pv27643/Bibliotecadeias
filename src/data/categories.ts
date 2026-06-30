@@ -58,6 +58,15 @@ export const DEFAULT_SUBCATEGORIES_MAP: Record<string, string[]> = {
     'Direção Criativa',
     'Revisão & Qualidade',
     'Copy & Marketing',
-    'Cinematografia'
+    'Cinematografia',
+    'Backgrounds & Surfaces',
+    'Camera Profiles',
+    'Lighting Setups',
+    'UGC Poses & Scenes',
+    'Hands & Models',
+    'Atmospheric Effects',
+    'Director Signatures',
+    'Aspect Ratio & Frame',
+    'Motion & Camera Verbs'
   ]
 };
