@@ -1,16 +1,16 @@
-/**
- * Seed idempotente — Hands & Models Prompts
+﻿/**
+ * Seed idempotente — Director Signatures Prompts
  *
- * Uso: npx tsx seed-hands-models.ts
+ * Uso: npx tsx seed-director-signatures.ts
  */
 
 import { readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { HANDS_MODELS_PROMPTS } from './src/data/handsModelsPrompts.ts';
+import { DIRECTOR_SIGNATURES_PROMPTS } from '../../src/data/directorSignaturesPrompts.ts';
 
 const __dir = dirname(fileURLToPath(import.meta.url));
-const envRaw = readFileSync(resolve(__dir, '.env.local'), 'utf-8');
+const envRaw = readFileSync(resolve(__dir, '../../.env.local'), 'utf-8');
 const env: Record<string, string> = {};
 for (const line of envRaw.split('\n')) {
   const trimmed = line.trim();
@@ -42,7 +42,7 @@ async function main() {
   const totalBefore = existing.length;
 
   const existingIds = new Set(existing.map(p => p.id));
-  const toAdd = HANDS_MODELS_PROMPTS.filter(p => !existingIds.has(p.id));
+  const toAdd = DIRECTOR_SIGNATURES_PROMPTS.filter(p => !existingIds.has(p.id));
   const merged = [...existing, ...toAdd];
 
   const writeRes = await fetch(`${API_BASE}/prompts`, {

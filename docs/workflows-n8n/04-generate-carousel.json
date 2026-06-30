@@ -1,0 +1,25 @@
+{
+  "id": "generate-carousel",
+  "name": "Gerar Carrossel",
+  "description": "Cria os slides de um carrossel com título, corpo e conceito visual para cada slide.",
+  "webhook_path": "generate-carousel",
+  "method": "POST",
+  "requires_brand": true,
+  "inputs": [
+    { "name": "topic", "type": "text", "label": "Tópico do Carrossel", "required": true },
+    { "name": "num_slides", "type": "select", "label": "Número de Slides", "required": true, "options": ["3", "5", "7", "10"] },
+    { "name": "platform", "type": "select", "label": "Plataforma", "required": true, "options": ["Instagram", "LinkedIn", "Facebook"] }
+  ],
+  "output": {
+    "slides": "Array<{ slide_number, title, body, visual_concept }>",
+    "caption": "string",
+    "hashtags": "string[]"
+  },
+  "n8n_steps": [
+    "Webhook",
+    "Code: Montar prompt (injeta BSP + inputs)",
+    "OpenAI GPT-4o (response_format: json_object)",
+    "Code: Parsear slides",
+    "Respond to Webhook"
+  ]
+}

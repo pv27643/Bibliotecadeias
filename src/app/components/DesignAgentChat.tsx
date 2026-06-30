@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { MessageSquare, Send } from 'lucide-react';
 import type { BrandStyleProfile } from '../../types/brand';
 import ResultPanel, { type WorkflowOutput } from './ResultPanel';
-import { N8N_BASE_URL } from '../../config/workflows.config';
+import { getWebhookUrl } from '../../config/workflows.config';
 
 interface ChatMessage {
   id: string;
@@ -44,7 +44,7 @@ export default function DesignAgentChat({ activeBrand }: Props) {
     scrollBottom();
 
     try {
-      const res = await fetch(`${N8N_BASE_URL}/design-agent`, {
+      const res = await fetch(getWebhookUrl({ webhookPath: 'design-agent' }), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

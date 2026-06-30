@@ -1,0 +1,22 @@
+{
+  "id": "generate-bio",
+  "name": "Gerar Bio",
+  "description": "Gera uma bio otimizada para redes sociais com base no perfil de marca e plataforma alvo.",
+  "webhook_path": "generate-bio",
+  "method": "POST",
+  "requires_brand": true,
+  "inputs": [
+    { "name": "platform", "type": "select", "label": "Plataforma", "required": true, "options": ["Instagram", "LinkedIn", "TikTok", "Twitter/X", "YouTube"] },
+    { "name": "tone_extra", "type": "text", "label": "Tom adicional (opcional)", "required": false }
+  ],
+  "output": {
+    "bio": "string (bio otimizada para a plataforma)"
+  },
+  "n8n_steps": [
+    "Webhook",
+    "HTTP Request: Buscar BSP Supabase",
+    "Code: Montar prompt",
+    "OpenAI GPT-4o",
+    "Respond to Webhook"
+  ]
+}

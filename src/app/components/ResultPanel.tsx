@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Copy, Download, Check, ExternalLink, Image as ImageIcon, ChevronDown, ChevronUp, Clock } from 'lucide-react';
 
+const isSafeUrl = (url: string): boolean => /^https?:\/\//i.test(url);
+
 export interface WorkflowOutput {
   // Text workflows (W2, W4, W5, W6)
   caption?: string;
@@ -9,7 +11,7 @@ export interface WorkflowOutput {
   visual_concept?: string;
   variations?: Record<string, { caption?: string; hashtags?: string[] }>;
   slides?: Array<{ title: string; body: string; image_url?: string; visual_concept?: string }>;
-  posts?: Array<{ platform: string; caption: string; hashtags: string[]; visual_concept?: string }>;
+  posts?: Array<{ platform: string; caption: string; hashtags: string[]; cta?: string; visual_concept?: string }>;
   calendar?: Array<{ day: string; theme: string; caption: string; visual_concept?: string }>;
   // Visual workflows (W3, existing)
   image_url?: string;
@@ -105,13 +107,18 @@ function ImageResult({ url, alt, downloadUrl, viewLink }: { url: string; alt?: s
             </a>
           )}
         </div>
-      ) : (
+      ) : (isBase64 || isSafeUrl(url)) ? (
         <img
           src={url}
           alt={alt || 'Imagem gerada'}
           className="w-full max-h-96 object-contain bg-black/40"
           onError={() => setImgError(true)}
         />
+      ) : (
+        <div className="p-6 text-center text-gray-500 text-sm">
+          <ImageIcon className="w-8 h-8 mx-auto mb-2 opacity-30" />
+          <p>URL de imagem inválida.</p>
+        </div>
       )}
     </div>
   );
@@ -153,14 +160,25 @@ function CalendarView({ calendar }: { calendar: NonNullable<WorkflowOutput['cale
         <div key={i} className="rounded-lg border border-white/5 bg-black/20 p-3">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-medium text-blue-400">{item.day}</span>
-            <span className="text-xs text-gray-500">{item.theme}</span>
+            <div className="flex items-center gap-2">
+              {(item as any).format && (
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-gray-400">{(item as any).format}</span>
+              )}
+              <span className="text-xs text-gray-500">{item.theme}</span>
+            </div>
           </div>
           <p className="text-sm text-gray-200 whitespace-pre-wrap mb-2">{item.caption}</p>
+          {(item as any).hashtags?.length > 0 && (
+            <p className="text-xs text-gray-500 mb-1">{(item as any).hashtags.join(' ')}</p>
+          )}
+          {(item as any).cta && (
+            <p className="text-xs text-violet-400 mb-1">CTA: {(item as any).cta}</p>
+          )}
           {item.visual_concept && (
-            <p className="text-xs text-gray-500 italic">Conceito: {item.visual_concept}</p>
+            <p className="text-xs text-gray-500 italic">Visual: {item.visual_concept}</p>
           )}
           <div className="mt-2">
-            <CopyButton text={item.caption} label="Copiar legenda" />
+            <CopyButton text={[item.caption, (item as any).hashtags?.join(' '), (item as any).cta].filter(Boolean).join('\n\n')} label="Copiar legenda" />
           </div>
         </div>
       ))}
@@ -179,7 +197,7 @@ function SlideList({ slides }: { slides: NonNullable<WorkflowOutput['slides']> }
           </div>
           <p className="text-sm font-semibold text-white mb-1">{slide.title}</p>
           <p className="text-sm text-gray-300">{slide.body}</p>
-          {slide.image_url && (
+          {slide.image_url && (isSafeUrl(slide.image_url) || slide.image_url.startsWith('data:')) && (
             <img src={slide.image_url} alt={slide.title} className="mt-2 w-full rounded-lg object-cover" />
           )}
           {!slide.image_url && slide.visual_concept && (
@@ -296,11 +314,17 @@ export default function ResultPanel({ output, workflowId, duration, onRunAgain }
               <div key={i} className="rounded-lg border border-white/5 bg-black/20 p-3">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-medium text-blue-400">{post.platform}</span>
-                  <CopyButton text={`${post.caption}\n\n${post.hashtags.join(' ')}`} />
+                  <CopyButton text={[post.caption, post.hashtags?.join(' '), post.cta].filter(Boolean).join('\n\n')} />
                 </div>
                 <p className="text-sm text-gray-200 whitespace-pre-wrap">{post.caption}</p>
-                {post.hashtags?.length && (
+                {post.hashtags?.length > 0 && (
                   <p className="text-xs text-gray-500 mt-1">{post.hashtags.join(' ')}</p>
+                )}
+                {post.cta && (
+                  <p className="text-xs text-violet-400 mt-1">CTA: {post.cta}</p>
+                )}
+                {post.visual_concept && (
+                  <p className="text-xs text-gray-500 italic mt-1">Visual: {post.visual_concept}</p>
                 )}
               </div>
             ))}
@@ -320,6 +344,20 @@ export default function ResultPanel({ output, workflowId, duration, onRunAgain }
       {!output.caption && !output.image_url && !output.brand && !output.slides && !output.posts && !output.calendar && output.message && (
         <TextBlock label="Resultado" text={output.message} />
       )}
+
+      {/* Catch-all: render any unrecognised string fields */}
+      {(() => {
+        const KNOWN = new Set(['caption', 'hashtags', 'cta', 'visual_concept', 'image_url', 'viewLink', 'thumbnailLink', 'alt_text', 'downloadLink', 'downloadUrl', 'brand', 'slides', 'posts', 'calendar', 'variations', 'message', 'prompt_used']);
+        const extras = Object.entries(output).filter(([k, v]) => !KNOWN.has(k) && typeof v === 'string' && (v as string).trim().length > 0);
+        if (!extras.length) return null;
+        return (
+          <div className="space-y-3">
+            {extras.map(([k, v]) => (
+              <TextBlock key={k} label={k} text={v as string} />
+            ))}
+          </div>
+        );
+      })()}
 
       <button
         onClick={onRunAgain}

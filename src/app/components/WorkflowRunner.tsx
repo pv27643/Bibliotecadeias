@@ -112,12 +112,14 @@ export default function WorkflowRunner({ workflow, activeBrand, onBack }: Workfl
         try { data = JSON.parse(text); } catch { data = { message: text }; }
       }
 
+      if (Array.isArray(data)) data = data[0] ?? {};
+
       if (!response.ok) throw new Error(data?.message || data?.error || `Erro HTTP ${response.status}`);
 
       setResult(data);
 
       if (activeBrand?.id) {
-        await saveGeneration(activeBrand.id, workflow.id, workflow.name, formData, data);
+        await saveGeneration(activeBrand.id, workflow.id, workflow.name ?? '', formData, data);
       }
     } catch (err: any) {
       if (err instanceof TypeError && err.message.includes('fetch')) {

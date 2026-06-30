@@ -1,0 +1,24 @@
+{
+  "id": "repurpose-content",
+  "name": "Repurpose de Conteúdo",
+  "description": "Transforma conteúdo existente (URL ou texto) em posts adaptados para várias plataformas.",
+  "webhook_path": "repurpose-content",
+  "method": "POST",
+  "requires_brand": true,
+  "inputs": [
+    { "name": "source_url", "type": "text", "label": "URL do Conteúdo (opcional)", "required": false },
+    { "name": "source_text", "type": "textarea", "label": "Texto de Origem", "required": false },
+    { "name": "platforms", "type": "select", "label": "Plataformas Alvo", "required": true, "options": ["Instagram + LinkedIn", "Instagram + TikTok", "LinkedIn + Twitter/X", "Todas (Instagram, LinkedIn, TikTok, Twitter/X)"] },
+    { "name": "num_posts", "type": "select", "label": "Posts por Plataforma", "required": true, "options": ["1", "2", "3"] }
+  ],
+  "output": {
+    "posts": "Array<{ platform, caption, hashtags, cta, visual_concept }>"
+  },
+  "n8n_steps": [
+    "Webhook",
+    "If: tem source_url → HTTP Request: Jina Reader (r.jina.ai/{{url}})",
+    "Code: Combinar texto",
+    "OpenAI GPT-4o (response_format: json_object)",
+    "Respond to Webhook"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "id": "weekly-batch",
+  "name": "Batch Semanal",
+  "description": "Gera um calendário de conteúdo para 7 dias com legendas e conceitos visuais prontos a agendar.",
+  "webhook_path": "weekly-batch",
+  "method": "POST",
+  "requires_brand": true,
+  "inputs": [
+    { "name": "themes", "type": "textarea", "label": "Temas da Semana (um por linha)", "required": true },
+    { "name": "platform", "type": "select", "label": "Plataforma Principal", "required": true, "options": ["Instagram", "LinkedIn", "Facebook", "TikTok"] },
+    { "name": "post_frequency", "type": "select", "label": "Frequência", "required": true, "options": ["1 post/dia (7 posts)", "Dias úteis (5 posts)", "3 posts/semana"] }
+  ],
+  "output": {
+    "calendar": "Array<{ day, theme, format, caption, hashtags, cta, visual_concept }>"
+  },
+  "n8n_steps": [
+    "Webhook",
+    "Code: Parsear temas (split por \\n)",
+    "OpenAI GPT-4o (response_format: json_object)",
+    "Respond to Webhook"
+  ]
+}

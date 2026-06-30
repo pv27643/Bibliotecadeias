@@ -1,16 +1,16 @@
-/**
- * Seed idempotente — Camera Profiles Prompts
+﻿/**
+ * Seed idempotente — Atmospheric Effects Prompts
  *
- * Uso: npx tsx seed-camera-profiles.ts
+ * Uso: npx tsx seed-atmospheric-effects.ts
  */
 
 import { readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { CAMERA_PROFILES_PROMPTS } from './src/data/cameraProfilesPrompts.ts';
+import { ATMOSPHERIC_EFFECTS_PROMPTS } from '../../src/data/atmosphericEffectsPrompts.ts';
 
 const __dir = dirname(fileURLToPath(import.meta.url));
-const envRaw = readFileSync(resolve(__dir, '.env.local'), 'utf-8');
+const envRaw = readFileSync(resolve(__dir, '../../.env.local'), 'utf-8');
 const env: Record<string, string> = {};
 for (const line of envRaw.split('\n')) {
   const trimmed = line.trim();
@@ -42,7 +42,7 @@ async function main() {
   const totalBefore = existing.length;
 
   const existingIds = new Set(existing.map(p => p.id));
-  const toAdd = CAMERA_PROFILES_PROMPTS.filter(p => !existingIds.has(p.id));
+  const toAdd = ATMOSPHERIC_EFFECTS_PROMPTS.filter(p => !existingIds.has(p.id));
   const merged = [...existing, ...toAdd];
 
   const writeRes = await fetch(`${API_BASE}/prompts`, {

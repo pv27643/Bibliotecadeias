@@ -1,5 +1,6 @@
 import { createContext, ReactNode, useState, useEffect, useContext } from 'react';
-import { Tool, Prompt, WorkflowType } from '@/app/App';
+import type { Tool, Prompt } from '@/types/models';
+import type { WorkflowType } from '@/app/App';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
 import {
   DEFAULT_TOOL_CATEGORIES,
@@ -8,7 +9,9 @@ import {
   DEFAULT_SUBCATEGORIES_MAP
 } from '@/data/categories';
 
-const API_BASE = `https://${projectId}.supabase.co/functions/v1/make-server-d8505aef`;
+const API_BASE = projectId && projectId !== 'demo-project'
+  ? `https://${projectId}.supabase.co/functions/v1/make-server-d8505aef`
+  : null;
 const ACTIVE_WORKFLOW_PATHS = ['identidadevisual18', 'brand-post-generator', 'execute-workflow'];
 
 const ACTIVE_WORKFLOW_FALLBACKS: WorkflowType[] = [
@@ -138,6 +141,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const loadAllData = async () => {
+      if (!API_BASE) { setIsLoading(false); return; }
       setIsLoading(true);
       try {
         const response = await fetch(`${API_BASE}/data`, {
@@ -166,6 +170,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const saveTools = async (newTools: Tool[]) => {
     setTools(newTools);
+    if (!API_BASE) return;
     try {
       await fetch(`${API_BASE}/tools`, {
         method: 'POST',
@@ -179,6 +184,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const savePrompts = async (newPrompts: Prompt[]) => {
     setPrompts(newPrompts);
+    if (!API_BASE) return;
     try {
       await fetch(`${API_BASE}/prompts`, {
         method: 'POST',
@@ -192,6 +198,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const saveWorkflows = async (newWorkflows: WorkflowType[]) => {
     setWorkflows(newWorkflows);
+    if (!API_BASE) return;
     try {
       await fetch(`${API_BASE}/workflows`, {
         method: 'POST',
@@ -204,6 +211,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const saveCategories = async (type: 'tool' | 'prompt' | 'workflow', categories: string[]) => {
+    if (!API_BASE) return;
     try {
       await fetch(`${API_BASE}/categories`, {
         method: 'POST',
@@ -216,6 +224,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const saveSubcategories = async (subcategories: Record<string, string[]>) => {
+    if (!API_BASE) return;
     try {
       await fetch(`${API_BASE}/subcategories`, {
         method: 'POST',

@@ -1,0 +1,29 @@
+{
+  "id": "generate-post",
+  "name": "Gerar Post (Texto)",
+  "description": "Gera legenda, hashtags e CTA para um post nas redes sociais, respeitando o tom de voz da marca.",
+  "webhook_path": "generate-post",
+  "method": "POST",
+  "requires_brand": true,
+  "inputs": [
+    { "name": "theme", "type": "text", "label": "Tema do Post", "required": true },
+    { "name": "platform", "type": "select", "label": "Plataforma", "required": true, "options": ["Instagram", "LinkedIn", "Facebook", "TikTok", "Twitter/X"] },
+    { "name": "goal", "type": "select", "label": "Objetivo", "required": true, "options": ["Engagement", "Awareness", "Conversão", "Educação", "Entretenimento"] },
+    { "name": "format", "type": "select", "label": "Formato", "required": true, "options": ["Post simples", "Carrossel", "Story", "Reel", "Artigo"] },
+    { "name": "extra_context", "type": "textarea", "label": "Contexto adicional (opcional)", "required": false }
+  ],
+  "output": {
+    "caption": "string",
+    "hashtags": "string[]",
+    "cta": "string",
+    "visual_concept": "string",
+    "variations": "Record<platform, { caption, hashtags }>"
+  },
+  "n8n_steps": [
+    "Webhook",
+    "Code: Montar prompt (injeta brand_style + inputs)",
+    "OpenAI GPT-4o (response_format: json_object)",
+    "Code: Parsear + validar JSON",
+    "Respond to Webhook"
+  ]
+}

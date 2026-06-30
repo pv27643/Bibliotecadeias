@@ -1,16 +1,16 @@
-/**
- * Seed idempotente — UGC Poses & Scenes Prompts
+﻿/**
+ * Seed idempotente — Hands & Models Prompts
  *
- * Uso: npx tsx seed-ugc-poses.ts
+ * Uso: npx tsx seed-hands-models.ts
  */
 
 import { readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { UGC_POSES_PROMPTS } from './src/data/ugcPosesPrompts.ts';
+import { HANDS_MODELS_PROMPTS } from '../../src/data/handsModelsPrompts.ts';
 
 const __dir = dirname(fileURLToPath(import.meta.url));
-const envRaw = readFileSync(resolve(__dir, '.env.local'), 'utf-8');
+const envRaw = readFileSync(resolve(__dir, '../../.env.local'), 'utf-8');
 const env: Record<string, string> = {};
 for (const line of envRaw.split('\n')) {
   const trimmed = line.trim();
@@ -42,7 +42,7 @@ async function main() {
   const totalBefore = existing.length;
 
   const existingIds = new Set(existing.map(p => p.id));
-  const toAdd = UGC_POSES_PROMPTS.filter(p => !existingIds.has(p.id));
+  const toAdd = HANDS_MODELS_PROMPTS.filter(p => !existingIds.has(p.id));
   const merged = [...existing, ...toAdd];
 
   const writeRes = await fetch(`${API_BASE}/prompts`, {

@@ -1,0 +1,29 @@
+{
+  "id": "generate-visual",
+  "name": "Gerar Visual",
+  "description": "Cria uma imagem para post usando a identidade visual da marca via IA (gpt-image-1).",
+  "webhook_path": "generate-visual",
+  "method": "POST",
+  "requires_brand": true,
+  "inputs": [
+    { "name": "concept", "type": "textarea", "label": "Conceito Visual", "required": true },
+    { "name": "text_overlay", "type": "text", "label": "Texto na Imagem (opcional)", "required": false },
+    { "name": "aspect_ratio", "type": "select", "label": "Formato", "required": true, "options": ["1:1 (Feed)", "9:16 (Story/Reel)", "16:9 (Landscape)", "4:5 (Feed vertical)"] }
+  ],
+  "output": {
+    "image_url": "string (https:// or data:image/png;base64,...)",
+    "prompt_used": "string (enhanced 500-word prompt sent to gpt-image-1)"
+  },
+  "n8n_steps": [
+    "Webhook",
+    "Code: Extrair Input",
+    "HTTP Request: Buscar BSP Supabase",
+    "Code: Construir Style Anchor",
+    "Code: Montar Enhancer Payload",
+    "OpenAI GPT-4o: Enhancer (gera prompt 500+ palavras)",
+    "Code: Montar Request Imagem",
+    "HTTP Request: gpt-image-1 (gerar imagem)",
+    "Code: Extrair Resultado",
+    "Respond to Webhook"
+  ]
+}

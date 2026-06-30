@@ -1,0 +1,26 @@
+{
+  "id": "extract-brand-style",
+  "name": "Extrair Estilo de Marca",
+  "description": "Analisa um website ou imagens e extrai a identidade visual completa da marca (paleta, tipografia, tom de voz).",
+  "webhook_path": "extract-brand-style",
+  "method": "POST",
+  "requires_brand": false,
+  "inputs": [
+    { "name": "source_type", "type": "select", "label": "Fonte", "required": true, "options": ["url", "images"] },
+    { "name": "url", "type": "text", "label": "URL do Website", "required": false },
+    { "name": "brand_name", "type": "text", "label": "Nome da Marca", "required": true },
+    { "name": "images", "type": "image", "label": "Imagens de Referência", "required": false, "maxImages": 6 }
+  ],
+  "output": {
+    "brand": "BrandStyleProfile object (palette, typography, tone_of_voice, imagery_style, layout_patterns, platforms)"
+  },
+  "n8n_steps": [
+    "Webhook",
+    "Code: Preparar input",
+    "If: source_type = url → HTTP Request: Fetch HTML + Screenshot",
+    "OpenAI GPT-4o Vision: Analisar imagens/screenshot",
+    "Code: Parsear JSON",
+    "HTTP Request: Guardar no Supabase (brand_profiles)",
+    "Respond to Webhook"
+  ]
+}

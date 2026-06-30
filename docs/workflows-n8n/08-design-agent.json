@@ -1,0 +1,19 @@
+{
+  "id": "design-agent",
+  "name": "Design Agent (Chat)",
+  "description": "Agente de chat especializado em design e branding. Responde a perguntas, gera conceitos visuais e sugere melhorias.",
+  "webhook_path": "design-agent",
+  "method": "POST",
+  "requires_brand": false,
+  "inputs": [
+    { "name": "message", "type": "textarea", "label": "Mensagem", "required": true }
+  ],
+  "output": {
+    "message": "string (resposta do agente)"
+  },
+  "n8n_steps": [
+    "Webhook",
+    "OpenAI GPT-4o (modo chat com memória de sessão)",
+    "Respond to Webhook"
+  ]
+}

@@ -1,34 +1,12 @@
-const DEFAULT_N8N_BASE_URL = (import.meta as any).env?.VITE_N8N_WEBHOOK || 'http://localhost:5678/webhook';
-
-export let N8N_BASE_URL = localStorage.getItem('n8nBaseUrl') || DEFAULT_N8N_BASE_URL;
+const getN8nBaseUrl = (): string =>
+  localStorage.getItem('n8nBaseUrl') || import.meta.env.VITE_N8N_WEBHOOK || 'http://localhost:5678/webhook';
 
 export const setN8nBaseUrl = (url: string) => {
-  N8N_BASE_URL = url;
   localStorage.setItem('n8nBaseUrl', url);
 };
 
-export interface WorkflowConfig {
-  id: string;
-  name: string;
-  description: string;
-  category: 'N8N';
-  icon: string;
-  color: string;
-  inputs: WorkflowInput[];
-  webhookPath: string;
-  isN8nWorkflow: true;
-  requiresBrand?: boolean;
-}
-
-export interface WorkflowInput {
-  name: string;
-  type: 'text' | 'textarea' | 'select' | 'image' | 'email';
-  label: string;
-  required?: boolean;
-  options?: string[];
-  placeholder?: string;
-  maxImages?: number;
-}
+import type { WorkflowConfig, WorkflowInput } from '@/types/workflow';
+export type { WorkflowConfig, WorkflowInput };
 
 export interface ExecuteWorkflowPayload {
   workflowId: string;
@@ -43,7 +21,7 @@ export const WORKFLOWS: WorkflowConfig[] = [
     category: 'N8N',
     icon: 'palette',
     color: 'from-violet-500 to-purple-600',
-    webhookPath: (import.meta as any).env?.VITE_N8N_PATH_EXTRACT_BRAND || 'extract-brand-style',
+    webhookPath: import.meta.env.VITE_N8N_PATH_EXTRACT_BRAND || 'extract-brand-style',
     isN8nWorkflow: true,
     requiresBrand: false,
     inputs: [
@@ -85,7 +63,7 @@ export const WORKFLOWS: WorkflowConfig[] = [
     category: 'N8N',
     icon: 'message-square',
     color: 'from-blue-500 to-cyan-500',
-    webhookPath: (import.meta as any).env?.VITE_N8N_PATH_GENERATE_POST || 'generate-post',
+    webhookPath: import.meta.env.VITE_N8N_PATH_GENERATE_POST || 'generate-post',
     isN8nWorkflow: true,
     requiresBrand: true,
     inputs: [
@@ -133,7 +111,7 @@ export const WORKFLOWS: WorkflowConfig[] = [
     category: 'N8N',
     icon: 'image',
     color: 'from-pink-500 to-rose-500',
-    webhookPath: (import.meta as any).env?.VITE_N8N_PATH_GENERATE_VISUAL || 'generate-visual',
+    webhookPath: import.meta.env.VITE_N8N_PATH_GENERATE_VISUAL || 'generate-visual',
     isN8nWorkflow: true,
     requiresBrand: true,
     inputs: [
@@ -167,7 +145,7 @@ export const WORKFLOWS: WorkflowConfig[] = [
     category: 'N8N',
     icon: 'layout',
     color: 'from-amber-500 to-orange-500',
-    webhookPath: (import.meta as any).env?.VITE_N8N_PATH_GENERATE_CAROUSEL || 'generate-carousel',
+    webhookPath: import.meta.env.VITE_N8N_PATH_GENERATE_CAROUSEL || 'generate-carousel',
     isN8nWorkflow: true,
     requiresBrand: true,
     inputs: [
@@ -201,7 +179,7 @@ export const WORKFLOWS: WorkflowConfig[] = [
     category: 'N8N',
     icon: 'refresh-cw',
     color: 'from-teal-500 to-green-500',
-    webhookPath: (import.meta as any).env?.VITE_N8N_PATH_REPURPOSE || 'repurpose-content',
+    webhookPath: import.meta.env.VITE_N8N_PATH_REPURPOSE || 'repurpose-content',
     isN8nWorkflow: true,
     requiresBrand: true,
     inputs: [
@@ -242,7 +220,7 @@ export const WORKFLOWS: WorkflowConfig[] = [
     category: 'N8N',
     icon: 'calendar',
     color: 'from-indigo-500 to-blue-600',
-    webhookPath: (import.meta as any).env?.VITE_N8N_PATH_WEEKLY_BATCH || 'weekly-batch',
+    webhookPath: import.meta.env.VITE_N8N_PATH_WEEKLY_BATCH || 'weekly-batch',
     isN8nWorkflow: true,
     requiresBrand: true,
     inputs: [
@@ -276,7 +254,7 @@ export const WORKFLOWS: WorkflowConfig[] = [
     category: 'N8N',
     icon: 'pen-tool',
     color: 'from-cyan-500 to-blue-500',
-    webhookPath: (import.meta as any).env?.VITE_N8N_PATH_GENERATE_BIO || 'generate-bio',
+    webhookPath: import.meta.env.VITE_N8N_PATH_GENERATE_BIO || 'generate-bio',
     isN8nWorkflow: true,
     requiresBrand: true,
     inputs: [
@@ -306,5 +284,5 @@ export const getWorkflowsByCategory = (category: string): WorkflowConfig[] =>
 
 export const getCategories = (): string[] => ['N8N'];
 
-export const getWebhookUrl = (workflow: Pick<WorkflowConfig, 'webhookPath'>): string =>
-  `${N8N_BASE_URL}/${workflow.webhookPath}`;
+export const getWebhookUrl = (workflow: { webhookPath?: string }): string =>
+  `${getN8nBaseUrl()}/${workflow.webhookPath ?? ''}`;
